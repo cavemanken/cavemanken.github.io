@@ -1,26 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!--
-    <script type="text/javascript">
-      var _paq = _paq || [];
-      _paq.push(["trackPageView"]);
-      _paq.push(["enableLinkTracking"]);
-      (function () {
-        var u = "//analytics.codebox.net/";
-        _paq.push(["setTrackerUrl", u + "piwik.php"]);
-        _paq.push(["setSiteId", "1"]);
-        var d = document,
-          g = d.createElement("script"),
-          s = d.getElementsByTagName("script")[0];
-        g.type = "text/javascript";
-        g.async = true;
-        g.defer = true;
-        g.src = u + "piwik.js";
-        s.parentNode.insertBefore(g, s);
-      })();
-    </script>
--->
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -234,29 +214,57 @@
       });
 
       var presetLocations = [
-        { lat: 35.047, lng: -85.3106 },
-        { lat: 38, lng: -84 },
+        { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
+        { lat: 38, lng: -84, name: "Winchester" },
       ];
 
-      // TODO: add additional objects like Andromeda galaxy
       var presetObjects = [
-        { raH: 17, raM: 35, raS: 7, decD: -37, decM: 7, decS: 5 },
-        { raH: 00, raM: 44, raS: 0, decD: 41, decM: 23, decS: 43 },
+        {
+          raH: 00,
+          raM: 44,
+          raS: 00,
+          decD: 41,
+          decM: 23,
+          decS: 43,
+          name: "Andromeda Galaxy (M31)",
+        },
+        {
+          raH: 20,
+          raM: 00,
+          raS: 33,
+          decD: 22,
+          decM: 46,
+          decS: 39,
+          name: "Dumbbell Nebula (M27)",
+        },
+        {
+          raH: 16,
+          raM: 42,
+          raS: 30,
+          decD: 36,
+          decM: 24,
+          decS: 57,
+          name: "Hercules Gobular Cluster (M13)",
+        },
+        {
+          raH: 17,
+          raM: 35,
+          raS: 07,
+          decD: -37,
+          decM: 07,
+          decS: 05,
+          name: "Milky Way",
+        },
+        {
+          raH: 05,
+          raM: 36,
+          raS: 21,
+          decD: -05,
+          decM: 22,
+          decS: 43,
+          name: "Orion Nebula (M42)",
+        }, // Orion Nebula
       ];
-
-      function setLocation(index) {
-        document.getElementById("lat").value = presetLocations[index].lat;
-        document.getElementById("lng").value = presetLocations[index].lng;
-      }
-
-      function setObject(index) {
-        document.getElementById("raH").value = presetObjects[index].raH;
-        document.getElementById("raM").value = presetObjects[index].raM;
-        document.getElementById("raS").value = presetObjects[index].raS;
-        document.getElementById("decD").value = presetObjects[index].decD;
-        document.getElementById("decM").value = presetObjects[index].decM;
-        document.getElementById("decS").value = presetObjects[index].decS;
-      }
 
       function resetGrid() {
         document.getElementById("viewingTimes").innerHTML = "";
@@ -317,17 +325,8 @@
       function generate() {
         if (validateInputs()) {
           var startDate = document.getElementById("date").value;
-          if (document.getElementById("lat").value === "") {
-            // if nothing entered for location default to Winchester
-            setLocation(1);
-          }
           var lat = document.getElementById("lat").value;
           var lng = document.getElementById("lng").value;
-
-          if (document.getElementById("raH").value === "") {
-            // if nothing entered for object set to Milky Way
-            setObject(0);
-          }
 
           // generate the rise and set times for the selected object for the next 366 days
           var date = new Date(startDate);
@@ -999,34 +998,29 @@
 
       view.init();
 
-      view.addLocationPreset("Chattanooga", 35.047, -85.3106);
-      view.addLocationPreset("Winchester", 38, -84);
+      for (var i = 0; i < presetLocations.length; i++) {
+        view.addLocationPreset(
+          presetLocations[i].name,
+          presetLocations[i].lat,
+          presetLocations[i].lng,
+          presetObjects[i].raS,
+          presetObjects[i].decD,
+          presetObjects[i].decM,
+          presetObjects[i].decS
+        );
+      }
 
-      /*
-      view.addLocationPreset("Greenwich", 51.4826, -0.0077);
-      view.addLocationPreset("New York", 40.7128, -74.006);
-      view.addLocationPreset("Hong Kong", 22.3964, 114.1095);
-      view.addLocationPreset("Sydney", -33.8688, 151.2093);
-      view.addLocationPreset("Santiago", -33.4489, -70.6693);
-      view.addLocationPreset("North Pole", 90, 0);
-      view.addLocationPreset("South Pole", -90, 0);
-      */
-
-      view.addObjectPreset("Milky Way Center", 17, 35, 7, -37, 7, 5);
-      view.addObjectPreset("Andromeda", 00, 44, 0, 41, 23, 43);
-
-      /*
-      view.addObjectPreset("Sirius", 6, 45, 9, -16, 42, 58);
-      view.addObjectPreset("Canopus", 6, 23, 57, -52, 41, 44);
-      view.addObjectPreset("Arcturus", 14, 15, 40, 19, 10, 56);
-      view.addObjectPreset("Vega", 18, 36, 56, 38, 47, 1);
-      view.addObjectPreset("Capella", 5, 16, 41, 45, 59, 53);
-      view.addObjectPreset("Rigel", 5, 14, 32, -8, 12, 6);
-      view.addObjectPreset("Procyon", 7, 39, 18, 5, 13, 30);
-      view.addObjectPreset("Achernar", 1, 37, 43, -57, 14, 12);
-      view.addObjectPreset("Betelgeuse", 5, 55, 10, 7, 24, 25);
-      view.addObjectPreset("Polaris", 2, 31, 49, 89, 15, 38);
-      */
+      for (var i = 0; i < presetObjects.length; i++) {
+        view.addObjectPreset(
+          presetObjects[i].name,
+          presetObjects[i].raH,
+          presetObjects[i].raM,
+          presetObjects[i].raS,
+          presetObjects[i].decD,
+          presetObjects[i].decM,
+          presetObjects[i].decS
+        );
+      }
 
       view.onSubmit((values) => {
         const date = values.date,
@@ -1093,10 +1087,6 @@
 
     #viewingTimes tr:nth-child(odd) {
       background-color: lightgray;
-    }
-
-    #inputValues table {
-      width: 100%;
     }
   </style>
 </html>
