@@ -206,8 +206,6 @@
         <button onclick="generate();" style="font-size: 15px">
           Find Best Viewing Times
         </button>
-        <br />
-        <br />
         <div id="viewingTimes"></div>
       </article>
     </main>
@@ -254,214 +252,253 @@
         document.getElementById("decS").value = presetObjects[index].decS;
       }
 
+      function validateInputs() {
+        console.log("date:", document.getElementById("date").value);
+        if (document.getElementById("date").value.trim() === "") {
+          alert("Please enter a valid starting date.");
+          return false;
+        }
+        if (
+          document.getElementById("lat").value.trim() === "" ||
+          document.getElementById("lng").value.trim() === ""
+        ) {
+          alert(
+            "Please enter a valid location.  Latitude and longitude are required, or click on one of the presets."
+          );
+          return false;
+        }
+        if (
+          document.getElementById("raH").value.trim() === "" ||
+          document.getElementById("raM").value.trim() === "" ||
+          document.getElementById("raS").value.trim() === "" ||
+          document.getElementById("decD").value.trim() === "" ||
+          document.getElementById("decM").value.trim() === "" ||
+          document.getElementById("decS").value.trim() === ""
+        ) {
+          alert(
+            "Please enter an objects right ascension and declination or click on one of the presets."
+          );
+          return false;
+        }
+        return true;
+      }
+
       function generate() {
-        var startDate = document.getElementById("date").value;
-        if (document.getElementById("lat").value === "") {
-          // if nothing entered for location default to Winchester
-          setLocation(1);
-        }
-        var lat = document.getElementById("lat").value;
-        var lng = document.getElementById("lng").value;
+        if (validateInputs()) {
+          var startDate = document.getElementById("date").value;
+          if (document.getElementById("lat").value === "") {
+            // if nothing entered for location default to Winchester
+            setLocation(1);
+          }
+          var lat = document.getElementById("lat").value;
+          var lng = document.getElementById("lng").value;
 
-        if (document.getElementById("raH").value === "") {
-          // if nothing entered for object set to Milky Way
-          setObject(0);
-        }
-
-        // generate the rise and set times for the selected object for the next 366 days
-        var date = new Date(startDate);
-        var riseSetArray = [];
-        for (var d = 0; d < 366; d++) {
-          // console.log(date.toISOString().split("T")[0]);
-
-          // set the date in the "date" element
-          var isoDate = date.toISOString().substring(0, 10);
-          document.getElementById("date").value = isoDate;
-
-          // trigger the calculate function
-          document.getElementById("calc").click();
-
-          // parse out the results from the outputData div
-          if (
-            document.getElementById("outputData").innerHTML === "Never sets" ||
-            document.getElementById("outputData").innerHTML === "Never rises"
-          ) {
-            objectRises = document.getElementById("outputData").innerHTML;
-            objectSets = document.getElementById("outputData").innerHTML;
-          } else {
-            objectRises = document
-              .getElementById("outputData")
-              .innerHTML.split("<div>")[1]
-              .split("</div>")[0];
-            objectSets = document
-              .getElementById("outputData")
-              .innerHTML.split("<div>")[2]
-              .split("</div>")[0];
-            // convert to local time
-            objectRises = new Date(
-              date.toISOString().substring(0, 10) + " " + objectRises
-            ).toLocaleTimeString("en-US", { hour12: false });
-            objectSets = new Date(
-              date.toISOString().substring(0, 10) + " " + objectSets
-            ).toLocaleTimeString("en-US", { hour12: false });
+          if (document.getElementById("raH").value === "") {
+            // if nothing entered for object set to Milky Way
+            setObject(0);
           }
 
-          // get sun and moon stuff based on the date and add to the array
-          var astronomicalDusk = SunCalc.getTimes(
-            date,
-            lat,
-            lng
-          ).night.toLocaleTimeString("en-US", { hour12: false });
-          var astronomicalDawn = SunCalc.getTimes(
-            date,
-            lat,
-            lng
-          ).nightEnd.toLocaleTimeString("en-US", { hour12: false });
+          // generate the rise and set times for the selected object for the next 366 days
+          var date = new Date(startDate);
+          var riseSetArray = [];
+          for (var d = 0; d < 366; d++) {
+            // console.log(date.toISOString().split("T")[0]);
 
-          var moonRises = "";
-          var moonSets = "";
-          if (SunCalc.getMoonTimes(date, lat, lng).rise !== undefined) {
-            moonRises = SunCalc.getMoonTimes(
-              date,
-              lat,
-              lng
-            ).rise.toLocaleTimeString("en-US", { hour12: false });
-          }
-          if (SunCalc.getMoonTimes(date, lat, lng).set !== undefined) {
-            moonSets = SunCalc.getMoonTimes(
-              date,
-              lat,
-              lng
-            ).set.toLocaleTimeString("en-US", { hour12: false });
-          }
+            // set the date in the "date" element
+            var isoDate = date.toISOString().substring(0, 10);
+            document.getElementById("date").value = isoDate;
 
-          var moonPhase = SunCalc.getMoonIllumination(date).phase;
+            // trigger the calculate function
+            document.getElementById("calc").click();
 
-          var sunRises = SunCalc.getTimes(
-            date,
-            lat,
-            lng
-          ).sunrise.toLocaleTimeString("en-US", { hour12: false });
-          var sunSets = SunCalc.getTimes(
-            date,
-            lat,
-            lng
-          ).sunset.toLocaleTimeString("en-US", { hour12: false });
-
-          // console.log("sun", sunRises, sunSets);
-          riseSetArray.push({
-            potentialViewingDate: false,
-            date: date.toISOString().split("T")[0],
-            moonRises: moonRises,
-            moonSets: moonSets,
-            moonPhase: moonPhase,
-            objectRises: objectRises,
-            objectSets: objectSets,
-            astronomicalDusk: astronomicalDusk,
-            astronomicalDawn: astronomicalDawn,
-            sunRises: sunRises,
-            sunSets: sunSets,
-          });
-          // go to next day
-          date = date.addDays(1);
-        }
-
-        // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
-        // let's fix these
-        for (var i = 0; i < riseSetArray.length; i++) {
-          riseSetArray[i].moonRises = fixTimes(riseSetArray[i].moonRises);
-          riseSetArray[i].moonSets = fixTimes(riseSetArray[i].moonSets);
-          riseSetArray[i].objectRises = fixTimes(riseSetArray[i].objectRises);
-          riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
-        }
-
-        // start finding the best nights to view the Milky Way
-        var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
-        for (var i = 0; i < riseSetArray.length; i++) {
-          if (
-            riseSetArray[i].moonPhase <= 0.5 ||
-            riseSetArray[i].moonPhase >= 0.5
-          ) {
-            // The moon phase might be good, let's see if the miky way peak is during the astronomical night
-            // find the when the Milky Way is at its peak
-            if (objectRises < objectSets) {
-              objectPeak = addSeconds(
-                objectRises,
-                Math.abs(
-                  (hmsToSeconds(objectRises) - hmsToSeconds(objectSets)) / 2
-                )
-              );
-            } else {
-              // add 24 hours to the objectSets and then do the calculation
-              objectPeak = addSeconds(
-                objectRises,
-                Math.abs(
-                  hmsToSeconds(objectSets) +
-                    24 * 60 * 60 -
-                    hmsToSeconds(objectRises)
-                ) / 2
-              );
-            }
-            riseSetArray[i].objectPeak = objectPeak;
-
-            // see if the Milky Way peak is between astronomical dusk and astronomical dawn
+            // parse out the results from the outputData div
             if (
-              isTimeBetween(
-                objectPeak,
-                riseSetArray[i].astronomicalDusk,
-                riseSetArray[i].astronomicalDawn
-              )
+              document.getElementById("outputData").innerHTML ===
+                "Never sets" ||
+              document.getElementById("outputData").innerHTML === "Never rises"
             ) {
-              // if so, make sure the moon won't interfer
-              // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
-              if (
-                riseSetArray[i].moonSets !== "" &&
-                riseSetArray[i].moonRises !== ""
-              ) {
-                if (
-                  isTimeBetween(
-                    objectPeak,
-                    addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
-                    subtractSeconds(riseSetArray[i].moonRises, moonBuffer * 60)
+              objectRises = document.getElementById("outputData").innerHTML;
+              objectSets = document.getElementById("outputData").innerHTML;
+            } else {
+              objectRises = document
+                .getElementById("outputData")
+                .innerHTML.split("<div>")[1]
+                .split("</div>")[0];
+              objectSets = document
+                .getElementById("outputData")
+                .innerHTML.split("<div>")[2]
+                .split("</div>")[0];
+              // convert to local time
+              objectRises = new Date(
+                date.toISOString().substring(0, 10) + " " + objectRises
+              ).toLocaleTimeString("en-US", { hour12: false });
+              objectSets = new Date(
+                date.toISOString().substring(0, 10) + " " + objectSets
+              ).toLocaleTimeString("en-US", { hour12: false });
+            }
+
+            // get sun and moon stuff based on the date and add to the array
+            var astronomicalDusk = SunCalc.getTimes(
+              date,
+              lat,
+              lng
+            ).night.toLocaleTimeString("en-US", { hour12: false });
+            var astronomicalDawn = SunCalc.getTimes(
+              date,
+              lat,
+              lng
+            ).nightEnd.toLocaleTimeString("en-US", { hour12: false });
+
+            var moonRises = "";
+            var moonSets = "";
+            if (SunCalc.getMoonTimes(date, lat, lng).rise !== undefined) {
+              moonRises = SunCalc.getMoonTimes(
+                date,
+                lat,
+                lng
+              ).rise.toLocaleTimeString("en-US", { hour12: false });
+            }
+            if (SunCalc.getMoonTimes(date, lat, lng).set !== undefined) {
+              moonSets = SunCalc.getMoonTimes(
+                date,
+                lat,
+                lng
+              ).set.toLocaleTimeString("en-US", { hour12: false });
+            }
+
+            var moonPhase = SunCalc.getMoonIllumination(date).phase;
+
+            var sunRises = SunCalc.getTimes(
+              date,
+              lat,
+              lng
+            ).sunrise.toLocaleTimeString("en-US", { hour12: false });
+            var sunSets = SunCalc.getTimes(
+              date,
+              lat,
+              lng
+            ).sunset.toLocaleTimeString("en-US", { hour12: false });
+
+            // console.log("sun", sunRises, sunSets);
+            riseSetArray.push({
+              potentialViewingDate: false,
+              date: date.toISOString().split("T")[0],
+              moonRises: moonRises,
+              moonSets: moonSets,
+              moonPhase: moonPhase,
+              objectRises: objectRises,
+              objectSets: objectSets,
+              astronomicalDusk: astronomicalDusk,
+              astronomicalDawn: astronomicalDawn,
+              sunRises: sunRises,
+              sunSets: sunSets,
+            });
+            // go to next day
+            date = date.addDays(1);
+          }
+
+          // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
+          // let's fix these
+          for (var i = 0; i < riseSetArray.length; i++) {
+            riseSetArray[i].moonRises = fixTimes(riseSetArray[i].moonRises);
+            riseSetArray[i].moonSets = fixTimes(riseSetArray[i].moonSets);
+            riseSetArray[i].objectRises = fixTimes(riseSetArray[i].objectRises);
+            riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
+          }
+
+          // start finding the best nights to view the Milky Way
+          var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
+          for (var i = 0; i < riseSetArray.length; i++) {
+            if (
+              riseSetArray[i].moonPhase <= 0.5 ||
+              riseSetArray[i].moonPhase >= 0.5
+            ) {
+              // The moon phase might be good, let's see if the miky way peak is during the astronomical night
+              // find the when the Milky Way is at its peak
+              if (objectRises < objectSets) {
+                objectPeak = addSeconds(
+                  objectRises,
+                  Math.abs(
+                    (hmsToSeconds(objectRises) - hmsToSeconds(objectSets)) / 2
                   )
+                );
+              } else {
+                // add 24 hours to the objectSets and then do the calculation
+                objectPeak = addSeconds(
+                  objectRises,
+                  Math.abs(
+                    hmsToSeconds(objectSets) +
+                      24 * 60 * 60 -
+                      hmsToSeconds(objectRises)
+                  ) / 2
+                );
+              }
+              riseSetArray[i].objectPeak = objectPeak;
+
+              // see if the Milky Way peak is between astronomical dusk and astronomical dawn
+              if (
+                isTimeBetween(
+                  objectPeak,
+                  riseSetArray[i].astronomicalDusk,
+                  riseSetArray[i].astronomicalDawn
+                )
+              ) {
+                // if so, make sure the moon won't interfer
+                // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
+                if (
+                  riseSetArray[i].moonSets !== "" &&
+                  riseSetArray[i].moonRises !== ""
                 ) {
-                  riseSetArray[i].potentialViewingDate = true;
+                  if (
+                    isTimeBetween(
+                      objectPeak,
+                      addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
+                      subtractSeconds(
+                        riseSetArray[i].moonRises,
+                        moonBuffer * 60
+                      )
+                    )
+                  ) {
+                    riseSetArray[i].potentialViewingDate = true;
+                  }
                 }
               }
             }
-          }
-          objectRises = riseSetArray[i].objectRises;
-          objectSets = riseSetArray[i].objectSets;
-          // not sure how to handle peak if the Object never sets???
+            objectRises = riseSetArray[i].objectRises;
+            objectSets = riseSetArray[i].objectSets;
+            // not sure how to handle peak if the Object never sets???
 
-          // console.log(objectRises, objectSets, objectPeak);
-        }
-        // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
-        var cnt = 0;
-        var viewingTimesHtml =
-          "<table><tr><th>Night Of</th><th>Object Rises</th><th>Peak Viewing Time</th><th>Object Sets</th></tr>";
-        for (var i = 0; i < riseSetArray.length; i++) {
-          if (riseSetArray[i].potentialViewingDate) {
-            viewingTimesHtml +=
-              "<tr><td>" +
-              riseSetArray[i].date +
-              "</td><td>" +
-              riseSetArray[i].objectRises.substr(0, 5) +
-              "</td><td>" +
-              riseSetArray[i].objectPeak.substr(0, 5) +
-              "</td><td>" +
-              riseSetArray[i].objectSets.substr(0, 5) +
-              "</td></tr>";
-            cnt++;
-            console.log(riseSetArray[i]);
+            // console.log(objectRises, objectSets, objectPeak);
           }
-        }
-        viewingTimesHtml += "</table>";
-        console.log(cnt);
-        document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
+          // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
+          var cnt = 0;
+          var viewingTimesHtml =
+            '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the Moon or the Sun.</p>';
+          viewingTimesHtml +=
+            "<table><tr><th>Night Of</th><th>Object Rises</th><th>Peak Viewing Time</th><th>Object Sets</th></tr>";
+          for (var i = 0; i < riseSetArray.length; i++) {
+            if (riseSetArray[i].potentialViewingDate) {
+              viewingTimesHtml +=
+                "<tr><td>" +
+                riseSetArray[i].date +
+                "</td><td>" +
+                riseSetArray[i].objectRises.substr(0, 5) +
+                "</td><td>" +
+                riseSetArray[i].objectPeak.substr(0, 5) +
+                "</td><td>" +
+                riseSetArray[i].objectSets.substr(0, 5) +
+                "</td></tr>";
+              cnt++;
+              console.log(riseSetArray[i]);
+            }
+          }
+          viewingTimesHtml += "</table>";
+          console.log(cnt);
+          document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
 
-        // restore the start date
-        document.getElementById("date").value = startDate;
+          // restore the start date
+          document.getElementById("date").value = startDate;
+        }
       }
 
       function isTimeBetween(hmsTime, hmsStart, hmsEnd) {
