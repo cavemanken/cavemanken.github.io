@@ -505,7 +505,7 @@
           var viewingTimesHtml =
             '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the Moon or the Sun.</p>';
           viewingTimesHtml +=
-            "<table><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th></tr>";
+            "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th></tr></thead><tbody>";
           for (var i = 0; i < riseSetArray.length; i++) {
             if (riseSetArray[i].potentialViewingDate) {
               viewingTimesHtml +=
@@ -522,7 +522,7 @@
               console.log(riseSetArray[i]);
             }
           }
-          viewingTimesHtml += "</table>";
+          viewingTimesHtml += "</tbody></table>";
           console.log(cnt);
           document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
 
@@ -1081,23 +1081,20 @@
     #viewingTimes th,
     #viewingTimes td {
       text-align: center;
-      padding: 8px;
+      padding: 4px;
       border: solid gray 1px;
     }
 
-    #viewingTimes tr:nth-child(odd) {
+    #viewingTimes tr:nth-child(even) {
       background-color: lightgray;
     }
-    table {
-      text-align: left;
-      position: relative;
-      border-collapse: collapse;
-    }
-    #viewingTimes th {
+    #viewingTimes table thead {
       position: sticky;
-      position: -webkit-sticky;
-      top: 0px;
-      z-index: 0;
+    }
+    #viewingTimes table thead {
+      inset-block-start: -1px; /* "top" */
+      background-color: white;
+      border: solid gray 1px;
     }
   </style>
 </html>
