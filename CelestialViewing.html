@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+    <script type="text/javascript">
+      var _paq = _paq || [];
+      _paq.push(["trackPageView"]);
+      _paq.push(["enableLinkTracking"]);
+      (function () {
+        var u = "//analytics.codebox.net/";
+        _paq.push(["setTrackerUrl", u + "piwik.php"]);
+        _paq.push(["setSiteId", "1"]);
+        var d = document,
+          g = d.createElement("script"),
+          s = d.getElementsByTagName("script")[0];
+        g.type = "text/javascript";
+        g.async = true;
+        g.defer = true;
+        g.src = u + "piwik.js";
+        s.parentNode.insertBefore(g, s);
+      })();
+    </script>
+-->
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A browser-based utility for calculating the rising and setting times of celestial objects."
+    />
+
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://codebox.net/assets/images/favicon.ico"
+    />
+    <link
+      rel="canonical"
+      href="https://codebox.net/pages/star-rise-and-set-time-calculator"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://codebox.net/css/main.css"
+    />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://codebox.net/css/star-rise-and-set-time-calculator.css"
+    />
+
+    <title>Best Celestial Viewing Times</title>
+  </head>
+  <body>
+    <main role="main">
+      <div id="mobileMenuButton"></div>
+
+      <article id="content">
+        <h2>Best Celestial Viewing Times</h2>
+        <!--
+        <p id="publicationDate">Published: <time>18 Apr 2022</time></p>
+        -->
+
+        <noscript>
+          <div>
+            You must enable JavaScript in your browser for this page to work
+            correctly.
+          </div>
+        </noscript>
+
+        <section id="pageContent">
+          <p>
+            Here is a tool for determining the best times in the upcoming 365
+            days to view any celestial object. Dates and times shown will be
+            when the object is near its transit with no moonlight obscuring the
+            view. All times listed should be accurate to within &plusmn; 10
+            minutes.
+          </p>
+
+          <form id="inputValues">
+            <table>
+              <tr>
+                <th align="left">Start Date</th>
+                <th align="left">Latitude/Longitude</th>
+                <th align="left">&nbsp;</th>
+                <th align="left">Object Right Ascension</th>
+                <th align="left">Object Declination</th>
+              </tr>
+              <tr>
+                <td>
+                  <div class="inputs">
+                    <input
+                      type="date"
+                      id="date"
+                      min="2000-01-01"
+                      max="3000-01-01"
+                    />
+                  </div>
+                </td>
+                <td>
+                  <div class="inputs">
+                    <input
+                      id="lat"
+                      placeholder="Latitude"
+                      required
+                      pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
+                    />
+                    <input
+                      id="lng"
+                      placeholder="Longitude"
+                      required
+                      pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
+                    />
+                  </div>
+                </td>
+                <!-- TODO: make the location button next to location-->
+                <td>
+                  <svg
+                    id="location"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
+                    />
+                  </svg>
+                </td>
+                <td>
+                  <div class="inputs">
+                    <input
+                      id="raH"
+                      placeholder="Hours"
+                      required
+                      pattern="[0-9]{1,2}"
+                    />
+                    <input
+                      id="raM"
+                      placeholder="Minutes"
+                      required
+                      pattern="[0-9]{1,2}"
+                    />
+                    <input
+                      id="raS"
+                      placeholder="Seconds"
+                      required
+                      pattern="[0-9]{1,2}"
+                    />
+                  </div>
+                </td>
+                <td>
+                  <div class="inputs">
+                    <input
+                      id="decD"
+                      placeholder="Degrees"
+                      required
+                      pattern="(-|\+|)[0-9]{1,2}"
+                    />
+                    <input
+                      id="decM"
+                      placeholder="Minutes"
+                      required
+                      pattern="[0-9]{1,2}"
+                    />
+                    <input
+                      id="decS"
+                      placeholder="Seconds"
+                      required
+                      pattern="[0-9]{1,2}"
+                    />
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th align="left">Presets</th>
+                <td colspan="2">
+                  <div class="inputs">
+                    <ul id="locationPresets"></ul>
+                  </div>
+                </td>
+                <td>
+                  <div class="inputs">
+                    <ul id="objectPresets"></ul>
+                  </div>
+                </td>
+              </tr>
+            </table>
+
+            <div class="row" style="visibility: hidden; height: 0mm">
+              <button id="calc">Calculate</button>
+              <button id="reset">Reset</button>
+            </div>
+          </form>
+
+          <div id="output">
+            <div id="outputData"></div>
+          </div>
+        </section>
+        <button onclick="generate();" style="font-size: 15px">
+          Find Best Viewing Times
+        </button>
+        <br />
+        <br />
+        <div id="viewingTimes"></div>
+      </article>
+    </main>
+
+    <!-- <footer>&copy; 2004-2022 Rob Dawson</footer> -->
+
+    <script type="application/javascript">
+      Date.prototype.addDays = function (days) {
+        let date = new Date(this.valueOf());
+        date.setDate(date.getDate() + days);
+        return date;
+      };
+      window.addEventListener("load", function () {
+        "use strict";
+        const mobileMenu = document.getElementById("mobileMenuButton"),
+          sidebarBarNav = document.getElementById("sidebarBarNav");
+        mobileMenu.onclick = function () {
+          sidebarBarNav.classList.toggle("open");
+        };
+      });
+
+      var presetLocations = [
+        { lat: 35.047, lng: -85.3106 },
+        { lat: 38, lng: -84 },
+      ];
+
+      // TODO: add additional objects like Andromeda galaxy
+      var presetObjects = [
+        { raH: 17, raM: 35, raS: 7, decD: -37, decM: 7, decS: 5 },
+        { raH: 00, raM: 44, raS: 0, decD: 41, decM: 23, decS: 43 },
+      ];
+
+      function setLocation(index) {
+        document.getElementById("lat").value = presetLocations[index].lat;
+        document.getElementById("lng").value = presetLocations[index].lng;
+      }
+
+      function setObject(index) {
+        document.getElementById("raH").value = presetObjects[index].raH;
+        document.getElementById("raM").value = presetObjects[index].raM;
+        document.getElementById("raS").value = presetObjects[index].raS;
+        document.getElementById("decD").value = presetObjects[index].decD;
+        document.getElementById("decM").value = presetObjects[index].decM;
+        document.getElementById("decS").value = presetObjects[index].decS;
+      }
+
+      function generate() {
+        var startDate = document.getElementById("date").value;
+        if (document.getElementById("lat").value === "") {
+          // if nothing entered for location default to Winchester
+          setLocation(1);
+        }
+        var lat = document.getElementById("lat").value;
+        var lng = document.getElementById("lng").value;
+
+        if (document.getElementById("raH").value === "") {
+          // if nothing entered for object set to Milky Way
+          setObject(0);
+        }
+
+        // generate the rise and set times for the selected object for the next 366 days
+        var date = new Date(startDate);
+        var riseSetArray = [];
+        for (var d = 0; d < 366; d++) {
+          // console.log(date.toISOString().split("T")[0]);
+
+          // set the date in the "date" element
+          var isoDate = date.toISOString().substring(0, 10);
+          document.getElementById("date").value = isoDate;
+
+          // trigger the calculate function
+          document.getElementById("calc").click();
+
+          // parse out the results from the outputData div
+          if (
+            document.getElementById("outputData").innerHTML === "Never sets" ||
+            document.getElementById("outputData").innerHTML === "Never rises"
+          ) {
+            objectRises = document.getElementById("outputData").innerHTML;
+            objectSets = document.getElementById("outputData").innerHTML;
+          } else {
+            objectRises = document
+              .getElementById("outputData")
+              .innerHTML.split("<div>")[1]
+              .split("</div>")[0];
+            objectSets = document
+              .getElementById("outputData")
+              .innerHTML.split("<div>")[2]
+              .split("</div>")[0];
+            // convert to local time
+            objectRises = new Date(
+              date.toISOString().substring(0, 10) + " " + objectRises
+            ).toLocaleTimeString("en-US", { hour12: false });
+            objectSets = new Date(
+              date.toISOString().substring(0, 10) + " " + objectSets
+            ).toLocaleTimeString("en-US", { hour12: false });
+          }
+
+          // get sun and moon stuff based on the date and add to the array
+          var astronomicalDusk = SunCalc.getTimes(
+            date,
+            lat,
+            lng
+          ).night.toLocaleTimeString("en-US", { hour12: false });
+          var astronomicalDawn = SunCalc.getTimes(
+            date,
+            lat,
+            lng
+          ).nightEnd.toLocaleTimeString("en-US", { hour12: false });
+
+          var moonRises = "";
+          var moonSets = "";
+          if (SunCalc.getMoonTimes(date, lat, lng).rise !== undefined) {
+            moonRises = SunCalc.getMoonTimes(
+              date,
+              lat,
+              lng
+            ).rise.toLocaleTimeString("en-US", { hour12: false });
+          }
+          if (SunCalc.getMoonTimes(date, lat, lng).set !== undefined) {
+            moonSets = SunCalc.getMoonTimes(
+              date,
+              lat,
+              lng
+            ).set.toLocaleTimeString("en-US", { hour12: false });
+          }
+
+          var moonPhase = SunCalc.getMoonIllumination(date).phase;
+
+          var sunRises = SunCalc.getTimes(
+            date,
+            lat,
+            lng
+          ).sunrise.toLocaleTimeString("en-US", { hour12: false });
+          var sunSets = SunCalc.getTimes(
+            date,
+            lat,
+            lng
+          ).sunset.toLocaleTimeString("en-US", { hour12: false });
+
+          // console.log("sun", sunRises, sunSets);
+          riseSetArray.push({
+            potentialViewingDate: false,
+            date: date.toISOString().split("T")[0],
+            moonRises: moonRises,
+            moonSets: moonSets,
+            moonPhase: moonPhase,
+            objectRises: objectRises,
+            objectSets: objectSets,
+            astronomicalDusk: astronomicalDusk,
+            astronomicalDawn: astronomicalDawn,
+            sunRises: sunRises,
+            sunSets: sunSets,
+          });
+          // go to next day
+          date = date.addDays(1);
+        }
+
+        // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
+        // let's fix these
+        for (var i = 0; i < riseSetArray.length; i++) {
+          riseSetArray[i].moonRises = fixTimes(riseSetArray[i].moonRises);
+          riseSetArray[i].moonSets = fixTimes(riseSetArray[i].moonSets);
+          riseSetArray[i].objectRises = fixTimes(riseSetArray[i].objectRises);
+          riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
+        }
+
+        // start finding the best nights to view the Milky Way
+        var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
+        for (var i = 0; i < riseSetArray.length; i++) {
+          if (
+            riseSetArray[i].moonPhase <= 0.5 ||
+            riseSetArray[i].moonPhase >= 0.5
+          ) {
+            // The moon phase might be good, let's see if the miky way peak is during the astronomical night
+            // find the when the Milky Way is at its peak
+            if (objectRises < objectSets) {
+              objectPeak = addSeconds(
+                objectRises,
+                Math.abs(
+                  (hmsToSeconds(objectRises) - hmsToSeconds(objectSets)) / 2
+                )
+              );
+            } else {
+              // add 24 hours to the objectSets and then do the calculation
+              objectPeak = addSeconds(
+                objectRises,
+                Math.abs(
+                  hmsToSeconds(objectSets) +
+                    24 * 60 * 60 -
+                    hmsToSeconds(objectRises)
+                ) / 2
+              );
+            }
+            riseSetArray[i].objectPeak = objectPeak;
+
+            // see if the Milky Way peak is between astronomical dusk and astronomical dawn
+            if (
+              isTimeBetween(
+                objectPeak,
+                riseSetArray[i].astronomicalDusk,
+                riseSetArray[i].astronomicalDawn
+              )
+            ) {
+              // if so, make sure the moon won't interfer
+              // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
+              if (
+                riseSetArray[i].moonSets !== "" &&
+                riseSetArray[i].moonRises !== ""
+              ) {
+                if (
+                  isTimeBetween(
+                    objectPeak,
+                    addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
+                    subtractSeconds(riseSetArray[i].moonRises, moonBuffer * 60)
+                  )
+                ) {
+                  riseSetArray[i].potentialViewingDate = true;
+                }
+              }
+            }
+          }
+          objectRises = riseSetArray[i].objectRises;
+          objectSets = riseSetArray[i].objectSets;
+          // not sure how to handle peak if the Object never sets???
+
+          // console.log(objectRises, objectSets, objectPeak);
+        }
+        // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
+        var cnt = 0;
+        var viewingTimesHtml =
+          "<table><tr><th>Night Of</th><th>Object Rises</th><th>Peak Viewing Time</th><th>Object Sets</th></tr>";
+        for (var i = 0; i < riseSetArray.length; i++) {
+          if (riseSetArray[i].potentialViewingDate) {
+            viewingTimesHtml +=
+              "<tr><td>" +
+              riseSetArray[i].date +
+              "</td><td>" +
+              riseSetArray[i].objectRises.substr(0, 5) +
+              "</td><td>" +
+              riseSetArray[i].objectPeak.substr(0, 5) +
+              "</td><td>" +
+              riseSetArray[i].objectSets.substr(0, 5) +
+              "</td></tr>";
+            cnt++;
+            console.log(riseSetArray[i]);
+          }
+        }
+        viewingTimesHtml += "</table>";
+        console.log(cnt);
+        document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
+
+        // restore the start date
+        document.getElementById("date").value = startDate;
+      }
+
+      function isTimeBetween(hmsTime, hmsStart, hmsEnd) {
+        var hmsTimeInSeconds = hmsToSeconds(hmsTime);
+        var hmsStartInSeconds = hmsToSeconds(hmsStart);
+        var hmsEndInSeconds = hmsToSeconds(hmsEnd);
+        if (hmsStart > hmsEnd) {
+          hmsEndInSeconds += 24 * 60 * 60;
+        }
+        if (hmsStart > hmsTime) {
+          hmsTimeInSeconds += 24 * 60 * 60;
+        }
+        if (
+          hmsTimeInSeconds > hmsStartInSeconds &&
+          hmsTimeInSeconds < hmsEndInSeconds
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      function fixTimes(hms) {
+        if (hms.substr(0, 2) === "24") {
+          hms = "00" + hms.substr(2);
+        }
+        return hms;
+      }
+
+      function addSeconds(hms, secondsToAdd) {
+        var seconds = hmsToSeconds(hms);
+        seconds += secondsToAdd;
+        if (seconds >= 24 * 60 * 60) {
+          seconds -= 24 * 60 * 60;
+        }
+        return secondsToHms(seconds);
+      }
+
+      function subtractSeconds(hms, secondsToSubtract) {
+        var seconds = hmsToSeconds(hms);
+        seconds -= secondsToSubtract;
+        if (seconds < 0) {
+          seconds += 24 * 60 * 60;
+        }
+        return secondsToHms(seconds);
+      }
+
+      function hmsToSeconds(hms) {
+        var a = hms.split(":"); // split it at the colons
+        return +a[0] * 60 * 60 + +a[1] * 60 + +a[2];
+      }
+
+      function secondsToHms(seconds) {
+        return new Date(seconds * 1000).toISOString().substr(11, 8);
+      }
+
+      //*************************************************************************************************
+      // Brought in from https://codebox.net/js/star-rise-and-set-time-calculator/constants.js
+      //*************************************************************************************************
+      ("use strict");
+
+      const ARC_MINUTES_PER_DEGREE = 60,
+        ARC_SECONDS_PER_ARC_MINUTE = 60,
+        ARC_SECONDS_PER_DEGREE =
+          ARC_MINUTES_PER_DEGREE * ARC_SECONDS_PER_ARC_MINUTE,
+        MILLISECONDS_PER_SECOND = 1000,
+        RADIANS_PER_DAY = Math.PI * 2,
+        SECONDS_PER_MINUTE = 60,
+        MINUTES_PER_HOUR = 60,
+        SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR,
+        HOURS_PER_DAY = 24,
+        MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY,
+        SECONDS_PER_DAY = SECONDS_PER_MINUTE * MINUTES_PER_DAY,
+        MILLISECONDS_PER_DAY = SECONDS_PER_DAY * MILLISECONDS_PER_SECOND,
+        EPOCH_MILLIS_AT_2000_01_01_12_00_00 = 946728000000,
+        CLOCK_HOURS_PER_SIDEREAL_HOUR =
+          1 +
+          1 /
+            (365 +
+              5 / HOURS_PER_DAY +
+              48 / MINUTES_PER_DAY +
+              46 / SECONDS_PER_DAY);
+
+      //*************************************************************************************************
+      // Brought in from https://codebox.net/js/star-rise-and-set-time-calculator/builders.js
+      //*************************************************************************************************
+      ("use strict");
+
+      function assert(val, msg) {
+        if (!val) {
+          throw Error(msg || "Assertion failure");
+        }
+      }
+
+      function assertInRange(val, min, max) {
+        assert(
+          val >= min && val <= max,
+          `Expected value ${val} to be in range ${min} -> ${max}`
+        );
+      }
+
+      function degreesToRadians(degrees) {
+        return (degrees * Math.PI) / 180;
+      }
+
+      const builders = Object.freeze({
+        buildLocation() {
+          const builder = {
+            fromDegrees(latDegrees, lngDegrees) {
+              return builder.fromRadians(
+                degreesToRadians(latDegrees),
+                degreesToRadians(lngDegrees)
+              );
+            },
+            fromRadians(latRadians, lngRadians) {
+              assertInRange(latRadians, -Math.PI / 2, Math.PI / 2);
+              assertInRange(lngRadians, -Math.PI, Math.PI);
+
+              return Object.freeze({
+                radians: Object.freeze({
+                  lat: latRadians,
+                  lng: lngRadians,
+                }),
+              });
+            },
+          };
+          return builder;
+        },
+
+        buildClock() {
+          return {
+            withRealTime() {
+              return Object.freeze({
+                millis() {
+                  return Date.now();
+                },
+              });
+            },
+            withFixedUTCTime(year, month, day, hour, minute, second) {
+              assertInRange(year, 0, 9999);
+              assertInRange(month, 1, 12);
+              assertInRange(day, 1, 31);
+              assertInRange(hour, 0, 23);
+              assertInRange(minute, 0, 59);
+              assertInRange(second, 0, 59);
+
+              const millisSinceEpoch = Date.UTC(
+                year,
+                month - 1,
+                day,
+                hour,
+                minute,
+                second
+              );
+
+              return Object.freeze({
+                millis() {
+                  return millisSinceEpoch;
+                },
+              });
+            },
+          };
+        },
+
+        buildRightAscension() {
+          const builder = {
+            fromHour(hour) {
+              assertInRange(hour, 0, 24);
+
+              return Object.freeze({
+                radians: (Math.PI * 2 * hour) / 24,
+              });
+            },
+            fromHourMinSec(hours, minutes, seconds) {
+              assertInRange(hours, 0, 23);
+              assertInRange(minutes, 0, 59);
+              assertInRange(seconds, 0, 59);
+
+              return builder.fromHour(hours + minutes / 60 + seconds / 3600);
+            },
+          };
+          return builder;
+        },
+
+        buildDeclination() {
+          const builder = {
+            fromDegrees(degrees) {
+              assertInRange(degrees, -90, 90);
+
+              return Object.freeze({
+                radians: degreesToRadians(degrees),
+              });
+            },
+            fromDegreesMinSec(negative, degrees, arcMinutes, arcSeconds) {
+              assertInRange(degrees, -90, 90);
+              assertInRange(arcMinutes, 0, 60);
+              assertInRange(arcSeconds, 0, 60);
+
+              const absDegrees = Math.abs(degrees),
+                absArcMinutes = Math.abs(arcMinutes),
+                absArcSeconds = Math.abs(arcSeconds),
+                factor = negative ? -1 : 1;
+
+              return builder.fromDegrees(
+                factor *
+                  (absDegrees +
+                    absArcMinutes / ARC_MINUTES_PER_DEGREE +
+                    absArcSeconds / ARC_SECONDS_PER_DEGREE)
+              );
+            },
+          };
+          return builder;
+        },
+      });
+
+      //*************************************************************************************************
+      // Brought in from https://codebox.net/js/star-rise-and-set-time-calculator/calc.js
+      //*************************************************************************************************
+      ("use strict");
+
+      function buildCalculator() {
+        function localClockTimeInRadians(clock) {
+          const previousMidnight = new Date(clock.millis());
+          previousMidnight.setMilliseconds(0);
+          previousMidnight.setSeconds(0);
+          previousMidnight.setMinutes(0);
+          previousMidnight.setHours(0);
+
+          const previousMidnightMillis = previousMidnight.getTime(),
+            secondsSinceMidnight =
+              (clock.millis() - previousMidnightMillis) /
+              MILLISECONDS_PER_SECOND;
+
+          return (RADIANS_PER_DAY * secondsSinceMidnight) / SECONDS_PER_DAY;
+        }
+
+        function zeroPad(num, len) {
+          return num.toString().padStart(len, "0");
+        }
+
+        function calc(
+          objectRightAscension,
+          objectDeclination,
+          userLocation,
+          clock
+        ) {
+          function hoursToClockTime(timeInHours) {
+            const hours = Math.floor(timeInHours),
+              minutes = Math.floor((timeInHours - hours) * MINUTES_PER_HOUR),
+              seconds = Math.floor(
+                (timeInHours - hours - minutes / MINUTES_PER_HOUR) *
+                  SECONDS_PER_HOUR
+              );
+
+            return `${zeroPad(hours, 2)}:${zeroPad(minutes, 2)}:${zeroPad(
+              seconds,
+              2
+            )}`;
+          }
+
+          function unmod(r, a, b, m, x_0, x_1) {
+            // find all 'n' such that x_0 <= (n * m + r - a) / b <= x_1
+            const from_n = Math.ceil((x_0 * b + a - r) / m),
+              to_n = Math.floor((x_1 * b + a - r) / m);
+            const x_values = [];
+            for (let n = from_n; n <= to_n; n++) {
+              x_values.push((n * m + r - a) / b);
+            }
+            return x_values;
+          }
+
+          function radiansToUtcTime(radians) {
+            const daysSince_2000_01_01_12 =
+                (clock.millis() - EPOCH_MILLIS_AT_2000_01_01_12_00_00) /
+                MILLISECONDS_PER_DAY,
+              prevMidDay = Math.floor(daysSince_2000_01_01_12),
+              // https://aa.usno.navy.mil/faq/docs/GAST.php
+              days = unmod(
+                radians,
+                4.894961212735792 + userLocation.radians.lng,
+                6.30038809898489,
+                2 * Math.PI,
+                prevMidDay,
+                prevMidDay + 1
+              )[0],
+              millisSinceEpoch =
+                days * MILLISECONDS_PER_DAY +
+                EPOCH_MILLIS_AT_2000_01_01_12_00_00,
+              millisSinceStartOfDay = millisSinceEpoch % MILLISECONDS_PER_DAY,
+              hoursSinceStartOfDay =
+                millisSinceStartOfDay /
+                (MILLISECONDS_PER_SECOND * SECONDS_PER_HOUR);
+            return hoursToClockTime(hoursSinceStartOfDay);
+          }
+
+          const ra = objectRightAscension.radians,
+            dec = objectDeclination.radians,
+            lat = userLocation.radians.lat,
+            lng = userLocation.radians.lng,
+            neverRises = Math.abs(dec - lat) >= Math.PI / 2,
+            neverSets = Math.abs(dec + lat) >= Math.PI / 2;
+
+          let riseTime, setTime;
+
+          if (!neverRises && !neverSets) {
+            const c = Math.acos(-Math.tan(dec) * Math.tan(lat)),
+              riseTimeRadians = ra - c,
+              setTimeRadians = ra + c;
+
+            riseTime = radiansToUtcTime(riseTimeRadians);
+            setTime = radiansToUtcTime(setTimeRadians);
+          }
+
+          return {
+            neverRises,
+            neverSets,
+            riseTime,
+            setTime,
+          };
+        }
+
+        return Object.freeze({
+          forLocation(userLocation) {
+            return Object.freeze({
+              withClock(clock) {
+                return {
+                  calculate(objectRightAscension, objectDeclination) {
+                    return calc(
+                      objectRightAscension,
+                      objectDeclination,
+                      userLocation,
+                      clock
+                    );
+                  },
+                };
+              },
+            });
+          },
+        });
+      }
+
+      //*************************************************************************************************
+      // Brought in from https://codebox.net/js/star-rise-and-set-time-calculator/view.js
+      //*************************************************************************************************
+      ("use strict");
+
+      const view = (() => {
+        const form = document.getElementsByTagName("form")[0],
+          submit = document.getElementById("calc"),
+          reset = document.getElementById("reset"),
+          location = document.getElementById("location"),
+          date = document.getElementById("date"),
+          inputs = form.querySelectorAll("input"),
+          output = document.getElementById("output"),
+          outputData = document.getElementById("outputData"),
+          locationPresets = document.getElementById("locationPresets"),
+          objectPresets = document.getElementById("objectPresets"),
+          inputFields = {};
+
+        let submitHandler;
+
+        function buildOutputRow(labelText, otherText = "") {
+          return `<div class="row"><label>${labelText}</label><div>${otherText}</div></div>`;
+        }
+        function setFieldValue(fieldId, value) {
+          if (value !== undefined) {
+            inputFields[fieldId].value = value;
+          }
+        }
+        function showOutput(html) {
+          // TODO: added this so the result do not show up
+          // output.style.display = "block";
+          outputData.innerHTML = html;
+        }
+
+        date.valueAsDate = new Date();
+
+        const viewObject = {
+          init() {
+            inputs.forEach((el) => (inputFields[el.id] = el));
+
+            submit.onclick = (e) => {
+              e.preventDefault();
+              if (form.checkValidity() && submitHandler) {
+                submitHandler(viewObject.getValues());
+              }
+            };
+
+            reset.onclick = () => {
+              viewObject.reset();
+            };
+            location.onclick = (e) => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                  inputFields.lat.value = position.coords.latitude;
+                  inputFields.lng.value = position.coords.longitude;
+                });
+              }
+            };
+          },
+          reset() {
+            inputs.forEach((el) => (el.value = ""));
+            outputData.innerHTML = "";
+            output.style.display = "none";
+          },
+          getValues() {
+            const values = {};
+            inputs.forEach((el) => {
+              if (el.type === "date") {
+                values[el.id] = el.valueAsDate;
+              } else {
+                values[el.id] = parseFloat(el.value);
+              }
+            });
+            return values;
+          },
+          onSubmit(handler) {
+            submitHandler = handler;
+          },
+          addLocationPreset(name, lat, lng) {
+            const newPreset = document.createElement("li");
+
+            newPreset.onclick = () => {
+              setFieldValue("lat", lat);
+              setFieldValue("lng", lng);
+            };
+            newPreset.innerHTML = name;
+            locationPresets.appendChild(newPreset);
+          },
+          addObjectPreset(name, raH, raM, raS, decD, decM, decS) {
+            const newPreset = document.createElement("li");
+
+            newPreset.onclick = () => {
+              setFieldValue("raH", raH);
+              setFieldValue("raM", raM);
+              setFieldValue("raS", raS);
+
+              setFieldValue("decD", decD);
+              setFieldValue("decM", decM);
+              setFieldValue("decS", decS);
+            };
+            newPreset.innerHTML = name;
+            objectPresets.appendChild(newPreset);
+          },
+          neverRises() {
+            showOutput("Never rises");
+          },
+          neverSets() {
+            showOutput("Never sets");
+          },
+          risesAndSets(riseTime, setTime) {
+            //            console.log(riseTime, setTime);
+            showOutput(
+              buildOutputRow("Rises at:", riseTime + " UTC") +
+                buildOutputRow("Sets at:", setTime + " UTC")
+            );
+          },
+        };
+
+        return viewObject;
+      })();
+
+      //*************************************************************************************************
+      // Brought in from https://codebox.net/js/star-rise-and-set-time-calculator/main.js
+      //*************************************************************************************************
+      ("use strict");
+
+      view.init();
+
+      view.addLocationPreset("Chattanooga, TN", 35.047, -85.3106);
+      view.addLocationPreset("Winchester", 38, -84);
+
+      /*
+      view.addLocationPreset("Greenwich", 51.4826, -0.0077);
+      view.addLocationPreset("New York", 40.7128, -74.006);
+      view.addLocationPreset("Hong Kong", 22.3964, 114.1095);
+      view.addLocationPreset("Sydney", -33.8688, 151.2093);
+      view.addLocationPreset("Santiago", -33.4489, -70.6693);
+      view.addLocationPreset("North Pole", 90, 0);
+      view.addLocationPreset("South Pole", -90, 0);
+      */
+
+      view.addObjectPreset("Milky Way Center", 17, 35, 7, -37, 7, 5);
+      view.addObjectPreset("Andromeda", 00, 44, 0, 41, 23, 43);
+
+      /*
+      view.addObjectPreset("Sirius", 6, 45, 9, -16, 42, 58);
+      view.addObjectPreset("Canopus", 6, 23, 57, -52, 41, 44);
+      view.addObjectPreset("Arcturus", 14, 15, 40, 19, 10, 56);
+      view.addObjectPreset("Vega", 18, 36, 56, 38, 47, 1);
+      view.addObjectPreset("Capella", 5, 16, 41, 45, 59, 53);
+      view.addObjectPreset("Rigel", 5, 14, 32, -8, 12, 6);
+      view.addObjectPreset("Procyon", 7, 39, 18, 5, 13, 30);
+      view.addObjectPreset("Achernar", 1, 37, 43, -57, 14, 12);
+      view.addObjectPreset("Betelgeuse", 5, 55, 10, 7, 24, 25);
+      view.addObjectPreset("Polaris", 2, 31, 49, 89, 15, 38);
+      */
+
+      view.onSubmit((values) => {
+        const date = values.date,
+          location = builders
+            .buildLocation()
+            .fromDegrees(values.lat, values.lng),
+          clock = builders
+            .buildClock()
+            .withFixedUTCTime(
+              date.getYear() + 1900,
+              date.getMonth() + 1,
+              date.getDate(),
+              12,
+              0,
+              0
+            ),
+          ra = builders
+            .buildRightAscension()
+            .fromHourMinSec(values.raH, values.raM, values.raS),
+          dec = builders
+            .buildDeclination()
+            .fromDegreesMinSec(
+              values.decD < 0,
+              Math.abs(values.decD),
+              values.decM,
+              values.decS
+            ),
+          calculator = buildCalculator().forLocation(location).withClock(clock);
+
+        const result = calculator.calculate(ra, dec);
+
+        if (result.neverRises) {
+          view.neverRises();
+        } else if (result.neverSets) {
+          view.neverSets();
+        } else {
+          view.risesAndSets(result.riseTime, result.setTime);
+        }
+      });
+    </script>
+
+    <!--
+    <script src="https://codebox.net/js/star-rise-and-set-time-calculator/constants.js"></script>
+    <script src="https://codebox.net/js/star-rise-and-set-time-calculator/builders.js"></script>
+    <script src="https://codebox.net/js/star-rise-and-set-time-calculator/calc.js"></script>
+    <script src="https://codebox.net/js/star-rise-and-set-time-calculator/view.js"></script>
+    <script src="https://codebox.net/js/star-rise-and-set-time-calculator/main.js"></script>
+    -->
+    <script src="SunCalc.js"></script>
+  </body>
+
+  <style>
+    #viewingTimes table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #viewingTimes th,
+    #viewingTimes td {
+      text-align: center;
+      padding: 8px;
+      border: solid gray 1px;
+    }
+
+    #viewingTimes tr:nth-child(odd) {
+      background-color: lightgray;
+    }
+  </style>
+</html>
