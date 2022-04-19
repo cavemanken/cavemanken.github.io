@@ -100,6 +100,7 @@
                       id="date"
                       min="2000-01-01"
                       max="3000-01-01"
+                      onchange="resetGrid()"
                     />
                   </div>
                 </td>
@@ -110,12 +111,14 @@
                       placeholder="Latitude"
                       required
                       pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
+                      onchange="resetGrid()"
                     />
                     <input
                       id="lng"
                       placeholder="Longitude"
                       required
                       pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
+                      onchange="resetGrid()"
                     />
                   </div>
                 </td>
@@ -127,6 +130,7 @@
                     width="12"
                     height="12"
                     viewBox="0 0 24 24"
+                    onchange="resetGrid()"
                   >
                     <path
                       d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
@@ -140,18 +144,21 @@
                       placeholder="Hours"
                       required
                       pattern="[0-9]{1,2}"
+                      onchange="resetGrid()"
                     />
                     <input
                       id="raM"
                       placeholder="Minutes"
                       required
                       pattern="[0-9]{1,2}"
+                      onchange="resetGrid()"
                     />
                     <input
                       id="raS"
                       placeholder="Seconds"
                       required
                       pattern="[0-9]{1,2}"
+                      onchange="resetGrid()"
                     />
                   </div>
                 </td>
@@ -162,18 +169,21 @@
                       placeholder="Degrees"
                       required
                       pattern="(-|\+|)[0-9]{1,2}"
+                      onchange="resetGrid()"
                     />
                     <input
                       id="decM"
                       placeholder="Minutes"
                       required
                       pattern="[0-9]{1,2}"
+                      onchange="resetGrid()"
                     />
                     <input
                       id="decS"
                       placeholder="Seconds"
                       required
                       pattern="[0-9]{1,2}"
+                      onchange="resetGrid()"
                     />
                   </div>
                 </td>
@@ -182,12 +192,12 @@
                 <th align="left">Presets</th>
                 <td colspan="2">
                   <div class="inputs">
-                    <ul id="locationPresets"></ul>
+                    <ul id="locationPresets" onclick="resetGrid()"></ul>
                   </div>
                 </td>
                 <td>
                   <div class="inputs">
-                    <ul id="objectPresets"></ul>
+                    <ul id="objectPresets" onclick="resetGrid()"></ul>
                   </div>
                 </td>
               </tr>
@@ -252,12 +262,16 @@
         document.getElementById("decS").value = presetObjects[index].decS;
       }
 
+      function resetGrid() {
+        document.getElementById("viewingTimes").innerHTML = "";
+      }
+
       function validateInputs() {
-        console.log("date:", document.getElementById("date").value);
         if (document.getElementById("date").value.trim() === "") {
           alert("Please enter a valid starting date.");
           return false;
         }
+
         if (
           document.getElementById("lat").value.trim() === "" ||
           document.getElementById("lng").value.trim() === ""
@@ -267,6 +281,7 @@
           );
           return false;
         }
+
         if (
           document.getElementById("raH").value.trim() === "" ||
           document.getElementById("raM").value.trim() === "" ||
@@ -279,6 +294,26 @@
             "Please enter an objects right ascension and declination or click on one of the presets."
           );
           return false;
+        } else {
+          // round all to the nearest whole number...it cannot handle decimals at the moment
+          document.getElementById("raH").value = Math.round(
+            document.getElementById("raH").value
+          );
+          document.getElementById("raM").value = Math.round(
+            document.getElementById("raM").value
+          );
+          document.getElementById("raS").value = Math.round(
+            document.getElementById("raS").value
+          );
+          document.getElementById("decD").value = Math.round(
+            document.getElementById("decD").value
+          );
+          document.getElementById("decM").value = Math.round(
+            document.getElementById("decM").value
+          );
+          document.getElementById("decS").value = Math.round(
+            document.getElementById("decS").value
+          );
         }
         return true;
       }
