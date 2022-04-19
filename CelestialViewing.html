@@ -475,16 +475,16 @@
           var viewingTimesHtml =
             '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the Moon or the Sun.</p>';
           viewingTimesHtml +=
-            "<table><tr><th>Night Of</th><th>Object Rises</th><th>Peak Viewing Time</th><th>Object Sets</th></tr>";
+            "<table><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th></tr>";
           for (var i = 0; i < riseSetArray.length; i++) {
             if (riseSetArray[i].potentialViewingDate) {
               viewingTimesHtml +=
                 "<tr><td>" +
                 riseSetArray[i].date +
                 "</td><td>" +
-                riseSetArray[i].objectRises.substr(0, 5) +
-                "</td><td>" +
                 riseSetArray[i].objectPeak.substr(0, 5) +
+                "</td><td>" +
+                riseSetArray[i].objectRises.substr(0, 5) +
                 "</td><td>" +
                 riseSetArray[i].objectSets.substr(0, 5) +
                 "</td></tr>";
