@@ -8,33 +8,6 @@
       name="description"
       content="A browser-based utility for calculating the rising and setting times of celestial objects."
     />
-
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="https://codebox.net/assets/images/favicon.ico"
-    />
-    <link
-      rel="canonical"
-      href="https://codebox.net/pages/star-rise-and-set-time-calculator"
-    />
-    <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://codebox.net/css/main.css"
-    />
-
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://codebox.net/css/star-rise-and-set-time-calculator.css"
-    />
-
     <title>Best Celestial Viewing Times</title>
   </head>
   <body>
@@ -501,6 +474,8 @@
             // console.log(objectRises, objectSets, objectPeak);
           }
           // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
+
+          // now loop through everything that still has potentialViewingDate of true, these are the ones that won't be obsured by moonlight or astronomical twilight
           var cnt = 0;
           var viewingTimesHtml =
             '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the Moon or the Sun.</p>';
@@ -519,11 +494,9 @@
                 riseSetArray[i].objectSets.substr(0, 5) +
                 "</td></tr>";
               cnt++;
-              console.log(riseSetArray[i]);
             }
           }
           viewingTimesHtml += "</tbody></table>";
-          console.log(cnt);
           document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
 
           // restore the start date
@@ -1097,4 +1070,30 @@
       border: solid gray 1px;
     }
   </style>
+
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="https://codebox.net/assets/images/favicon.ico"
+  />
+  <link
+    rel="canonical"
+    href="https://codebox.net/pages/star-rise-and-set-time-calculator"
+  />
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans"
+    rel="stylesheet"
+    type="text/css"
+  />
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://codebox.net/css/main.css"
+  />
+
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://codebox.net/css/star-rise-and-set-time-calculator.css"
+  />
 </html>
