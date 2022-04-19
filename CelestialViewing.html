@@ -88,7 +88,6 @@
               <tr>
                 <th align="left">Start Date</th>
                 <th align="left">Latitude/Longitude</th>
-                <th align="left">&nbsp;</th>
                 <th align="left">Object Right Ascension</th>
                 <th align="left">Object Declination</th>
               </tr>
@@ -120,22 +119,19 @@
                       pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
                       onchange="resetGrid()"
                     />
+                    <svg
+                      id="location"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        onclick="resetGrid()"
+                        d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
+                      />
+                    </svg>
                   </div>
-                </td>
-                <!-- TODO: make the location button next to location-->
-                <td>
-                  <svg
-                    id="location"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    onchange="resetGrid()"
-                  >
-                    <path
-                      d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
-                    />
-                  </svg>
                 </td>
                 <td>
                   <div class="inputs">
@@ -190,12 +186,12 @@
               </tr>
               <tr>
                 <th align="left">Presets</th>
-                <td colspan="2">
+                <td>
                   <div class="inputs">
                     <ul id="locationPresets" onclick="resetGrid()"></ul>
                   </div>
                 </td>
-                <td>
+                <td colspan="2">
                   <div class="inputs">
                     <ul id="objectPresets" onclick="resetGrid()"></ul>
                   </div>
@@ -1097,6 +1093,10 @@
 
     #viewingTimes tr:nth-child(odd) {
       background-color: lightgray;
+    }
+
+    #inputValues table {
+      width: 100%;
     }
   </style>
 </html>
