@@ -5,8 +5,9 @@
 	<script>
 		var d = new Date(2022,03,27);
 		console.log(d);
-		
-		console.log(astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7)*180.0/Math.PI, new Date(2022, 3, 27), astro.degreesToRadians(-84)));		
+		console.log('sidereal transit time in degrees: ', astro.transitTimeSiderealRadians(17,35,7)*180.0/Math.PI);
+		console.log('sidereal transit time in radians: ', astro.transitTimeSiderealRadians(17,35,7));
+		console.log(astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84)));		
 /*		
 		console.log(astro.hmsToDegrees(23,59,59));
 		console.log(astro.dmsToDegrees(23,59,59));

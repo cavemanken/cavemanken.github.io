@@ -31,6 +31,9 @@ var astro = (function() {
 	var degreesToRadians = function(d) {
 		return d*Math.PI/180.0;
 	};	
+	var radiansToDegrees = function(r) {
+		return r*180.0/Math.PI;
+	};	
 	var hmsToRadians = function(h, m, s) {
 		return degreesToRadians(hmsToDegrees(h, m, s));
 	};	
@@ -49,7 +52,6 @@ var astro = (function() {
 	var radiansToUtcTime = function(radians, date, lngRadians) {
 		// get millis between date and 01JAN1970
 		var millis = date.getTime();
-		console.log(millis);
 		
 		const daysSince_2000_01_01_12 =
 			(millis - EPOCH_MILLIS_AT_2000_01_01_12_00_00) /
@@ -88,15 +90,6 @@ var astro = (function() {
 		)}`;
 	};	
 		
-	var jdFromDate = function (date) {
-		const millisecondsSince1970Now = new Date+0;
-		console.log('jd', millisecondsSince1970Now);
-		const julianDayNow = 2440587.5+new Date/864e5
-		const julianDay = 2440587.5+date/864e5
-		const dateNow = new Date((julianDayNow-2440587.5)*864e5)
-		return julianDay;
-	};
-	
 	var test = function(date) {
 		var time = date.getTime();
 		console.log(time);
@@ -122,13 +115,12 @@ var astro = (function() {
 	return	{	hmsToDegrees				:	hmsToDegrees
 			,	dmsToDegrees				:	dmsToDegrees
 			,	degreesToRadians			:	degreesToRadians
+			,	radiansToDegrees			:	radiansToDegrees
 			,	hmsToRadians				:	hmsToRadians
 			,	dmsToRadians				:	dmsToRadians
 			,	riseTimeSiderealRadians		:	riseTimeSiderealRadians
 			,	transitTimeSiderealRadians	:	transitTimeSiderealRadians
 			,	setTimeSiderealRadians		:	setTimeSiderealRadians
 			,	radiansToUtcTime			:	radiansToUtcTime
-			,	jdFromDate					:	jdFromDate
-			,	test						:	test
 	};
 })();
