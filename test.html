@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <head> 
+	<script type="text/javascript" src="astro.js"></script>
+	<script>
+		var d = new Date(2022,03,27);
+		console.log(d);
+		
+		console.log(astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7)*180.0/Math.PI, new Date(2022, 3, 27), astro.degreesToRadians(-84)));		
+/*		
+		console.log(astro.hmsToDegrees(23,59,59));
+		console.log(astro.dmsToDegrees(23,59,59));
+		console.log(astro.degreesToRadians(180));
+		console.log(astro.hmsToRadians(12, 0, 0));
+		console.log(astro.dmsToRadians(180, 0, 0));
+		console.log(d)
+		console.log(astro.jdFromDate(d));
+*/		
+	</script>
+	</head>
+	<h1>test</h1>
+</html>
+	
