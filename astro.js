@@ -23,10 +23,10 @@ var astro = (function() {
 				  46 / SECONDS_PER_DAY);
 			  
 	var hmsToDegrees = function(h, m, s) {
-		return h*180.0/12.0 + m/60.0 + s/3600;
+		return h*180.0/12.0 + m/60.0 + s/3600.0;
 	};	
 	var dmsToDegrees = function(d, m, s) {
-		return d + m/60.0 + s/3600;
+		return d + m/60.0 + s/3600.0;
 	};	
 	var degreesToRadians = function(d) {
 		return d*Math.PI/180.0;
@@ -40,14 +40,14 @@ var astro = (function() {
 	var dmsToRadians = function(h, m, s) {
 		return degreesToRadians(dmsToDegrees(h, m, s));
 	};
-	var riseTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH) {
-		return 0;
+	var riseTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH,latitudeInDegrees) {
+		return hmsToRadians(raH, raM, raS) - Math.acos(-Math.tan(dmsToRadians(decD,decM,decH))*Math.tan(degreesToRadians(latitudeInDegrees)));
 	};
 	var transitTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH) {
 		return hmsToRadians(raH, raM, raS);
 	};
-	var setTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH) {
-		return 0;
+	var setTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH,latitudeInDegrees) {
+		return hmsToRadians(raH, raM, raS) + Math.acos(-Math.tan(dmsToRadians(decD,decM,decH))*Math.tan(degreesToRadians(latitudeInDegrees)));
 	};
 	var radiansToUtcTime = function(radians, date, lngRadians) {
 		// get millis between date and 01JAN1970
@@ -73,7 +73,7 @@ var astro = (function() {
 		  hoursSinceStartOfDay =
 			millisSinceStartOfDay /
 			(MILLISECONDS_PER_SECOND * SECONDS_PER_HOUR);
-		return hoursToClockTime(hoursSinceStartOfDay);
+		return hoursToClockTime(hoursSinceStartOfDay) + ' UTC';
     };
 	
 	var hoursToClockTime = function(timeInHours) {
