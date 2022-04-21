@@ -23,7 +23,7 @@ var astro = (function() {
 				  46 / SECONDS_PER_DAY);
 			  
 	var hmsToDegrees = function(h, m, s) {
-		return h*180.0/12.0 + m/60.0 + s/3600.0;
+		return h*180.0/12.0 + m/4.0 + s/240.0;
 	};	
 	var dmsToDegrees = function(d, m, s) {
 		return d + m/60.0 + s/3600.0;
@@ -40,15 +40,20 @@ var astro = (function() {
 	var dmsToRadians = function(h, m, s) {
 		return degreesToRadians(dmsToDegrees(h, m, s));
 	};
-	var riseTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH,latitudeInDegrees) {
-		return hmsToRadians(raH, raM, raS) - Math.acos(-Math.tan(dmsToRadians(decD,decM,decH))*Math.tan(degreesToRadians(latitudeInDegrees)));
-	};
-	var transitTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH) {
+	var transitTimeSiderealRadians = function(raH,raM,raS) {
+		// just the Right Ascension converted to radians (latitude nor declination)
 		return hmsToRadians(raH, raM, raS);
 	};
+	var riseTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH,latitudeInDegrees) {
+		// need the declination and the latitude to figure out the rise time
+		return hmsToRadians(raH, raM, raS) - Math.acos(-Math.tan(dmsToRadians(decD,decM,decH))*Math.tan(degreesToRadians(latitudeInDegrees)));
+	};
 	var setTimeSiderealRadians = function(raH,raM,raS,decD,decM,decH,latitudeInDegrees) {
+		// need the declination and the latitude to figure out the set time
 		return hmsToRadians(raH, raM, raS) + Math.acos(-Math.tan(dmsToRadians(decD,decM,decH))*Math.tan(degreesToRadians(latitudeInDegrees)));
 	};
+	
+	// this will convert the sidereal time (in radians) to UTC time base upon the date and the longitude of the observer
 	var radiansToUtcTime = function(radians, date, lngRadians) {
 		// get millis between date and 01JAN1970
 		var millis = date.getTime();
@@ -76,6 +81,7 @@ var astro = (function() {
 		return hoursToClockTime(hoursSinceStartOfDay) + ' UTC';
     };
 	
+	// other unexported utilities
 	var hoursToClockTime = function(timeInHours) {
 		const hours = Math.floor(timeInHours),
 		  minutes = Math.floor((timeInHours - hours) * MINUTES_PER_HOUR),
@@ -90,12 +96,6 @@ var astro = (function() {
 		)}`;
 	};	
 		
-	var test = function(date) {
-		var time = date.getTime();
-		console.log(time);
-	};
-	
-	// other unexported utilities
 	var unmod = function(r, a, b, m, x_0, x_1) {
 		// find all 'n' such that x_0 <= (n * m + r - a) / b <= x_1
 		const from_n = Math.ceil((x_0 * b + a - r) / m),
@@ -109,7 +109,7 @@ var astro = (function() {
 	
 	var zeroPad = function(num, len) {
 		return num.toString().padStart(len, "0");
-	}
+	};
 		  
 	// expose the public methods here
 	return	{	hmsToDegrees				:	hmsToDegrees

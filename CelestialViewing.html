@@ -311,7 +311,6 @@
             var isoDate = date.toISOString().substring(0, 10);
             document.getElementById("date").value = isoDate;
 
-            console.log(isoDate);
             // trigger the calculate function
             document.getElementById("calc").click();
 
@@ -775,7 +774,6 @@
           }
 
           function radiansToUtcTime(radians) {
-            console.log("radiansToUtcTime: ", radians);
             const daysSince_2000_01_01_12 =
                 (clock.millis() - EPOCH_MILLIS_AT_2000_01_01_12_00_00) /
                 MILLISECONDS_PER_DAY,
