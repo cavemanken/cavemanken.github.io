@@ -13,6 +13,8 @@
 		console.log(astro.radiansToUtcTime(4.460804616846518, new Date(2022,3,27), astro.degreesToRadians(-84)));		
 		console.log(astro.riseTimeSiderealRadians(17,35,7,-37,7,5,38));
 		console.log(astro.setTimeSiderealRadians(17,35,7,-37,7,5,38));
+		console.log(astro.radiansToUtcTime(astro.riseTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));		
+		console.log(astro.radiansToUtcTime(astro.setTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));		
 /*		4.460804616846518
 		console.log(astro.hmsToDegrees(23,59,59));
 		console.log(astro.dmsToDegrees(23,59,59));
