@@ -419,6 +419,7 @@
               // The moon phase might be good, let's see if the miky way peak is during the astronomical night
               // find the when the Milky Way is at its peak
               if (objectRises < objectSets) {
+                // TODO: a bug??? shouldn't it be looking at riseSetArray[i]?
                 objectPeak = addSeconds(
                   objectRises,
                   Math.abs(

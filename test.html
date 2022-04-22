@@ -1,19 +1,289 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-    <head> 
-	<script type="text/javascript" src="astro.js"></script>
-	<script>
-		var d = new Date(2022,03,27);
-		console.log(d);
-		console.log('milky way RA converted to radians (same as transit sidereal time):', astro.hmsToRadians(17,35,7));
-		console.log('rise:', astro.radiansToUtcTime(astro.riseTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));		
-		console.log('set:', astro.radiansToUtcTime(astro.setTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));		
-		// console.log('transit:', astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84)));		
-		var transitUTCTime = astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84));
-		console.log('transit UTC time:', transitUTCTime);
-		var localDateTime = new Date( Date.UTC(2022, 03, 27, transitUTCTime.substr(0,2), transitUTCTime.substr(3,2), transitUTCTime.substr(6,2)));
-		console.log(localDateTime);
-	</script>
-	</head>
-	<h1>test</h1>
+  <head>
+    <h1>test</h1>
+    <div id="viewingTimes"></div>
+  </head>
+  <script type="text/javascript" src="astro.js"></script>
+  <script type="text/javascript" src="SunCalc.js"></script>
+  <script>
+    Date.prototype.addDays = function (days) {
+      let date = new Date(this.valueOf());
+      date.setDate(date.getDate() + days);
+      return date;
+    };
+
+    var date = new Date(2022, 03, 27);
+    var raH = 17;
+    var raM = 35;
+    var raS = 7;
+    var decD = -37;
+    var decM = 7;
+    var decS = 5;
+    var lat = 38;
+    var lng = -84;
+    var riseSetArray = [];
+
+    // generate a year's worth of rise, set, and transit times.
+    for (var i = 0; i < 366; i++) {
+      // TODO: need to handle never rises and never sets
+      // generate
+      var transitUTCTime = astro.radiansToUtcTime(
+        astro.transitTimeSiderealRadians(raH, raM, raS),
+        date,
+        astro.degreesToRadians(lng)
+      );
+      var localTransitDateTime = astro.convertDateAndUtcTimeToLocalTime(
+        date,
+        transitUTCTime
+      );
+      var riseUTCTime = astro.radiansToUtcTime(
+        astro.riseTimeSiderealRadians(raH, raM, raS, decD, decM, decS, lat),
+        date,
+        astro.degreesToRadians(lng)
+      );
+      var localRiseDateTime = astro.convertDateAndUtcTimeToLocalTime(
+        date,
+        riseUTCTime
+      );
+      var setUTCTime = astro.radiansToUtcTime(
+        astro.setTimeSiderealRadians(raH, raM, raS, decD, decM, decS, lat),
+        date,
+        astro.degreesToRadians(lng)
+      );
+      var localSetDateTime = astro.convertDateAndUtcTimeToLocalTime(
+        date,
+        setUTCTime
+      );
+
+      // get sun and moon stuff based on the date and add to the array
+      var astronomicalDusk = SunCalc.getTimes(
+        date,
+        lat,
+        lng
+      ).night.toLocaleTimeString("en-US", { hour12: false });
+      var astronomicalDawn = SunCalc.getTimes(
+        date,
+        lat,
+        lng
+      ).nightEnd.toLocaleTimeString("en-US", { hour12: false });
+
+      var moonRises = "";
+      var moonSets = "";
+      if (SunCalc.getMoonTimes(date, lat, lng).rise !== undefined) {
+        moonRises = SunCalc.getMoonTimes(
+          date,
+          lat,
+          lng
+        ).rise.toLocaleTimeString("en-US", { hour12: false });
+      }
+      if (SunCalc.getMoonTimes(date, lat, lng).set !== undefined) {
+        moonSets = SunCalc.getMoonTimes(date, lat, lng).set.toLocaleTimeString(
+          "en-US",
+          { hour12: false }
+        );
+      }
+
+      var moonPhase = SunCalc.getMoonIllumination(date).phase;
+
+      var sunRises = SunCalc.getTimes(
+        date,
+        lat,
+        lng
+      ).sunrise.toLocaleTimeString("en-US", { hour12: false });
+      var sunSets = SunCalc.getTimes(date, lat, lng).sunset.toLocaleTimeString(
+        "en-US",
+        { hour12: false }
+      );
+
+      riseSetArray.push({
+        potentialViewingDate: false,
+        date: date.toISOString().split("T")[0],
+        moonRises: moonRises,
+        moonSets: moonSets,
+        moonPhase: moonPhase,
+        objectTransits: localTransitDateTime.toTimeString().split(" ")[0],
+        objectRises: localRiseDateTime.toTimeString().split(" ")[0],
+        objectSets: localSetDateTime.toTimeString().split(" ")[0],
+        astronomicalDusk: astronomicalDusk,
+        astronomicalDawn: astronomicalDawn,
+        sunRises: sunRises,
+        sunSets: sunSets,
+      });
+
+      date = date.addDays(1);
+    }
+
+    console.log(riseSetArray);
+
+    // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
+    // let's fix these
+    for (var i = 0; i < riseSetArray.length; i++) {
+      riseSetArray[i].moonRises = fixTimes(riseSetArray[i].moonRises);
+      riseSetArray[i].moonSets = fixTimes(riseSetArray[i].moonSets);
+      riseSetArray[i].objectRises = fixTimes(riseSetArray[i].objectRises);
+      riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
+    }
+
+    // start finding the best nights to view the Milky Way
+    var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
+    for (var i = 0; i < riseSetArray.length; i++) {
+      if (
+        riseSetArray[i].moonPhase <= 0.5 ||
+        riseSetArray[i].moonPhase >= 0.5
+      ) {
+        // The moon phase might be good, let's see if the objects transit during the astronomical night
+
+        // see if the Objects transit is between astronomical dusk and astronomical dawn
+        if (
+          isTimeBetween(
+            riseSetArray[i].objectTransits,
+            riseSetArray[i].astronomicalDusk,
+            riseSetArray[i].astronomicalDawn
+          )
+        ) {
+          // if so, make sure the moon won't interfer
+          // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
+          if (
+            riseSetArray[i].moonSets !== "" &&
+            riseSetArray[i].moonRises !== ""
+          ) {
+            if (
+              isTimeBetween(
+                riseSetArray[i].objectTransits,
+                addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
+                subtractSeconds(riseSetArray[i].moonRises, moonBuffer * 60)
+              )
+            ) {
+              riseSetArray[i].potentialViewingDate = true;
+            }
+          }
+        }
+      }
+      objectRises = riseSetArray[i].objectRises;
+      objectSets = riseSetArray[i].objectSets;
+      // not sure how to handle transit if the Object never sets???
+
+      // console.log(objectRises, objectSets, objectTransits);
+    }
+    // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
+
+    // now loop through everything that still has potentialViewingDate of true, these are the ones that won't be obsured by moonlight or astronomical twilight
+    var cnt = 0;
+    var viewingTimesHtml =
+      '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the Moon or the Sun.</p>';
+    viewingTimesHtml +=
+      "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th></tr></thead><tbody>";
+    for (var i = 0; i < riseSetArray.length; i++) {
+      if (riseSetArray[i].potentialViewingDate) {
+        viewingTimesHtml +=
+          "<tr><td>" +
+          riseSetArray[i].date +
+          "</td><td>" +
+          riseSetArray[i].objectTransits.substr(0, 5) +
+          "</td><td>" +
+          riseSetArray[i].objectRises.substr(0, 5) +
+          "</td><td>" +
+          riseSetArray[i].objectSets.substr(0, 5) +
+          "</td></tr>";
+        cnt++;
+      }
+    }
+    viewingTimesHtml += "</tbody></table>";
+    document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
+
+    /*
+          console.log(d);
+          console.log('milky way RA converted to radians (same as transit sidereal time):', astro.hmsToRadians(17,35,7));
+          console.log('rise:', astro.radiansToUtcTime(astro.riseTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));
+          console.log('set:', astro.radiansToUtcTime(astro.setTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));
+          // console.log('transit:', astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84)));
+          var transitUTCTime = astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84));
+          console.log('transit UTC time:', transitUTCTime);
+          var localDateTime = new Date( Date.UTC(2022, 03, 27, transitUTCTime.substr(0,2), transitUTCTime.substr(3,2), transitUTCTime.substr(6,2)));
+          console.log(localDateTime);
+          */
+
+    function isTimeBetween(hmsTime, hmsStart, hmsEnd) {
+      var hmsTimeInSeconds = hmsToSeconds(hmsTime);
+      var hmsStartInSeconds = hmsToSeconds(hmsStart);
+      var hmsEndInSeconds = hmsToSeconds(hmsEnd);
+      if (hmsStart > hmsEnd) {
+        hmsEndInSeconds += 24 * 60 * 60;
+      }
+      if (hmsStart > hmsTime) {
+        hmsTimeInSeconds += 24 * 60 * 60;
+      }
+      if (
+        hmsTimeInSeconds > hmsStartInSeconds &&
+        hmsTimeInSeconds < hmsEndInSeconds
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    function addSeconds(hms, secondsToAdd) {
+      var seconds = hmsToSeconds(hms);
+      seconds += secondsToAdd;
+      if (seconds >= 24 * 60 * 60) {
+        seconds -= 24 * 60 * 60;
+      }
+      return secondsToHms(seconds);
+    }
+
+    function subtractSeconds(hms, secondsToSubtract) {
+      var seconds = hmsToSeconds(hms);
+      seconds -= secondsToSubtract;
+      if (seconds < 0) {
+        seconds += 24 * 60 * 60;
+      }
+      return secondsToHms(seconds);
+    }
+
+    function fixTimes(hms) {
+      if (hms.substr(0, 2) === "24") {
+        hms = "00" + hms.substr(2);
+      }
+      return hms;
+    }
+
+    function hmsToSeconds(hms) {
+      var a = hms.split(":"); // split it at the colons
+      return +a[0] * 60 * 60 + +a[1] * 60 + +a[2];
+    }
+
+    function secondsToHms(seconds) {
+      return new Date(seconds * 1000).toISOString().substr(11, 8);
+    }
+  </script>
+  <style>
+    #viewingTimes table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #viewingTimes th,
+    #viewingTimes td {
+      text-align: center;
+      padding: 4px;
+      border: solid gray 1px;
+    }
+
+    #viewingTimes tr:nth-child(even) {
+      background-color: lightgray;
+    }
+    #viewingTimes table thead {
+      position: sticky;
+    }
+    #viewingTimes table thead {
+      inset-block-start: -1px; /* "top" */
+      background-color: white;
+      border: solid gray 1px;
+    }
+    p {
+      margin: 2px 0 2px 0;
+    }
+  </style>
 </html>
