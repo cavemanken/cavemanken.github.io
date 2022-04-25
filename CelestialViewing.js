@@ -107,7 +107,7 @@ var cv = (function () {
     alwaysBelowHorizon = false;
     resetGrid();
     if (validateInputs(true)) {
-      var date = new Date(startDate);
+      var date = new Date(startDate + ' 08:00'); // add 8 hours so when it get adjusted it won't be the day before
 
       // console.log(date, raH * 1.0, raM, raS, decD, decM, decS, lat, lng);
       // console.log(date);
@@ -315,7 +315,7 @@ var cv = (function () {
           '<p>Note: you should have at least 30 minutes before and/or after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
         viewingTimesHtml +=
           "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th><th>Moon Rises</th><th>Moon Sets</th></tr></thead><tbody>";
-        for (var i = 0; i < riseSetArray.length; i++) {
+        for (var i = 0; i < riseSetArray.length-1; i++) {
           if (riseSetArray[i].potentialViewingDate) {
             viewingTimesHtml +=
               "<tr><td>" +
