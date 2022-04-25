@@ -296,9 +296,9 @@ var cv = (function () {
       // now loop through everything that still has potentialViewingDate of true, these are the ones that won't be obsured by moonlight or astronomical twilight
       var cnt = 0;
       var viewingTimesHtml =
-        '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
+        '<p>Note: you should have at least 30 minutes before and/or after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
       viewingTimesHtml +=
-        "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th></tr></thead><tbody>";
+        "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th><th>Moon Rises</th><th>Moon Sets</th></tr></thead><tbody>";
       for (var i = 0; i < riseSetArray.length; i++) {
         if (riseSetArray[i].potentialViewingDate) {
           viewingTimesHtml +=
@@ -310,6 +310,10 @@ var cv = (function () {
             riseSetArray[i].objectRises.substr(0, 5) +
             "</td><td>" +
             riseSetArray[i].objectSets.substr(0, 5) +
+            "</td><td>" +
+            riseSetArray[i].adjustedMoonRises.substr(0, 5) +
+            "</td><td>" +
+            riseSetArray[i].adjustedMoonSets.substr(0, 5) +
             "</td></tr>";
           cnt++;
         }
