@@ -1,4 +1,6 @@
 var cv = (function () {
+  var alwaysAboveHorizon = false;
+  var alwaysBelowHorizon = false;
   var startDate;
   var raH;
   var raM;
@@ -101,6 +103,8 @@ var cv = (function () {
 
 
   function generate() {
+    alwaysAboveHorizon = false;
+    alwaysBelowHorizon = false;
     resetGrid();
     if (validateInputs(true)) {
       var date = new Date(startDate);
@@ -110,216 +114,229 @@ var cv = (function () {
 
       // these are independent of the date so calculate them one time here
       var transitTimeRadians = astro.transitTimeSiderealRadians(raH, raM, raS);
-      var riseTimeRadians = astro.riseTimeSiderealRadians(
-        raH,
-        raM,
-        raS,
-        decD,
-        decM,
-        decS,
-        lat
-      );
-      var setTimeRadians = astro.setTimeSiderealRadians(
-        raH,
-        raM,
-        raS,
-        decD,
-        decM,
-        decS,
-        lat
-      );
-      // console.log(riseTimeRadians, transitTimeRadians, setTimeRadians);
+      // check to see if object is always below or always above the horizon
+      if (Math.abs(astro.dmsToDegrees(decD,decM,decS) - Number(lat)) > 90) {
+        alwaysBelowHorizon = true;
+        console.log("object is always below the horizon at given latitude");
+      } else if (Math.abs(astro.dmsToDegrees(decD,decM,decS) + Number(lat)) > 90) {
+        alwaysAboveHorizon = true;
+        console.log("object is always above the horizon at given latitude");
+      }
+      
+      if (alwaysBelowHorizon) {
+        var viewingTimesHtml = "<p>Selected object is always below the horizon at the given latitude.</p>"
+      } else {
+        var riseTimeRadians = astro.riseTimeSiderealRadians(
+          raH,
+          raM,
+          raS,
+          decD,
+          decM,
+          decS,
+          lat
+        );
+        var setTimeRadians = astro.setTimeSiderealRadians(
+          raH,
+          raM,
+          raS,
+          decD,
+          decM,
+          decS,
+          lat
+        );
+        // console.log(riseTimeRadians, transitTimeRadians, setTimeRadians);
 
-      // generate a year's worth of rise, set, and transit times.
-      for (var i = 0; i < 366; i++) {
-        // TODO: need to handle never rises and never sets
-        // generate
+        // generate a year's worth of rise, set, and transit times.
+        for (var i = 0; i < 366; i++) {
+          // TODO: need to handle never rises and never sets
+          // generate
 
-        var transitUTCTime = astro.radiansToUtcTime(
-          transitTimeRadians,
-          date,
-          astro.degreesToRadians(lng)
-        );
-        var localTransitDateTime = astro.convertDateAndUtcTimeToLocalTime(
-          date,
-          transitUTCTime
-        );
-        var riseUTCTime = astro.radiansToUtcTime(
-          riseTimeRadians,
-          date,
-          astro.degreesToRadians(lng)
-        );
-        var localRiseDateTime = astro.convertDateAndUtcTimeToLocalTime(
-          date,
-          riseUTCTime
-        );
-        var setUTCTime = astro.radiansToUtcTime(
-          setTimeRadians,
-          date,
-          astro.degreesToRadians(lng)
-        );
-        var localSetDateTime = astro.convertDateAndUtcTimeToLocalTime(
-          date,
-          setUTCTime
-        );
+          var transitUTCTime = astro.radiansToUtcTime(
+            transitTimeRadians,
+            date,
+            astro.degreesToRadians(lng)
+          );
+          var localTransitDateTime = astro.convertDateAndUtcTimeToLocalTime(
+            date,
+            transitUTCTime
+          );
+          var riseUTCTime = astro.radiansToUtcTime(
+            riseTimeRadians,
+            date,
+            astro.degreesToRadians(lng)
+          );
+          var localRiseDateTime = astro.convertDateAndUtcTimeToLocalTime(
+            date,
+            riseUTCTime
+          );
+          var setUTCTime = astro.radiansToUtcTime(
+            setTimeRadians,
+            date,
+            astro.degreesToRadians(lng)
+          );
+          var localSetDateTime = astro.convertDateAndUtcTimeToLocalTime(
+            date,
+            setUTCTime
+          );
 
-        // get sun and moon stuff based on the date and add to the array
-        var astronomicalDusk = SunCalc.getTimes(
-          date,
-          lat,
-          lng
-        ).night.toLocaleTimeString("en-US", { hour12: false });
-        var astronomicalDawn = SunCalc.getTimes(
-          date,
-          lat,
-          lng
-        ).nightEnd.toLocaleTimeString("en-US", { hour12: false });
-
-        var moonRises = "";
-        var moonSets = "";
-        if (SunCalc.getMoonTimes(date, lat, lng).rise !== undefined) {
-          moonRises = SunCalc.getMoonTimes(
+          // get sun and moon stuff based on the date and add to the array
+          var astronomicalDusk = SunCalc.getTimes(
             date,
             lat,
             lng
-          ).rise.toLocaleTimeString("en-US", { hour12: false });
-        }
-        if (SunCalc.getMoonTimes(date, lat, lng).set !== undefined) {
-          moonSets = SunCalc.getMoonTimes(
+          ).night.toLocaleTimeString("en-US", { hour12: false });
+          var astronomicalDawn = SunCalc.getTimes(
             date,
             lat,
             lng
-          ).set.toLocaleTimeString("en-US", { hour12: false });
+          ).nightEnd.toLocaleTimeString("en-US", { hour12: false });
+
+          var moonRises = "";
+          var moonSets = "";
+          if (SunCalc.getMoonTimes(date, lat, lng).rise !== undefined) {
+            moonRises = SunCalc.getMoonTimes(
+              date,
+              lat,
+              lng
+            ).rise.toLocaleTimeString("en-US", { hour12: false });
+          }
+          if (SunCalc.getMoonTimes(date, lat, lng).set !== undefined) {
+            moonSets = SunCalc.getMoonTimes(
+              date,
+              lat,
+              lng
+            ).set.toLocaleTimeString("en-US", { hour12: false });
+          }
+
+          var moonPhase = SunCalc.getMoonIllumination(date).phase;
+
+          var sunRises = SunCalc.getTimes(
+            date,
+            lat,
+            lng
+          ).sunrise.toLocaleTimeString("en-US", { hour12: false });
+          var sunSets = SunCalc.getTimes(
+            date,
+            lat,
+            lng
+          ).sunset.toLocaleTimeString("en-US", { hour12: false });
+
+          riseSetArray.push({
+            potentialViewingDate: false,
+            date: date.toISOString().split("T")[0],
+            moonRises: moonRises,
+            moonSets: moonSets,
+            moonPhase: moonPhase,
+            objectTransits: localTransitDateTime.toTimeString().split(" ")[0],
+            objectRises: localRiseDateTime.toTimeString().split(" ")[0],
+            objectSets: localSetDateTime.toTimeString().split(" ")[0],
+            astronomicalDusk: astronomicalDusk,
+            astronomicalDawn: astronomicalDawn,
+            sunRises: sunRises,
+            sunSets: sunSets,
+            adjustedMoonRises: "",
+            adjustedMoonSets: "",
+          });
+
+          date = date.addDays(1);
         }
 
-        var moonPhase = SunCalc.getMoonIllumination(date).phase;
+        // console.log(riseSetArray);
 
-        var sunRises = SunCalc.getTimes(
-          date,
-          lat,
-          lng
-        ).sunrise.toLocaleTimeString("en-US", { hour12: false });
-        var sunSets = SunCalc.getTimes(
-          date,
-          lat,
-          lng
-        ).sunset.toLocaleTimeString("en-US", { hour12: false });
-
-        riseSetArray.push({
-          potentialViewingDate: false,
-          date: date.toISOString().split("T")[0],
-          moonRises: moonRises,
-          moonSets: moonSets,
-          moonPhase: moonPhase,
-          objectTransits: localTransitDateTime.toTimeString().split(" ")[0],
-          objectRises: localRiseDateTime.toTimeString().split(" ")[0],
-          objectSets: localSetDateTime.toTimeString().split(" ")[0],
-          astronomicalDusk: astronomicalDusk,
-          astronomicalDawn: astronomicalDawn,
-          sunRises: sunRises,
-          sunSets: sunSets,
-          adjustedMoonRises: "",
-          adjustedMoonSets: "",
-        });
-
-        date = date.addDays(1);
-      }
-
-      // console.log(riseSetArray);
-
-      // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
-      // let's fix these
-      for (var i = 0; i < riseSetArray.length; i++) {
-        riseSetArray[i].moonRises = fixTimes(riseSetArray[i].moonRises);
-        riseSetArray[i].moonSets = fixTimes(riseSetArray[i].moonSets);
-        riseSetArray[i].objectRises = fixTimes(riseSetArray[i].objectRises);
-        riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
-      }
-
-      // since we are showing them data for the "night of", then let's adjust the moon times accordingly
-      for (var i = 0; i < riseSetArray.length-1; i++) {
-        if (riseSetArray[i].moonRises < '12:00:00') {
-          riseSetArray[i].adjustedMoonRises = riseSetArray[i+1].moonRises;
-        } else {
-          riseSetArray[i].adjustedMoonRises = riseSetArray[i].moonRises;
+        // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
+        // let's fix these
+        for (var i = 0; i < riseSetArray.length; i++) {
+          riseSetArray[i].moonRises = fixTimes(riseSetArray[i].moonRises);
+          riseSetArray[i].moonSets = fixTimes(riseSetArray[i].moonSets);
+          riseSetArray[i].objectRises = fixTimes(riseSetArray[i].objectRises);
+          riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
         }
-        if (riseSetArray[i].moonSets < '12:00:00') {
-          riseSetArray[i].adjustedMoonSets = riseSetArray[i+1].moonSets;
-        } else {
-          riseSetArray[i].adjustedMoonSets = riseSetArray[i].moonSets;
-        }
-        // console.log(riseSetArray[i].date,riseSetArray[i].moonRises,riseSetArray[i].moonSets,riseSetArray[i].adjustedMoonRises, riseSetArray[i].adjustedMoonSets);
-      }
 
-      // start finding the best nights to view the Milky Way
-      var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
-      // get all but the last element since this might not have adjusted moon times
-      for (var i = 0; i < riseSetArray.length-1; i++) {
-        // see if the Objects transit is between astronomical dusk and astronomical dawn
-        if (
-          isTimeBetween(
-            riseSetArray[i].objectTransits,
-            riseSetArray[i].astronomicalDusk,
-            riseSetArray[i].astronomicalDawn
-          )
-        ) {
-          // if so, make sure the moon won't interfer
-          // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
-          // console.log(riseSetArray[i].date, 'x' + riseSetArray[i].moonSets +'x',  'y'+riseSetArray[i].moonRises+'y');
+        // since we are showing them data for the "night of", then let's adjust the moon times accordingly
+        for (var i = 0; i < riseSetArray.length-1; i++) {
+          if (riseSetArray[i].moonRises < '12:00:00') {
+            riseSetArray[i].adjustedMoonRises = riseSetArray[i+1].moonRises;
+          } else {
+            riseSetArray[i].adjustedMoonRises = riseSetArray[i].moonRises;
+          }
+          if (riseSetArray[i].moonSets < '12:00:00') {
+            riseSetArray[i].adjustedMoonSets = riseSetArray[i+1].moonSets;
+          } else {
+            riseSetArray[i].adjustedMoonSets = riseSetArray[i].moonSets;
+          }
+          // console.log(riseSetArray[i].date,riseSetArray[i].moonRises,riseSetArray[i].moonSets,riseSetArray[i].adjustedMoonRises, riseSetArray[i].adjustedMoonSets);
+        }
+
+        // start finding the best nights to view the Milky Way
+        var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
+        // get all but the last element since this might not have adjusted moon times
+        for (var i = 0; i < riseSetArray.length-1; i++) {
+          // see if the Objects transit is between astronomical dusk and astronomical dawn
           if (
-            riseSetArray[i].adjustedMoonSets !== "" &&
-            riseSetArray[i].adjustedMoonRises !== ""
+            isTimeBetween(
+              riseSetArray[i].objectTransits,
+              riseSetArray[i].astronomicalDusk,
+              riseSetArray[i].astronomicalDawn
+            )
           ) {
+            // if so, make sure the moon won't interfer
+            // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
+            // console.log(riseSetArray[i].date, 'x' + riseSetArray[i].moonSets +'x',  'y'+riseSetArray[i].moonRises+'y');
             if (
-              isTimeBetween(
-                riseSetArray[i].objectTransits,
-                addSeconds(riseSetArray[i].adjustedMoonSets, moonBuffer * 60),
-                subtractSeconds(riseSetArray[i].adjustedMoonRises, moonBuffer * 60)
-              )
+              riseSetArray[i].adjustedMoonSets !== "" &&
+              riseSetArray[i].adjustedMoonRises !== ""
             ) {
-              riseSetArray[i].potentialViewingDate = true;
+              if (
+                isTimeBetween(
+                  riseSetArray[i].objectTransits,
+                  addSeconds(riseSetArray[i].adjustedMoonSets, moonBuffer * 60),
+                  subtractSeconds(riseSetArray[i].adjustedMoonRises, moonBuffer * 60)
+                )
+              ) {
+                riseSetArray[i].potentialViewingDate = true;
+              }
+            } else if (riseSetArray[i].adjustedMoonRises === "") {
+              console.log(riseSetArray[i],'here1');
+            } else if (riseSetArray[i].adjustedMoonSets === "") {
+              console.log('here2');
             }
-          } else if (riseSetArray[i].adjustedMoonRises === "") {
-            console.log(riseSetArray[i],'here1');
-          } else if (riseSetArray[i].adjustedMoonSets === "") {
-            console.log('here2');
+          }
+          objectRises = riseSetArray[i].objectRises;
+          objectSets = riseSetArray[i].objectSets;
+          // not sure how to handle transit if the Object never sets???
+
+          // console.log(objectRises, objectSets, objectTransits);
+        }
+        // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
+
+        // now loop through everything that still has potentialViewingDate of true, these are the ones that won't be obsured by moonlight or astronomical twilight
+        var cnt = 0;
+        var viewingTimesHtml =
+          '<p>Note: you should have at least 30 minutes before and/or after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
+        viewingTimesHtml +=
+          "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th><th>Moon Rises</th><th>Moon Sets</th></tr></thead><tbody>";
+        for (var i = 0; i < riseSetArray.length; i++) {
+          if (riseSetArray[i].potentialViewingDate) {
+            viewingTimesHtml +=
+              "<tr><td>" +
+              riseSetArray[i].date +
+              "</td><td>" +
+              riseSetArray[i].objectTransits.substr(0, 5) +
+              "</td><td>" +
+              (alwaysAboveHorizon ? "never sets" : riseSetArray[i].objectRises.substr(0, 5)) +
+              "</td><td>" +
+              (alwaysAboveHorizon ? "never sets" : riseSetArray[i].objectSets.substr(0, 5)) +
+              "</td><td>" +
+              riseSetArray[i].adjustedMoonRises.substr(0, 5) +
+              "</td><td>" +
+              riseSetArray[i].adjustedMoonSets.substr(0, 5) +
+              "</td></tr>";
+            cnt++;
           }
         }
-        objectRises = riseSetArray[i].objectRises;
-        objectSets = riseSetArray[i].objectSets;
-        // not sure how to handle transit if the Object never sets???
-
-        // console.log(objectRises, objectSets, objectTransits);
+        viewingTimesHtml += "</tbody></table>";
       }
-      // console.log(objectRises, objectSets, secondsToHms(addSeconds(objectRises, Math.abs((hmsToSeconds(objectRises) - hmsToSeconds(objectSets))/2)));
-
-      // now loop through everything that still has potentialViewingDate of true, these are the ones that won't be obsured by moonlight or astronomical twilight
-      var cnt = 0;
-      var viewingTimesHtml =
-        '<p>Note: you should have at least 30 minutes before and/or after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
-      viewingTimesHtml +=
-        "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th><th>Moon Rises</th><th>Moon Sets</th></tr></thead><tbody>";
-      for (var i = 0; i < riseSetArray.length; i++) {
-        if (riseSetArray[i].potentialViewingDate) {
-          viewingTimesHtml +=
-            "<tr><td>" +
-            riseSetArray[i].date +
-            "</td><td>" +
-            riseSetArray[i].objectTransits.substr(0, 5) +
-            "</td><td>" +
-            riseSetArray[i].objectRises.substr(0, 5) +
-            "</td><td>" +
-            riseSetArray[i].objectSets.substr(0, 5) +
-            "</td><td>" +
-            riseSetArray[i].adjustedMoonRises.substr(0, 5) +
-            "</td><td>" +
-            riseSetArray[i].adjustedMoonSets.substr(0, 5) +
-            "</td></tr>";
-          cnt++;
-        }
-      }
-      viewingTimesHtml += "</tbody></table>";
-      document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
+    document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
     }
   }
 
