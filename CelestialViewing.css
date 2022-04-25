@@ -1,0 +1,36 @@
+#viewingTimes table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#viewingTimes th,
+#viewingTimes td {
+  text-align: center;
+  padding: 4px;
+  border: solid gray 1px;
+}
+
+#viewingTimes tr:nth-child(even) {
+  background-color: lightgray;
+}
+#viewingTimes table thead {
+  position: sticky;
+}
+#viewingTimes table thead {
+  inset-block-start: -1px; /* "top" */
+  background-color: white;
+  border: solid gray 1px;
+}
+p {
+  margin: 2px 0 2px 0;
+}
+button {
+  background-color: lightgray;
+  border: 1px solid black;
+  color: black;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}

@@ -11,92 +11,94 @@ var cv = (function () {
   var riseSetArray = [];
   inputFields = {};
 
+  function init() {
+    // default date field to today
+    document.getElementById("date").value = new Date()
+      .toISOString().substring(0,10);
+      var presetLocations = [
+        { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
+        { lat: 38.11217, lng: -83.532625, name: "Cave Run" },
+      ];
+
+    // setup the preset values and links  
+    var presetObjects = [
+      {
+        raH: 00,
+        raM: 44,
+        raS: 00,
+        decD: 41,
+        decM: 23,
+        decS: 43,
+        name: "Andromeda Galaxy (M31)",
+      },
+      {
+        raH: 20,
+        raM: 00,
+        raS: 33,
+        decD: 22,
+        decM: 46,
+        decS: 39,
+        name: "Dumbbell Nebula (M27)",
+      },
+      {
+        raH: 16,
+        raM: 42,
+        raS: 30,
+        decD: 36,
+        decM: 24,
+        decS: 57,
+        name: "Hercules Gobular Cluster (M13)",
+      },
+      {
+        raH: 17,
+        raM: 35,
+        raS: 07,
+        decD: -37,
+        decM: 07,
+        decS: 05,
+        name: "Milky Way",
+      },
+      {
+        raH: 05,
+        raM: 36,
+        raS: 21,
+        decD: -05,
+        decM: 22,
+        decS: 43,
+        name: "Orion Nebula (M42)",
+      }, // Orion Nebula
+    ];
+  
+    for (var i = 0; i < presetLocations.length; i++) {
+      addLocationPreset(
+        presetLocations[i].name,
+        presetLocations[i].lat,
+        presetLocations[i].lng,
+        presetObjects[i].raS,
+        presetObjects[i].decD,
+        presetObjects[i].decM,
+        presetObjects[i].decS
+      );
+    }
+    for (var i = 0; i < presetObjects.length; i++) {
+      addObjectPreset(
+        presetObjects[i].name,
+        presetObjects[i].raH,
+        presetObjects[i].raM,
+        presetObjects[i].raS,
+        presetObjects[i].decD,
+        presetObjects[i].decM,
+        presetObjects[i].decS
+      );
+    }
+  };
+
   Date.prototype.addDays = function (days) {
     let date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);
     return date;
   };
 
-  // default date field to today
-  document.getElementById("date").value = new Date()
-    .toISOString()
-    .substr(0, 10);
-
-  var presetLocations = [
-    { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
-    { lat: 38.11217, lng: -83.532625, name: "Cave Run" },
-  ];
-
-  var presetObjects = [
-    {
-      raH: 00,
-      raM: 44,
-      raS: 00,
-      decD: 41,
-      decM: 23,
-      decS: 43,
-      name: "Andromeda Galaxy (M31)",
-    },
-    {
-      raH: 20,
-      raM: 00,
-      raS: 33,
-      decD: 22,
-      decM: 46,
-      decS: 39,
-      name: "Dumbbell Nebula (M27)",
-    },
-    {
-      raH: 16,
-      raM: 42,
-      raS: 30,
-      decD: 36,
-      decM: 24,
-      decS: 57,
-      name: "Hercules Gobular Cluster (M13)",
-    },
-    {
-      raH: 17,
-      raM: 35,
-      raS: 07,
-      decD: -37,
-      decM: 07,
-      decS: 05,
-      name: "Milky Way",
-    },
-    {
-      raH: 05,
-      raM: 36,
-      raS: 21,
-      decD: -05,
-      decM: 22,
-      decS: 43,
-      name: "Orion Nebula (M42)",
-    }, // Orion Nebula
-  ];
-
-  for (var i = 0; i < presetLocations.length; i++) {
-    addLocationPreset(
-      presetLocations[i].name,
-      presetLocations[i].lat,
-      presetLocations[i].lng,
-      presetObjects[i].raS,
-      presetObjects[i].decD,
-      presetObjects[i].decM,
-      presetObjects[i].decS
-    );
-  }
-  for (var i = 0; i < presetObjects.length; i++) {
-    addObjectPreset(
-      presetObjects[i].name,
-      presetObjects[i].raH,
-      presetObjects[i].raM,
-      presetObjects[i].raS,
-      presetObjects[i].decD,
-      presetObjects[i].decM,
-      presetObjects[i].decS
-    );
-  }
 
   function generate() {
     resetGrid();
@@ -235,7 +237,7 @@ var cv = (function () {
         date = date.addDays(1);
       }
 
-      console.log(riseSetArray);
+      // console.log(riseSetArray);
 
       // for some reason the .toLocaleTimeString("en-US", { hour12: false }) return 24 instead of 00 for the hour
       // let's fix these
@@ -292,7 +294,7 @@ var cv = (function () {
       // now loop through everything that still has potentialViewingDate of true, these are the ones that won't be obsured by moonlight or astronomical twilight
       var cnt = 0;
       var viewingTimesHtml =
-        '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the Moon or the Sun.</p>';
+        '<p>Note: you should have at least 30 minutes before and after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
       viewingTimesHtml +=
         "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th></tr></thead><tbody>";
       for (var i = 0; i < riseSetArray.length; i++) {
@@ -314,18 +316,6 @@ var cv = (function () {
       document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
     }
   }
-
-  /*
-        console.log(d);
-        console.log('milky way RA converted to radians (same as transit sidereal time):', astro.hmsToRadians(17,35,7));
-        console.log('rise:', astro.radiansToUtcTime(astro.riseTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));
-        console.log('set:', astro.radiansToUtcTime(astro.setTimeSiderealRadians(17,35,7,-37,7,5,38), new Date(2022,3,27), astro.degreesToRadians(-84)));
-        // console.log('transit:', astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84)));
-        var transitUTCTime = astro.radiansToUtcTime(astro.transitTimeSiderealRadians(17,35,7), new Date(2022,3,27), astro.degreesToRadians(-84));
-        console.log('transit UTC time:', transitUTCTime);
-        var localDateTime = new Date( Date.UTC(2022, 03, 27, transitUTCTime.substr(0,2), transitUTCTime.substr(3,2), transitUTCTime.substr(6,2)));
-        console.log(localDateTime);
-        */
 
   function isTimeBetween(hmsTime, hmsStart, hmsEnd) {
     var hmsTimeInSeconds = hmsToSeconds(hmsTime);
@@ -444,7 +434,6 @@ var cv = (function () {
 
   function updateInputs() {
     startDate = document.getElementById("date").value.trim();
-    console.log("here", startDate);
     raH = document.getElementById("raH").value.trim();
     raM = document.getElementById("raM").value.trim();
     raS = document.getElementById("raS").value.trim();
@@ -458,7 +447,6 @@ var cv = (function () {
 
   function validateInputs(showMessages) {
     updateInputs();
-    console.log(startDate);
 
     if (startDate === "" || startDate === undefined) {
       if (showMessages) {
@@ -491,33 +479,11 @@ var cv = (function () {
       }
       return false;
     }
-    /*
-    else {
-      // round all to the nearest whole number...it cannot handle decimals at the moment
-      document.getElementById("raH").value = Math.round(
-        document.getElementById("raH").value
-      );
-      document.getElementById("raM").value = Math.round(
-        document.getElementById("raM").value
-      );
-      document.getElementById("raS").value = Math.round(
-        document.getElementById("raS").value
-      );
-      document.getElementById("decD").value = Math.round(
-        document.getElementById("decD").value
-      );
-      document.getElementById("decM").value = Math.round(
-        document.getElementById("decM").value
-      );
-      document.getElementById("decS").value = Math.round(
-        document.getElementById("decS").value
-      );
-    }
-    */
     return true;
   }
   // expose the public methods here
   return {
+    init: init,
     generate: generate,
     resetGrid: resetGrid,
     validateInputs: validateInputs,
