@@ -26,7 +26,7 @@
           to view any celestial object. The "Peak Viewing Time" shown will be
           when the object is at its transit with no moonlight or twilight
           obscuring the view. All times listed should be accurate to within
-          &plusmn; 5 minutes.
+          &plusmn;5 minutes.
         </p>
 
         <form id="inputValues">
@@ -56,14 +56,19 @@
                     placeholder="Latitude"
                     required
                     pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
-                    onchange="cv.resetGrid()"
+                    onchange="cv.updateLocationDescriptionLatLng();cv.resetGrid();"
                   />
                   <input
                     id="lng"
                     placeholder="Longitude"
                     required
                     pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
-                    onchange="cv.resetGrid()"
+                    onchange="cv.updateLocationDescriptionLatLng();cv.resetGrid();"
+                  />
+                  <img
+                    src="geolocicon.png"
+                    height="18"
+                    onclick="cv.getLocation();"
                   />
                   <!--
                   <svg
@@ -88,7 +93,7 @@
                     placeholder="Hours"
                     required
                     pattern="[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid()"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid();"
                   />
                   <input
                     id="raM"

@@ -122,7 +122,7 @@ var cv = (function () {
         alwaysAboveHorizon = true;
         console.log("object is always above the horizon at given latitude");
       }
-      
+
       if (alwaysBelowHorizon) {
         var viewingTimesHtml = "<p>Selected object is always below the horizon at the given latitude.</p>"
       } else {
@@ -398,11 +398,19 @@ var cv = (function () {
     document.getElementById("locationDescription").innerHTML = " from " + name;
   }
 
+  function updateLocationDescriptionLatLng() {
+    document.getElementById("locationDescription").innerHTML =
+      " from " +
+      document.getElementById("lat").value +
+      "," +
+      document.getElementById("lng").value;
+  }
+
   function updateObjectDescription(name) {
     document.getElementById("objectDescription").innerHTML = " for " + name;
   }
 
-  function updateObjectDescriptionRaDec(name) {
+  function updateObjectDescriptionRaDec() {
     updateInputs();
     document.getElementById("objectDescription").innerHTML =
       " for " +
@@ -504,12 +512,36 @@ var cv = (function () {
     }
     return true;
   }
+
+  function getLocation() {
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+
+  function geoSuccess(position) {
+    document.getElementById("lat").value = position.coords.latitude;
+    document.getElementById("lng").value = position.coords.longitude;
+    updateLocationDescriptionLatLng();
+    if (validateInputs(false)) {
+      generate();
+    }
+  }
+
+  function geoError() {
+      alert("Geocoder failed.");
+  }
+
   // expose the public methods here
   return {
     init: init,
     generate: generate,
+    getLocation: getLocation,
     resetGrid: resetGrid,
     validateInputs: validateInputs,
     updateObjectDescriptionRaDec: updateObjectDescriptionRaDec,
+    updateLocationDescriptionLatLng: updateLocationDescriptionLatLng,
   };
 })();
