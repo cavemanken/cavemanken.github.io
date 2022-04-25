@@ -103,26 +103,12 @@ var cv = (function () {
   function generate() {
     resetGrid();
     if (validateInputs(true)) {
-      /*    
-      raH = raH * 1.0;
-      raM = raM * 1.0;
-      raS = raS * 1.0;
-      */
-      // TODO: for some reason we need to convert these to numbers
-      decD = decD * 1.0;
-      decM = decM * 1.0;
-      decS = decS * 1.0;
-      /*  
-      lat = lat * 1.0;
-      lng = lng * 1.0;
-*/
       var date = new Date(startDate);
 
       // console.log(date, raH * 1.0, raM, raS, decD, decM, decS, lat, lng);
       // console.log(date);
 
-      // these are independent of the date
-      // calculate them one time
+      // these are independent of the date so calculate them one time here
       var transitTimeRadians = astro.transitTimeSiderealRadians(raH, raM, raS);
       var riseTimeRadians = astro.riseTimeSiderealRadians(
         raH,
@@ -251,36 +237,34 @@ var cv = (function () {
       // start finding the best nights to view the Milky Way
       var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
       for (var i = 0; i < riseSetArray.length; i++) {
+        // see if the Objects transit is between astronomical dusk and astronomical dawn
         if (
-          riseSetArray[i].moonPhase <= 0.5 ||
-          riseSetArray[i].moonPhase >= 0.5
+          isTimeBetween(
+            riseSetArray[i].objectTransits,
+            riseSetArray[i].astronomicalDusk,
+            riseSetArray[i].astronomicalDawn
+          )
         ) {
-          // The moon phase might be good, let's see if the objects transit during the astronomical night
-
-          // see if the Objects transit is between astronomical dusk and astronomical dawn
+          // if so, make sure the moon won't interfer
+          // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
+          console.log(riseSetArray[i].date, 'x' + riseSetArray[i].moonSets +'x',  'y'+riseSetArray[i].moonRises+'y');
           if (
-            isTimeBetween(
-              riseSetArray[i].objectTransits,
-              riseSetArray[i].astronomicalDusk,
-              riseSetArray[i].astronomicalDawn
-            )
+            riseSetArray[i].moonSets !== "" &&
+            riseSetArray[i].moonRises !== ""
           ) {
-            // if so, make sure the moon won't interfer
-            // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
             if (
-              riseSetArray[i].moonSets !== "" &&
-              riseSetArray[i].moonRises !== ""
+              isTimeBetween(
+                riseSetArray[i].objectTransits,
+                addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
+                subtractSeconds(riseSetArray[i].moonRises, moonBuffer * 60)
+              )
             ) {
-              if (
-                isTimeBetween(
-                  riseSetArray[i].objectTransits,
-                  addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
-                  subtractSeconds(riseSetArray[i].moonRises, moonBuffer * 60)
-                )
-              ) {
-                riseSetArray[i].potentialViewingDate = true;
-              }
+              riseSetArray[i].potentialViewingDate = true;
             }
+          } else if (riseSetArray[i].moonRises === "") {
+            console.log('here1');
+          } else if (riseSetArray[i].moonSets === "") {
+            console.log('here2');
           }
         }
         objectRises = riseSetArray[i].objectRises;

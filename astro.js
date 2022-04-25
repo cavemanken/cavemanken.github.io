@@ -23,7 +23,7 @@ var astro = (function () {
     return (h * 180.0) / 12.0 + m / 4.0 + s / 240.0;
   };
   var dmsToDegrees = function (d, m, s) {
-    return d + m / 60.0 + s / 3600.0;
+    return d * 1.0 + m / 60.0 + s / 3600.0;
   };
   var degreesToRadians = function (d) {
     return (d * Math.PI) / 180.0;
