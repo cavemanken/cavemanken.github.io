@@ -218,6 +218,8 @@ var cv = (function () {
           astronomicalDawn: astronomicalDawn,
           sunRises: sunRises,
           sunSets: sunSets,
+          adjustedMoonRises: "",
+          adjustedMoonSets: "",
         });
 
         date = date.addDays(1);
@@ -234,9 +236,25 @@ var cv = (function () {
         riseSetArray[i].objectSets = fixTimes(riseSetArray[i].objectSets);
       }
 
+      // since we are showing them data for the "night of", then let's adjust the moon times accordingly
+      for (var i = 0; i < riseSetArray.length-1; i++) {
+        if (riseSetArray[i].moonRises < '12:00:00') {
+          riseSetArray[i].adjustedMoonRises = riseSetArray[i+1].moonRises;
+        } else {
+          riseSetArray[i].adjustedMoonRises = riseSetArray[i].moonRises;
+        }
+        if (riseSetArray[i].moonSets < '12:00:00') {
+          riseSetArray[i].adjustedMoonSets = riseSetArray[i+1].moonSets;
+        } else {
+          riseSetArray[i].adjustedMoonSets = riseSetArray[i].moonSets;
+        }
+        // console.log(riseSetArray[i].date,riseSetArray[i].moonRises,riseSetArray[i].moonSets,riseSetArray[i].adjustedMoonRises, riseSetArray[i].adjustedMoonSets);
+      }
+
       // start finding the best nights to view the Milky Way
       var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
-      for (var i = 0; i < riseSetArray.length; i++) {
+      // get all but the last element since this might not have adjusted moon times
+      for (var i = 0; i < riseSetArray.length-1; i++) {
         // see if the Objects transit is between astronomical dusk and astronomical dawn
         if (
           isTimeBetween(
@@ -247,23 +265,23 @@ var cv = (function () {
         ) {
           // if so, make sure the moon won't interfer
           // TODO: need to handle days where moon may not rise or may not set. see 5/4/2022
-          console.log(riseSetArray[i].date, 'x' + riseSetArray[i].moonSets +'x',  'y'+riseSetArray[i].moonRises+'y');
+          // console.log(riseSetArray[i].date, 'x' + riseSetArray[i].moonSets +'x',  'y'+riseSetArray[i].moonRises+'y');
           if (
-            riseSetArray[i].moonSets !== "" &&
-            riseSetArray[i].moonRises !== ""
+            riseSetArray[i].adjustedMoonSets !== "" &&
+            riseSetArray[i].adjustedMoonRises !== ""
           ) {
             if (
               isTimeBetween(
                 riseSetArray[i].objectTransits,
-                addSeconds(riseSetArray[i].moonSets, moonBuffer * 60),
-                subtractSeconds(riseSetArray[i].moonRises, moonBuffer * 60)
+                addSeconds(riseSetArray[i].adjustedMoonSets, moonBuffer * 60),
+                subtractSeconds(riseSetArray[i].adjustedMoonRises, moonBuffer * 60)
               )
             ) {
               riseSetArray[i].potentialViewingDate = true;
             }
-          } else if (riseSetArray[i].moonRises === "") {
-            console.log('here1');
-          } else if (riseSetArray[i].moonSets === "") {
+          } else if (riseSetArray[i].adjustedMoonRises === "") {
+            console.log(riseSetArray[i],'here1');
+          } else if (riseSetArray[i].adjustedMoonSets === "") {
             console.log('here2');
           }
         }
