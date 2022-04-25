@@ -1,10 +1,6 @@
 // self invoking function that will create the object at load time
 var astro = (function () {
-  const ARC_MINUTES_PER_DEGREE = 60,
-    ARC_SECONDS_PER_ARC_MINUTE = 60,
-    ARC_SECONDS_PER_DEGREE =
-      ARC_MINUTES_PER_DEGREE * ARC_SECONDS_PER_ARC_MINUTE,
-    MILLISECONDS_PER_SECOND = 1000,
+  const MILLISECONDS_PER_SECOND = 1000,
     RADIANS_PER_DAY = Math.PI * 2,
     SECONDS_PER_MINUTE = 60,
     MINUTES_PER_HOUR = 60,

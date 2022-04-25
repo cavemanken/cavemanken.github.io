@@ -1,3 +1,51 @@
+html, body {
+  margin: 0;
+  padding: 0; 
+}
+
+html {
+  background-color: #ddd;
+  height: 100%;
+  font-family: 'Open Sans', sans-serif; 
+}
+
+h1 {
+  font-size: 2em; 
+}
+
+h2 {
+  padding-bottom: 5px;
+  border-bottom: 2px solid #ddd;
+  margin: 20px 0; 
+}
+
+h1, h2, article {
+  color: black; 
+}
+
+a {
+  text-decoration: none;
+  color: #006BB7; 
+}
+
+a:hover {
+  text-decoration: underline; 
+}
+
+body {
+  margin: 0 auto;
+  padding: 0 32px 0 16px;
+  max-width: 1200px;
+  min-height: 100%;
+  border-width: 0 1px;
+  border-color: #aaa;
+  border-style: solid;
+  background-color: white;
+  box-shadow: 0 0 10px 10px #ccc;
+  display: flex;
+  flex-direction: column; 
+}
+
 #viewingTimes table {
   border-collapse: collapse;
   width: 100%;
@@ -33,4 +81,59 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
+}
+
+#inputValues {
+  display: flex;
+  flex-direction: column; }
+  #inputValues ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0; }
+  #inputValues li {
+    display: inline;
+    cursor: pointer;
+    color: #0087ff;
+    margin-right: 10px;
+    font-size: 0.8em;
+    text-decoration: underline; }
+  #inputValues svg {
+    cursor: pointer;
+    margin-left: 5px; }
+  #inputValues input {
+    width: 6em; }
+  #inputValues #date {
+    width: 12em;
+    font-size: 12px;
+    font-family: sans-serif; }
+  #inputValues h2 {
+    margin-bottom: 10px; }
+  #inputValues button {
+    border: 1px solid gray;
+    padding: 5px 10px;
+    background-color: white;
+    border-radius: 1px;
+    margin-right: 5px;
+    cursor: pointer; }
+  #inputValues form:invalid #calc {
+    pointer-events: none;
+    color: lightgray;
+    border-color: lightgrey;
+    cursor: default; 
+}
+
+#output {
+  display: none; 
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  margin: 5px 0; }
+
+.row label {
+  flex-basis: 250px;
+  flex-shrink: 0;
+  font-weight: bold; 
 }
