@@ -107,7 +107,7 @@ var cv = (function () {
     alwaysBelowHorizon = false;
     resetGrid();
     if (validateInputs(true)) {
-      var date = new Date(startDate + ' 08:00'); // add 8 hours so when it get adjusted it won't be the day before
+      var date = new Date(startDate + ' 08:00'); // add 8 hours so when it gets adjusted it won't be the day before
 
       // console.log(date, raH * 1.0, raM, raS, decD, decM, decS, lat, lng);
       // console.log(date);
