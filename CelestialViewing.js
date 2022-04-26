@@ -16,13 +16,14 @@ var cv = (function () {
   function init() {
     // default date field to today
     document.getElementById("date").value = new Date()
-      .toISOString().substring(0,10);
-      var presetLocations = [
-        { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
-        { lat: 38.11217, lng: -83.532625, name: "Cave Run" },
-      ];
+      .toISOString()
+      .substring(0, 10);
+    var presetLocations = [
+      { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
+      { lat: 38.11217, lng: -83.532625, name: "Cave Run" },
+    ];
 
-    // setup the preset values and links  
+    // setup the preset values and links
     var presetObjects = [
       {
         raH: 00,
@@ -70,7 +71,7 @@ var cv = (function () {
         name: "Orion Nebula (M42)",
       }, // Orion Nebula
     ];
-  
+
     for (var i = 0; i < presetLocations.length; i++) {
       addLocationPreset(
         presetLocations[i].name,
@@ -93,7 +94,7 @@ var cv = (function () {
         presetObjects[i].decS
       );
     }
-  };
+  }
 
   Date.prototype.addDays = function (days) {
     let date = new Date(this.valueOf());
@@ -101,13 +102,12 @@ var cv = (function () {
     return date;
   };
 
-
   function generate() {
     alwaysAboveHorizon = false;
     alwaysBelowHorizon = false;
     resetGrid();
     if (validateInputs(true)) {
-      var date = new Date(startDate + ' 08:00'); // add 8 hours so when it gets adjusted it won't be the day before
+      var date = new Date(startDate + " 08:00"); // add 8 hours so when it gets adjusted it won't be the day before
 
       // console.log(date, raH * 1.0, raM, raS, decD, decM, decS, lat, lng);
       // console.log(date);
@@ -115,16 +115,19 @@ var cv = (function () {
       // these are independent of the date so calculate them one time here
       var transitTimeRadians = astro.transitTimeSiderealRadians(raH, raM, raS);
       // check to see if object is always below or always above the horizon
-      if (Math.abs(astro.dmsToDegrees(decD,decM,decS) - Number(lat)) > 90) {
+      if (Math.abs(astro.dmsToDegrees(decD, decM, decS) - Number(lat)) > 90) {
         alwaysBelowHorizon = true;
         console.log("object is always below the horizon at given latitude");
-      } else if (Math.abs(astro.dmsToDegrees(decD,decM,decS) + Number(lat)) > 90) {
+      } else if (
+        Math.abs(astro.dmsToDegrees(decD, decM, decS) + Number(lat)) > 90
+      ) {
         alwaysAboveHorizon = true;
         console.log("object is always above the horizon at given latitude");
       }
 
       if (alwaysBelowHorizon) {
-        var viewingTimesHtml = "<p>Selected object is always below the horizon at the given latitude.</p>"
+        var viewingTimesHtml =
+          "<p>Selected object is always below the horizon at the given latitude.</p>";
       } else {
         var riseTimeRadians = astro.riseTimeSiderealRadians(
           raH,
@@ -253,14 +256,14 @@ var cv = (function () {
         }
 
         // since we are showing them data for the "night of", then let's adjust the moon times accordingly
-        for (var i = 0; i < riseSetArray.length-1; i++) {
-          if (riseSetArray[i].moonRises < '12:00:00') {
-            riseSetArray[i].adjustedMoonRises = riseSetArray[i+1].moonRises;
+        for (var i = 0; i < riseSetArray.length - 1; i++) {
+          if (riseSetArray[i].moonRises < "12:00:00") {
+            riseSetArray[i].adjustedMoonRises = riseSetArray[i + 1].moonRises;
           } else {
             riseSetArray[i].adjustedMoonRises = riseSetArray[i].moonRises;
           }
-          if (riseSetArray[i].moonSets < '12:00:00') {
-            riseSetArray[i].adjustedMoonSets = riseSetArray[i+1].moonSets;
+          if (riseSetArray[i].moonSets < "12:00:00") {
+            riseSetArray[i].adjustedMoonSets = riseSetArray[i + 1].moonSets;
           } else {
             riseSetArray[i].adjustedMoonSets = riseSetArray[i].moonSets;
           }
@@ -270,7 +273,7 @@ var cv = (function () {
         // start finding the best nights to view the Milky Way
         var moonBuffer = 0; // assume the moon doesn't affect viewing until it rises
         // get all but the last element since this might not have adjusted moon times
-        for (var i = 0; i < riseSetArray.length-1; i++) {
+        for (var i = 0; i < riseSetArray.length - 1; i++) {
           // see if the Objects transit is between astronomical dusk and astronomical dawn
           if (
             isTimeBetween(
@@ -290,15 +293,18 @@ var cv = (function () {
                 isTimeBetween(
                   riseSetArray[i].objectTransits,
                   addSeconds(riseSetArray[i].adjustedMoonSets, moonBuffer * 60),
-                  subtractSeconds(riseSetArray[i].adjustedMoonRises, moonBuffer * 60)
+                  subtractSeconds(
+                    riseSetArray[i].adjustedMoonRises,
+                    moonBuffer * 60
+                  )
                 )
               ) {
                 riseSetArray[i].potentialViewingDate = true;
               }
             } else if (riseSetArray[i].adjustedMoonRises === "") {
-              console.log(riseSetArray[i],'here1');
+              console.log(riseSetArray[i], "here1");
             } else if (riseSetArray[i].adjustedMoonSets === "") {
-              console.log('here2');
+              console.log("here2");
             }
           }
           objectRises = riseSetArray[i].objectRises;
@@ -315,7 +321,7 @@ var cv = (function () {
           '<p>Note: you should have at least 30 minutes before and/or after the "Peak Viewing Time" without interference from the moon or the sun.</p>';
         viewingTimesHtml +=
           "<table><thead><tr><th>Night Of</th><th>Peak Viewing Time</th><th>Object Rises</th><th>Object Sets</th><th>Moon Rises</th><th>Moon Sets</th></tr></thead><tbody>";
-        for (var i = 0; i < riseSetArray.length-1; i++) {
+        for (var i = 0; i < riseSetArray.length - 1; i++) {
           if (riseSetArray[i].potentialViewingDate) {
             viewingTimesHtml +=
               "<tr><td>" +
@@ -323,9 +329,13 @@ var cv = (function () {
               "</td><td>" +
               riseSetArray[i].objectTransits.substr(0, 5) +
               "</td><td>" +
-              (alwaysAboveHorizon ? "never sets" : riseSetArray[i].objectRises.substr(0, 5)) +
+              (alwaysAboveHorizon
+                ? "never sets"
+                : riseSetArray[i].objectRises.substr(0, 5)) +
               "</td><td>" +
-              (alwaysAboveHorizon ? "never sets" : riseSetArray[i].objectSets.substr(0, 5)) +
+              (alwaysAboveHorizon
+                ? "never sets"
+                : riseSetArray[i].objectSets.substr(0, 5)) +
               "</td><td>" +
               riseSetArray[i].adjustedMoonRises.substr(0, 5) +
               "</td><td>" +
@@ -336,7 +346,7 @@ var cv = (function () {
         }
         viewingTimesHtml += "</tbody></table>";
       }
-    document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
+      document.getElementById("viewingTimes").innerHTML = viewingTimesHtml;
     }
   }
 
@@ -402,8 +412,10 @@ var cv = (function () {
     document.getElementById("locationDescription").innerHTML =
       " from " +
       document.getElementById("lat").value +
+      "&deg;" +
       "," +
-      document.getElementById("lng").value;
+      document.getElementById("lng").value +
+      "&deg;";
   }
 
   function updateObjectDescription(name) {
@@ -413,18 +425,19 @@ var cv = (function () {
   function updateObjectDescriptionRaDec() {
     updateInputs();
     document.getElementById("objectDescription").innerHTML =
-      " for " +
-      raH +
-      "," +
-      raM +
-      "," +
-      raS +
-      "," +
-      decD +
-      "," +
-      decM +
-      "," +
-      decS;
+      " for Right Ascension: " +
+      astro.zeroPad(raH, 2) +
+      "&#688; " +
+      astro.zeroPad(raM, 2) +
+      "&#7504; " +
+      astro.zeroPad(raS, 2) +
+      "&#738;, Declination: " +
+      astro.zeroPad(decD, 2) +
+      "&deg; " +
+      astro.zeroPad(decM, 2) +
+      "' " +
+      astro.zeroPad(decS, 2) +
+      '"';
   }
 
   function addLocationPreset(name, lat, lng) {
@@ -514,7 +527,7 @@ var cv = (function () {
   }
 
   function getLocation() {
-    if(navigator.geolocation) {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
     } else {
       alert("Geolocation is not supported by this browser.");
@@ -531,7 +544,7 @@ var cv = (function () {
   }
 
   function geoError() {
-      alert("Geocoder failed.");
+    alert("Geocoder failed.");
   }
 
   // expose the public methods here

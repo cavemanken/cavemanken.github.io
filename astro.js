@@ -149,5 +149,6 @@ var astro = (function () {
     setTimeSiderealRadians: setTimeSiderealRadians,
     radiansToUtcTime: radiansToUtcTime,
     convertDateAndUtcTimeToLocalTime: convertDateAndUtcTimeToLocalTime,
+    zeroPad: zeroPad,
   };
 })();

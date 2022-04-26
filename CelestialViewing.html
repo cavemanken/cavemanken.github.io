@@ -24,9 +24,9 @@
         <p>
           Here is a tool for determining the best times in the upcoming 365 days
           to view any celestial object. The "Peak Viewing Time" shown will be
-          when the object is at its transit (highest point) with no moonlight or twilight
-          obscuring the view. All times listed should be accurate to within
-          &plusmn;10 minutes.
+          when the object is at its transit (highest point) with no moonlight or
+          twilight obscuring the view. All times listed should be accurate to
+          within &plusmn;10 minutes.
         </p>
 
         <form id="inputValues">
@@ -56,14 +56,14 @@
                     placeholder="Latitude"
                     required
                     pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
-                    onchange="cv.updateLocationDescriptionLatLng();cv.resetGrid();"
+                    onchange="cv.updateLocationDescriptionLatLng();cv.generate();"
                   />
                   <input
                     id="lng"
                     placeholder="Longitude"
                     required
                     pattern="(-|\+|)[0-9]+(\.[0-9]+)?"
-                    onchange="cv.updateLocationDescriptionLatLng();cv.resetGrid();"
+                    onchange="cv.updateLocationDescriptionLatLng();cv.generate();"
                   />
                   <img
                     src="geolocicon.png"
@@ -93,21 +93,21 @@
                     placeholder="Hours"
                     required
                     pattern="[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid();"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.generate();"
                   />
                   <input
                     id="raM"
                     placeholder="Minutes"
                     required
                     pattern="[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid()"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.generate()"
                   />
                   <input
                     id="raS"
                     placeholder="Seconds"
                     required
                     pattern="[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid()"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.generate()"
                   />
                 </div>
               </td>
@@ -118,21 +118,21 @@
                     placeholder="Degrees"
                     required
                     pattern="(-|\+|)[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid()"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.generate()"
                   />
                   <input
                     id="decM"
                     placeholder="Minutes"
                     required
                     pattern="[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid()"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.generate()"
                   />
                   <input
                     id="decS"
                     placeholder="Seconds"
                     required
                     pattern="[0-9]{1,2}"
-                    onchange="cv.updateObjectDescriptionRaDec();cv.resetGrid()"
+                    onchange="cv.updateObjectDescriptionRaDec();cv.generate()"
                   />
                 </div>
               </td>
