@@ -87,7 +87,7 @@
                 </div>
               </td>
               <td>
-                <div class="inputs row">
+                <div class="inputs">
                   <input
                     id="raH"
                     placeholder="Hours"
@@ -112,7 +112,7 @@
                 </div>
               </td>
               <td>
-                <div class="inputs row">
+                <div class="inputs">
                   <input
                     id="decD"
                     placeholder="Degrees"
@@ -140,7 +140,7 @@
             <tr>
               <th align="left">Presets</th>
               <td>
-                <div class="inputs row">
+                <div class="inputs">
                   <ul
                     id="locationPresets"
                     onclick="if (cv.validateInputs(false)) cv.generate();"
@@ -148,7 +148,7 @@
                 </div>
               </td>
               <td colspan="2">
-                <div class="inputs row">
+                <div class="inputs">
                   <ul
                     id="objectPresets"
                     onclick="if (cv.validateInputs(false)) cv.generate();"
@@ -157,16 +157,7 @@
               </td>
             </tr>
           </table>
-
-          <div class="row" style="visibility: hidden; height: 0mm">
-            <button id="calc">Calculate</button>
-            <button id="reset">Reset</button>
-          </div>
         </form>
-
-        <div id="output">
-          <div id="outputData"></div>
-        </div>
       </section>
       <button onclick="cv.generate();" style="font-size: 15px">
         Find Best Viewing Times
