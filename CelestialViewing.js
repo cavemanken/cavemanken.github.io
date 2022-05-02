@@ -16,7 +16,7 @@ var cv = (function () {
   function init() {
     // default date field to today
     var d = new Date();
-    document.getElementById("date").value = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+    document.getElementById("date").value = d.getFullYear() + '-' + astro.zeroPad((d.getMonth()+1)) + '-' + astro.zeroPad(d.getDate());
     var presetLocations = [
       { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
       { lat: 38.11217, lng: -83.532625, name: "Cave Run" },
