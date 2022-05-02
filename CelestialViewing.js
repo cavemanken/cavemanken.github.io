@@ -15,9 +15,8 @@ var cv = (function () {
 
   function init() {
     // default date field to today
-    document.getElementById("date").value = new Date()
-      .toISOString()
-      .substring(0, 10);
+    var d = new Date();
+    document.getElementById("date").value = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
     var presetLocations = [
       { lat: 35.047, lng: -85.3106, name: "Chattanooga" },
       { lat: 38.11217, lng: -83.532625, name: "Cave Run" },
