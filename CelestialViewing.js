@@ -473,8 +473,6 @@ var cv = (function () {
   }
   function resetGrid() {
     document.getElementById("viewingTimes").innerHTML = "";
-	// pause here so it's obvious that the grid was rebuilt
-	await new Promise(res => { setTimeout(res, 1000); });	
   }
 
   function updateInputs() {
