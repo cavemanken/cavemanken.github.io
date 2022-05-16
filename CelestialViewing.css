@@ -75,10 +75,7 @@ body {
 p {
   margin: 5px 0 5px 0;
 }
-<!-- HTML !-->
-<button class="button-4" role="button">Button 4</button>
 
-/* CSS */
 .button-4 {
   appearance: none;
   background-color: #FAFBFC;
