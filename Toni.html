@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Countdown Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      margin-top: 100px;
+    }
+    #countdown {
+      font-size: 2em;
+      background: #222;
+      color: #fff;
+      display: inline-block;
+      padding: 20px 40px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Countdown Timer</h1>
+  <div id="countdown"></div>
+
+  <script>
+    // Set the date to count down to
+    const targetDate = new Date("December 31, 2025 23:59:59").getTime();
+
+    // Update every second
+    const timer = setInterval(function() {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      // Time calculations
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Display
+      document.getElementById("countdown").innerHTML = 
+        days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+      // When expired
+      if (distance < 0) {
+        clearInterval(timer);
+        document.getElementById("countdown").innerHTML = "TIME'S UP!";
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>
