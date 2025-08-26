@@ -2,6 +2,27 @@
 <body>
 
 <a href="https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing">AV Shared Google Link</a>
+<button onclick="myFunction()">Copy link to clipboard</button>
+
+
+<script>
+function myFunction() {
+  // Get the text field
+  var copyText = "https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing";
+
+  // Select the text field
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); // For mobile devices
+
+  // Copy the text inside the text field
+  navigator.clipboard.writeText(copyText.value);
+  
+  // Alert the copied text
+  alert("Copied the link: " + copyText.value);
+}
+</script>
+
+
 
 </body>
 </html>
