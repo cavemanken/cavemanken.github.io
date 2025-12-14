@@ -1,68 +1,69 @@
 <html>
-<p id="readingList"></p>
-<script src="2YearBibleChronological.js"></script>
-<script>
+	<p id="readingList"></p>
 
+	<script src="2YearBibleChronological.js"></script>
+	<script>
+		if (document.cookie == "") {
+			alert('no cookie found');
+			document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
+			createCookie("readingLocation",0,1000);
+		}	
 
-if (document.cookie == "") {
-	alert('no cookie found');
-	document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
-	createCookie("readingLocation",0,1000);
-	
-}	
+		alert(readCookie("readingLocation"));
+		
+		// on my desktop the cookies are not getting saved
+		readingLocation = readCookie("readingLocation");
+		
+		// testing on desktop
+		//readingLocation = 13;
+		let checkboxes = "";
 
-alert(readCookie("readingLocation"));
+		readings.forEach(myFunction);
 
-let checkboxes = "";
+		document.getElementById("readingList").innerHTML = checkboxes;
 
-readings.forEach(myFunction);
+		function myFunction(value,index) {
+			if (index >= readingLocation) {
+				checkboxes += '<br><input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
+				checkboxes += '<label for="reading' + index + '">' + value + '</label>';
+				checkboxes += '<br>';
+			}	
+		} 
+		function checkboxClick(value) {
+			alert(value);
+			createCookie("readingLocation",value,1000);
+			alert(readCookie("readingLocation"));
+			alert(document.cookie);
+		}
 
-document.getElementById("readingList").innerHTML = checkboxes;
+		function createCookie(name,value,days) {
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime() + (days * 24 * 60 * 60 *1000));
+				var expires = "; expires=" + date.toGMTString();
+			} else {
+				var expires = "";
+			}
+			document.cookie = name + "=" + value + expires + "; path=/";
+		}
 
-function myFunction(value,index) {
-	checkboxes += '<br><input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
-	checkboxes += '<label for="reading' + index + '">' + value + '</label>';
-	checkboxes += '<br>';
-} 
-function checkboxClick(value) {
-	alert(value);
-	createCookie("readingLocation",value,1000);
-	alert(readCookie("readingLocation"));
-	alert(document.cookie);
-}
+		function readCookie(name) {
+			var nameEQ = name + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0;i < ca.length;i++) {
+				var c = ca[i];
+				while (c.charAt(0)==' ') {
+					c = c.substring(1,c.length);
+				}
+				if (c.indexOf(nameEQ) == 0) {
+					return c.substring(nameEQ.length,c.length);
+				}
+			}
+			return null;
+		}
 
-function createCookie(name,value,days) {
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 *1000));
-        var expires = "; expires=" + date.toGMTString();
-    } else {
-        var expires = "";
-    }
-    document.cookie = name + "=" + value + expires + "; path=/";
-}
-
-function readCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') {
-            c = c.substring(1,c.length);
-        }
-        if (c.indexOf(nameEQ) == 0) {
-            return c.substring(nameEQ.length,c.length);
-        }
-    }
-    return null;
-}
-
-function eraseCookie(name) {
-    createCookie(name,"",-1);
-}
-
-/*
-*/
-alert(readings[1]);
-</script>
+		function eraseCookie(name) {
+			createCookie(name,"",-1);
+		}
+	</script>
 </html>
