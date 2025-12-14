@@ -3,11 +3,8 @@
 <script src="2YearBibleChronological.js"></script>
 <script>
 
-if (document.cookie == "") {
-	alert('undefined');
-	document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
-	// document.cookie = "readingLoc = 3;expires=Tue, 19 Jan 2038 04:14:07 GMT"
-}
+document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
+
 alert(document.cookie);
 
 let checkboxes = "";
@@ -23,6 +20,9 @@ function myFunction(value,index) {
 } 
 function checkboxClick(value) {
 	alert(value);
+	document.cookie = "loc=55";
+	// document.cookie = "readingLocation='" + value + ";expires=Tue, 19 Jan 2038 04:14:07 GMT";
+	alert(document.cookie);
 }
 
 /*
