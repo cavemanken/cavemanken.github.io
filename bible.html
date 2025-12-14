@@ -7,7 +7,7 @@
 		if (document.cookie == "") {
 			alert('no cookie found');
 			document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
-			createCookie("readingLocation",0,1000);
+			createCookie("readingLocation",-1,1000);
 		}	
 
 		alert(readCookie("readingLocation"));
