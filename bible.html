@@ -8,9 +8,10 @@ if (document.cookie == "") {
 	alert('no cookie found');
 	document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
 	createCookie("readingLocation",0,1000);
+	
 }	
 
-alert(document.cookie);
+alert(readCookie("readingLocation"));
 
 let checkboxes = "";
 
@@ -26,6 +27,7 @@ function myFunction(value,index) {
 function checkboxClick(value) {
 	alert(value);
 	createCookie("readingLocation",value,1000);
+	alert(readCookie("readingLocation"));
 	alert(document.cookie);
 }
 
