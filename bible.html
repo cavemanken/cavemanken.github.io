@@ -3,7 +3,10 @@
 <script src="2YearBibleChronological.js"></script>
 <script>
 
-document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
+if (document.cookie == "") {
+	alert('no cookie found');
+	document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
+}	
 
 alert(document.cookie);
 
@@ -20,7 +23,7 @@ function myFunction(value,index) {
 } 
 function checkboxClick(value) {
 	alert(value);
-	document.cookie = "loc=55";
+	document.cookie = '"readingLocation="' + value + '"';
 	// document.cookie = "readingLocation='" + value + ";expires=Tue, 19 Jan 2038 04:14:07 GMT";
 	alert(document.cookie);
 }
