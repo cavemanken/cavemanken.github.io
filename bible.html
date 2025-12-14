@@ -1,5 +1,5 @@
 <html>
-	<p id="readingList"></p>
+	<p id="readingList" style="font-size: 24px;"></p>
 
 	<script src="2YearBibleChronological.js"></script>
 	
@@ -8,13 +8,10 @@
 			alert('no cookie found');
 			document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
 			createCookie("readingLocation",-1,1000);
+			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
+		} else {
+			readingLocation = readCookie("readingLocation");
 		}	
-
-		alert(readCookie("readingLocation"));
-		readingLocation = readCookie("readingLocation");
-		
-		// on my desktop the cookies are not getting saved
-		readingLocation = readCookie("readingLocation");
 
 		// build the checkboxes	
 		let checkboxes = "";
