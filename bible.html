@@ -2,6 +2,7 @@
 	<p id="readingList"></p>
 
 	<script src="2YearBibleChronological.js"></script>
+	
 	<script>
 		if (document.cookie == "") {
 			alert('no cookie found');
@@ -10,30 +11,36 @@
 		}	
 
 		alert(readCookie("readingLocation"));
+		readingLocation = readCookie("readingLocation");
 		
 		// on my desktop the cookies are not getting saved
 		readingLocation = readCookie("readingLocation");
-		
-		// testing on desktop
-		//readingLocation = 13;
+
+		// build the checkboxes	
 		let checkboxes = "";
-
-		readings.forEach(myFunction);
-
+		readings.forEach(buildCheckboxes);
 		document.getElementById("readingList").innerHTML = checkboxes;
 
-		function myFunction(value,index) {
-			if (index >= readingLocation) {
+		function buildCheckboxes(value,index) {
+			if (index > readingLocation) {
 				checkboxes += '<br><input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
 				checkboxes += '<label for="reading' + index + '">' + value + '</label>';
 				checkboxes += '<br>';
 			}	
 		} 
 		function checkboxClick(value) {
-			alert(value);
-			createCookie("readingLocation",value,1000);
-			alert(readCookie("readingLocation"));
-			alert(document.cookie);
+			id = "reading" + value;
+			checkbox = document.getElementById(id);
+			if (checkbox.checked) {
+				// hold this in case they check it by mistake.
+				previousReadingLocation = readingLocation;
+				createCookie("readingLocation",value,1000);
+			} else {
+				// if they are unchecking a check box, set it back to previous
+				createCookie("readingLocation",previousReadingLocation,1000);
+			}
+			
+			readingLocation = readCookie("readingLocation");
 		}
 
 		function createCookie(name,value,days) {
