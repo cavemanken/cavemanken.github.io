@@ -4,12 +4,10 @@
 	<script src="2YearBibleChronological.js"></script>
 	
 	<script>
-//	document.cookie = 'loc=';
-	alert(readCookie('loc'));
-	createCookie('loc',2);
-		if (document.cookie == "") {
+	eraseCookie('loc');
+	alert(readCookie('readingLocation'));
+		if (readCookie('readingLocation') == "") {
 			alert('no cookie found');
-			document.cookie = "readingLocation=0;expires=Tue, 19 Jan 2038 04:14:07 GMT";
 			createCookie("readingLocation",-1,1000);
 			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
 		} else {
