@@ -6,7 +6,7 @@
 	<script>
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
-			createCookie("readingLocation",-1,1000);
+			createCookie("readingLocation",-1);	// chrome will not allow more than 400 day expiration on cookie
 			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
 		} else {
 			readingLocation = readCookie("readingLocation");
@@ -30,10 +30,10 @@
 			if (checkbox.checked) {
 				// hold this in case they check it by mistake.
 				previousReadingLocation = readingLocation;
-				createCookie("readingLocation",value,1000);
+				createCookie("readingLocation",value);
 			} else {
 				// if they are unchecking a check box, set it back to previous
-				createCookie("readingLocation",previousReadingLocation,1000);
+				createCookie("readingLocation",previousReadingLocation);
 			}
 			
 			readingLocation = readCookie("readingLocation");
@@ -41,6 +41,10 @@
 
 		function createCookie(name,value,days) {
 			if (days) {
+				// chrome no longer allows cookies to be larger than 400, if you try it will set the expiration for 1 week
+				if (days > 399) {
+					days = 399;
+				}	
 				var date = new Date();
 				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
 				var expires = "; expires=" + date.toGMTString();
