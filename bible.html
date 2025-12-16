@@ -11,6 +11,8 @@
 			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
 		} else {
 			readingLocation = readCookie("readingLocation");
+			// create the cookie again so that the expiration date is reset
+			createCookie("readingLocation",readingLocation,maxExpiration);	
 		}	
 
 		// build the checkboxes	
