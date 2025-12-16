@@ -4,7 +4,7 @@
 	<script src="2YearBibleChronological.js"></script>
 	
 	<script>
-		maxExpiration = 10; // chrome will not allow more than 400 day expiration on cookie
+		maxExpiration = 5; // chrome will not allow more than 400 day expiration on cookie
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
 			createCookie("readingLocation",-1,maxExpiration);	
