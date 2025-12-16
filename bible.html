@@ -4,11 +4,9 @@
 	<script src="2YearBibleChronological.js"></script>
 	
 	<script>
-	eraseCookie('loc');
-	alert(readCookie('readingLocation'));
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
-			createCookie("readingLocation",-1,10000);
+			createCookie("readingLocation",-1,1000);
 			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
 		} else {
 			readingLocation = readCookie("readingLocation");
@@ -32,10 +30,10 @@
 			if (checkbox.checked) {
 				// hold this in case they check it by mistake.
 				previousReadingLocation = readingLocation;
-				createCookie("readingLocation",value,10000);
+				createCookie("readingLocation",value,1000);
 			} else {
 				// if they are unchecking a check box, set it back to previous
-				createCookie("readingLocation",previousReadingLocation,10000);
+				createCookie("readingLocation",previousReadingLocation,1000);
 			}
 			
 			readingLocation = readCookie("readingLocation");
@@ -44,12 +42,14 @@
 		function createCookie(name,value,days) {
 			if (days) {
 				var date = new Date();
-				date.setTime(date.getTime() + (days * 24 * 60 * 60 *1000));
-				var expires = "; expires=" + date.toGMTString();
+				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+				var expires = "expires=" + date.toGMTString();
 			} else {
 				var expires = "";
 			}
-			document.cookie = name + "=" + value + expires + "; path=/";
+			document.cookie = name + "=" + value;
+			document.cookie = expires;
+			document.cookie = "path=/";
 		}
 
 		function readCookie(name) {
