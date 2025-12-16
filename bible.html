@@ -4,7 +4,7 @@
 	<script src="2YearBibleChronological.js"></script>
 	
 	<script>
-		maxExpiration = 5; // chrome will not allow more than 400 day expiration on cookie
+		maxExpiration = 1000; // looks like chrome will not allow more than 7 day expiration on cookie. However my browser on my phone may allow more.
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
 			createCookie("readingLocation",-1,maxExpiration);	
@@ -42,14 +42,9 @@
 
 		function createCookie(name,value,days) {
 			if (days) {
-				// chrome no longer allows cookies to be larger than 400, if you try it will set the expiration for 1 week
-				if (days > maxExpiration) {
-					days = maxExpiration;
-				}	
 				var date = new Date();
 				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
 				var expires = "; expires=" + date.toGMTString();
-				alert(date.toGMTString());
 			} else {
 				var expires = "";
 			}
