@@ -6,7 +6,7 @@
 	<script>
 	eraseCookie('loc');
 	alert(readCookie('readingLocation'));
-		if (readCookie('readingLocation') == "") {
+		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
 			createCookie("readingLocation",-1,1000);
 			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
