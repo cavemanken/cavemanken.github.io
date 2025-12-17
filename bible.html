@@ -4,29 +4,42 @@
 	<script src="2YearBibleChronological.js"></script>
 	
 	<script>
+		const readingsToShow = 10;
 		const maxExpiration = 1000; // looks like chrome will not allow more than 7 day expiration on cookie. However my browser on my phone may allow more.
-		var readingLocation = -1;
+		
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
 			createCookie("readingLocation",-1,maxExpiration);	
 		} else {
-			readingLocation = readCookie("readingLocation");
 			// create the cookie again so that the expiration date is reset
-			createCookie("readingLocation",readingLocation,maxExpiration);	
-		}	
-
-		// build the checkboxes	
-		let checkboxes = "";
-		readings.forEach(buildCheckboxes);
-		document.getElementById("readingList").innerHTML = checkboxes;
-
-		function buildCheckboxes(value,index) {
-			if (index > readingLocation) {
-				checkboxes += '<br><input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
-				checkboxes += '<label for="reading' + index + '">' + value + '</label>';
-				checkboxes += '<br>';
-			}	
+			createCookie("readingLocation",readCookie("readingLocation"),maxExpiration);	
+		}
+		
+		let readingList = "";
+		let checkboxCreated = false;
+		
+		buildList();
+		
+		function buildList() {
+			readingList = "";
+			checkboxCreated = false;
+			// build the list
+			readings.forEach(buildListItem);		
+			document.getElementById("readingList").innerHTML = readingList;
+		}
+		
+		function buildListItem(value,index,) {
+			if (index > readCookie("readingLocation") && index <= readCookie("readingLocation") + readingsToShow) {
+				readingList += '<br>';
+				if (!checkboxCreated) {
+					readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
+					checkboxCreated = true;
+				}
+				readingList += '<label for="reading' + index + '">' + value + '</label>';
+				readingList += '<br>';
+			}
 		} 
+		
 		function checkboxClick(value) {
 			var id = "reading" + value;
 			var checkbox = document.getElementById(id);
@@ -36,15 +49,10 @@
 			}
 			
 			if (checkbox.checked) {
-				// hold this in case they check it by mistake.
-				var previousReadingLocation = readingLocation;
 				createCookie("readingLocation",value,maxExpiration);
-			} else {
-				// if they are unchecking a check box, set it back to previous
-				createCookie("readingLocation",previousReadingLocation,maxExpiration);
 			}
 			
-			readingLocation = readCookie("readingLocation");
+			buildList();
 		}
 
 		function createCookie(name,value,days) {
