@@ -4,11 +4,11 @@
 	<script src="2YearBibleChronological.js"></script>
 	
 	<script>
-		maxExpiration = 1000; // looks like chrome will not allow more than 7 day expiration on cookie. However my browser on my phone may allow more.
+		const maxExpiration = 1000; // looks like chrome will not allow more than 7 day expiration on cookie. However my browser on my phone may allow more.
+		var readingLocation = -1;
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
 			createCookie("readingLocation",-1,maxExpiration);	
-			readingLocation = -1; // do this here since chrome on my desktop is not saving cookies
 		} else {
 			readingLocation = readCookie("readingLocation");
 			// create the cookie again so that the expiration date is reset
@@ -28,11 +28,16 @@
 			}	
 		} 
 		function checkboxClick(value) {
-			id = "reading" + value;
-			checkbox = document.getElementById(id);
+			var id = "reading" + value;
+			var checkbox = document.getElementById(id);
+			if (!checkbox) {
+				console.error(`Checkbox with id "${id}" not found`);
+				return;
+			}
+			
 			if (checkbox.checked) {
 				// hold this in case they check it by mistake.
-				previousReadingLocation = readingLocation;
+				var previousReadingLocation = readingLocation;
 				createCookie("readingLocation",value,maxExpiration);
 			} else {
 				// if they are unchecking a check box, set it back to previous
