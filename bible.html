@@ -6,7 +6,7 @@
 	<script>
 		const readingsToShow = 10;
 		const maxExpiration = 1000; // looks like chrome will not allow more than 7 day expiration on cookie. However my browser on my phone may allow more.
-		int readingLocation = -1;
+		let readingLocation = -1;
 		
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
