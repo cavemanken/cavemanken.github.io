@@ -18,16 +18,15 @@
 		buildList();
 		
 		function buildList() {
+			// build the list
 			readingList = "";
 			checkboxCreated = false;
-			// build the list
 			readings.forEach(buildListItem);		
 			document.getElementById("readingList").innerHTML = readingList;
 		}
 		
 		function buildListItem(value,index,) {
 			if (index > parseInt(readingLocation) && index <= (parseInt(readingLocation) + readingsToShow)) {
-				console.log(index,parseInt(readCookie("readingLocation")),readingsToShow);
 				readingList += '<br>';
 				if (!checkboxCreated) {
 					readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
