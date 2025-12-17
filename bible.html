@@ -30,6 +30,7 @@
 		
 		function buildListItem(value,index,) {
 			if (index > readCookie("readingLocation") && index <= readCookie("readingLocation") + readingsToShow) {
+				console.log(index,readCookie("readingLocation"),readingsToShow);
 				readingList += '<br>';
 				if (!checkboxCreated) {
 					readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
