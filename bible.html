@@ -6,13 +6,16 @@
 	<script>
 		const readingsToShow = 10;
 		const maxExpiration = 1000; // looks like chrome will not allow more than 7 day expiration on cookie. However my browser on my phone may allow more.
+		int readingLocation = -1;
 		
 		if (readCookie('readingLocation') == null) {
 			alert('no cookie found');
-			createCookie("readingLocation",-1,maxExpiration);	
+			createCookie("readingLocation",-1,maxExpiration);
+			readingLocation = -1;	
 		} else {
 			// create the cookie again so that the expiration date is reset
 			createCookie("readingLocation",readCookie("readingLocation"),maxExpiration);	
+			readingLocation = readCookie("readingLocation");
 		}
 		
 		let readingList = "";
@@ -29,8 +32,8 @@
 		}
 		
 		function buildListItem(value,index,) {
-			if (index > readCookie("readingLocation") && index <= readCookie("readingLocation") + readingsToShow) {
-				console.log(index,readCookie("readingLocation"),readingsToShow);
+			if (index > readingLocation && index <= (readingLocation + readingsToShow)) {
+				console.log(index,readingLocation,readingsToShow);
 				readingList += '<br>';
 				if (!checkboxCreated) {
 					readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
@@ -51,6 +54,7 @@
 			
 			if (checkbox.checked) {
 				createCookie("readingLocation",value,maxExpiration);
+				readingLocation = value;
 			}
 			
 			buildList();
