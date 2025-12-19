@@ -1,17 +1,14 @@
 <html>
 <script>
 
-// Save data
-localStorage.setItem('username', 'John');
-localStorage.setItem('settings', JSON.stringify({theme: 'dark', notifications: true}));
-
 // Get data
 const loc = localStorage.getItem('loc');
 if (loc == null) {
   localStorage.setItem('loc') = -1;
 }
-alert(localStorage.getItem('loc');
+alert(localStorage.getItem('loc'));
 localStorage.removeItem('username');
+localStorage.removeItem('settings');
 </script>
 test
 </html>
