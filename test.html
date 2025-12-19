@@ -9,6 +9,9 @@ localStorage.setItem('settings', JSON.stringify({theme: 'dark', notifications: t
 const username = localStorage.getItem('username');
 const settings = JSON.parse(localStorage.getItem('settings'));
 alert(username);
+
+// Remove data
+localStorage.removeItem('settings');
 </script>
 test
 </html>
