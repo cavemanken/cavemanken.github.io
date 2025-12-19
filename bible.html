@@ -13,27 +13,32 @@
 			localStorage.setItem('bible.readingLocation',-1);
 		}
 				
-		buildList();
+		buildList(false);
 		
-		function buildList() {
+		function buildList(showAll) {
 			// build the list
 			readingList = "";
 			checkboxCreated = false;
-			readings.forEach(buildListItem);		
+			for (let i = 0; i < readings.length; i++) {
+				buildListItem(readings[i],i,showAll);
+			}
+			//readings.forEach(buildListItem);		
 			document.getElementById("readingList").innerHTML = readingList;
 		}
 		
-		function buildListItem(value,index,) {
-			if (index > parseInt(localStorage.getItem('bible.readingLocation')) && index <= (parseInt(localStorage.getItem('bible.readingLocation')) + readingsToShow)) {
-				readingList += '<br>';
-				if (!checkboxCreated) {
-					readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
-					checkboxCreated = true;
+		function buildListItem(value,index,showAll) {
+			if (index > parseInt(localStorage.getItem('bible.readingLocation'))) {
+				if (showAll || index <= (parseInt(localStorage.getItem('bible.readingLocation')) + readingsToShow)) {
+					readingList += '<br>';
+					if (!checkboxCreated) {
+						readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
+						checkboxCreated = true;
+					}
+					readingList += '<label for="reading' + index + '">' + value + '</label>';
+					readingList += '<br>';
 				}
-				readingList += '<label for="reading' + index + '">' + value + '</label>';
-				readingList += '<br>';
-			}
-		} 
+			} 
+		}	
 		
 		function checkboxClick(value) {
 			var id = "reading" + value;
