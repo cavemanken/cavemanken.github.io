@@ -6,12 +6,12 @@ localStorage.setItem('username', 'John');
 localStorage.setItem('settings', JSON.stringify({theme: 'dark', notifications: true}));
 
 // Get data
-const username2 = localStorage.getItem('username2');
-const settings = JSON.parse(localStorage.getItem('settings'));
-alert(username2);
-
-// Remove data
-localStorage.removeItem('settings');
+const loc = localStorage.getItem('loc');
+if (loc == null) {
+  localStorage.setItem('loc') = -1;
+}
+alert(localStorage.getItem('loc');
+localStorage.removeItem('username');
 </script>
 test
 </html>
