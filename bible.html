@@ -1,59 +1,41 @@
-<html>
-	<p id="readingList" style="font-size: 24px;"></p>
-
-	<script src="2YearBibleChronological.js"></script>
-	
-	<script>
-		const readingsToShow = 20;
-		let readingList = "";
-		let checkboxCreated = false;
-		
-		localStorage.removeItem('readingLocation');
-		if (localStorage.getItem('bible.readingLocation') == null) {
-			localStorage.setItem('bible.readingLocation',-1);
-		}
-				
-		buildList(false);
-		
-		function buildList(showAll) {
-			// build the list
-			readingList = "";
-			checkboxCreated = false;
-			for (let i = 0; i < readings.length; i++) {
-				buildListItem(readings[i],i,showAll);
-			}
-			//readings.forEach(buildListItem);		
-			document.getElementById("readingList").innerHTML = readingList;
-		}
-		
-		function buildListItem(value,index,showAll) {
-			if (index > parseInt(localStorage.getItem('bible.readingLocation'))) {
-				if (showAll || index <= (parseInt(localStorage.getItem('bible.readingLocation')) + readingsToShow)) {
-					readingList += '<br>';
-					if (!checkboxCreated) {
-						readingList += '<input type="checkbox" id="reading' + index + '" name="reading' + index + '" value="' + value + '" onclick="checkboxClick(' + index + ')">';
-						checkboxCreated = true;
-					}
-					readingList += '<label for="reading' + index + '">' + value + '</label>';
-					readingList += '<br>';
-				}
-			} 
-		}	
-		
-		function checkboxClick(value) {
-			var id = "reading" + value;
-			var checkbox = document.getElementById(id);
-			if (!checkbox) {
-				console.error(`Checkbox with id "${id}" not found`);
-				return;
-			}
-			
-			if (checkbox.checked) {
-				localStorage.setItem('bible.readingLocation',value);
-			}
-			
-			buildList();
-		}
-
-	</script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue Basics</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="2YearBibleChronological.js" defer></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h4>Chronological Bible Reading Plan</h4>
+    </header>
+    <section id="plan">
+          <p>Loc: <input
+            type="text"
+            v-model="readingLocation"
+            @keyup="updateReadingLocation"         /></p>
+      <ul style="list-style-type: none;">
+        <li
+          v-for="(reading, index) in readingList"
+          :key="index"
+        >
+          <input
+            type="checkbox"
+            :id="'reading' + index"
+            @change="buildReadingList"
+            :style="checkboxVisibility(index)"
+            checked=false
+          />
+          <label :for="'reading' + index">{{ reading }}</label>
+        </li>
+    </section>
+  </body>
 </html>
