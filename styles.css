@@ -55,8 +55,7 @@ p {
 input {
   font: inherit;
   border: 1px solid #ccc;
-  max-width: 60px;
-}
+  width: 60px;
 
 section {
   margin: 10px;
