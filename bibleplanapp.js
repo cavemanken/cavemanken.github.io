@@ -1,6 +1,6 @@
 localStorage.removeItem("readingLocation");
 if (localStorage.getItem("bible.readingLocation") == null) {
-  localStorage.setItem("bible.readingLocation", -1);
+  localStorage.setItem("bible.readingLocation", 0);
 }
 var localStorageReadingLocation = parseInt(
   localStorage.getItem("bible.readingLocation")
