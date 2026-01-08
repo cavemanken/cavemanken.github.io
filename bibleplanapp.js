@@ -17,11 +17,14 @@ const app = Vue.createApp({
   computed: {
     readingList() {
       const list = [];
+      console.log("here", this.readingListSize, this.readingLocation, list);
       this.readingPlan.forEach((reading, index) => {
         if (
           index >= this.readingLocation &&
-          index < this.readingLocation + this.readingListSize
+          index <
+            parseInt(this.readingLocation) + parseInt(this.readingListSize)
         ) {
+          console.log("here2", this.readingListSize, this.readingLocation);
           list.push(reading);
         }
       });

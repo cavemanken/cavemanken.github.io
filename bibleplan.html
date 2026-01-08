@@ -15,15 +15,20 @@
   </head>
   <body>
     <header>
-      <h4>Chronological Bible Reading Plan</h4>
+      <h2>Chronological Bible Reading Plan</h3>
     </header>
     <section id="plan">
-      <p>Loc: 
+      <p>Day: 
         <input
             type="text"
             v-model="readingLocation"
             @keyup="updateLocalStorage"/>
           <button @click="buildReadingList(false)">Go Back</button>
+        Days to Show:  
+        <input
+            type="text"
+            v-model="readingListSize"
+            @keyup="updateLocalStorage"/>
       </p>
       <ul style="list-style-type: none;">
         <li
