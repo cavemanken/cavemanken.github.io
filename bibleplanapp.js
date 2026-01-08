@@ -16,7 +16,6 @@ const app = Vue.createApp({
   },
   computed: {
     readingList() {
-      console.log("building...");
       const list = [];
       this.readingPlan.forEach((reading, index) => {
         if (
@@ -31,13 +30,14 @@ const app = Vue.createApp({
   },
   methods: {
     buildReadingList(forward) {
-      console.log("updating reading location", this.readingLocation);
       if (forward) {
         this.readingLocation++;
       } else {
-        this.readingLocation--;
+        if (this.readingLocation > 0) {
+          this.readingLocation--;
+        }
       }
-      this.updateReadingLocation();
+      this.updateLocalStorage();
     },
     buttonDisabled(index) {
       if (index === 0) {
@@ -46,9 +46,8 @@ const app = Vue.createApp({
         return true;
       }
     },
-    updateReadingLocation() {
+    updateLocalStorage() {
       localStorage.setItem("bible.readingLocation", this.readingLocation);
-      console.log("lc", localStorage.getItem("bible.readingLocation"));
     },
   },
 });
