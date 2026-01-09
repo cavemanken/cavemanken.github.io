@@ -1,6 +1,8 @@
 const menu = Vue.createApp({
   data() {
     return {
+      linkText:
+        "https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing",
       menu: [
         ["Shepherd Acrostic.pdf", "Shepherding Acrostic.pdf", "_blank"],
         [
@@ -28,52 +30,71 @@ const menu = Vue.createApp({
         [
           "Bible Book Abbreviations Bookmarks.pdf",
           "Bible Book Abbreviations Bookmarks.pdf",
-          "_self",
+          "_blank",
         ],
         [
           "Year 1 Puzzles and Patterns Lesson.pdf",
           "Year 1 Puzzles and Patterns Lesson",
-          "_self",
+          "_blank",
         ],
         [
           "Lesson 3_ Longing for God.pdf",
           "Lesson 3_ Longing for God.pdf",
-          "_self",
+          "_blank",
         ],
         [
           "Psalms Leadership Development Ideas.pdf",
           "Psalms Leadership Development Ideas.pdf",
-          "_self",
+          "_blank",
         ],
         [
           "Leadership Development Resources.pdf",
           "Leadership Development Resources.pdf",
-          "_self",
+          "_blank",
         ],
         [
           "What is Leadership Development.pdf",
           "What is Leadership Development.pdf",
-          "_self",
+          "_blank",
         ],
         ["Gospel Conversations.pdf", "Gospel Conversations.pdf", "_self"],
         ["Sharing the Gospel.pdf", "Sharing the Gospel.pdf", "_self"],
         [
           "Leadership Development Helps.pdf",
           "Leadership Development Helps.pdf",
-          "_self",
+          "_blank",
         ],
         [
           "2025-10-23 The Path of Life – A Devotion on the Psalms.pdf",
           "2025-10-23 The Path of Life - A Devotion on the Psalms.pdf",
-          "_self",
+          "_blank",
         ],
         [
           "2025-12-04 Opening - Country Link.pdf",
           "2025-12-04 Opening - Country Link.pdf",
-          "_self",
+          "_blank",
+        ],
+        // ***add new items above ***
+        [
+          "https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing",
+          "AV Shared Google Link",
+          "_blank",
         ],
       ],
     };
+  },
+  methods: {
+    copyToClipboard() {
+      // Get the text field
+
+      // Select the text field
+      // linkText.select();
+      // linkText.setSelectionRange(0, 99999); // For mobile devices
+
+      // Copy the text inside the text field
+      //navigator.clipboard.writeText(linkText.value);
+      navigator.clipboard.writeText(this.linkText);
+    },
   },
 });
 
