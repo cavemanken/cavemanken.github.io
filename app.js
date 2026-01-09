@@ -1,9 +1,7 @@
 const app = Vue.createApp({
   data() {
     return {
-      readingPlan: readings,
-      readingLocation: localStorageReadingLocation,
-      readingListSize: 20,
+      cbsPrintingLink: "CBS.html",
     };
   },
   computed: {
@@ -38,9 +36,6 @@ const app = Vue.createApp({
       } else {
         return true;
       }
-    },
-    updateLocalStorage() {
-      localStorage.setItem("bible.readingLocation", this.readingLocation);
     },
   },
 });
