@@ -1,74 +1,24 @@
-<html>
-    <head>
-    <style>
-      body {background-color: #859B5F; /* Dark Olive Green lightened up */
-      }
-      ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        width: 300px;
-        background-color: #f1f1f1;
-      }
-    
-      li a {
-        display: block;
-        color: black;
-        padding: 8px 16px;
-        text-decoration: none;
-      }
-    
-      /* Change the link and background color on hover */
-      li a:hover {
-        background-color: DarkOliveGreen; /* #556B2F */
-        color: white;
-      }
-    </style>
-  </head>  
-<body>
-    <ul>
-      <li><a href="https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing">AV Shared Google Link</a><button onclick="copyToClipboard()">Copy link to clipboard</button></li>
-      <li><a href="Shepherd Acrostic.pdf" target="_blank">Shepherding Acrostic.pdf</a></li>
-      <li><a href="Shepherding - First Connections with Class Participants.pdf" target="_blank">First Connections.pdf</a></li>
-      <li><a href="Shepherding Role Descriptions.pdf" target="_blank">Shepherding Role Descriptions.pdf</a></li>
-      <li><a href="Shepherding Through Grief.pdf" target="_blank">Shepherding Through Grief.pdf</a></li>
-      <li><a href="2025-08-20 What Does Shepherding Look Like.pdf" target="_blank">My Notes for Shepherding.pdf</a></li>
-      <li><a href="CBSBookmark.pdf">CBSBookmark.pdf</a></li>
-      <li><a href="CBSBookmark2.pdf">CBSBookmark2.pdf</a>
-      <li><a href="Bible Book Abbreviations Bookmarks.pdf">Bible Book Abbreviations Bookmarks.pdf</a></li>
-      <li><a href="Year%201%20Puzzles%20and%20Patterns%20Lesson.pdf">Year 1 Puzzles and Patterns Lesson</a></li>
-      <li><a href="Lesson 3_ Longing for God.pdf">Lesson 3_ Longing for God.pdf</a></li>
-      <li><a href="Psalms Leadership Development Ideas.pdf">Psalms Leadership Development Ideas.pdf</a></li>
-      <li><a href="Leadership Development Resources.pdf">Leadership Development Resources.pdf</a></li>
-      <li><a href="What is Leadership Development.pdf">What is Leadership Development.pdf</a></li>
-      <li><a href="Gospel Conversations.pdf">Gospel Conversations.pdf</a></li>
-      <li><a href="Sharing the Gospel.pdf">Sharing the Gospel.pdf</a></li>
-        
-      <li><a href="Leadership Development Helps.pdf">Leadership Development Helps.pdf</a></li>
-      <li><a href="2025-10-23%20The%20Path%20of%20Life%20–%20A%20Devotion%20on%20the%20Psalms.pdf">2025-10-23 The Path of Life - A Devotion on the Psalms.pdf</a></li>
-      <li><a href="2025-12-04 Opening - Country Link.pdf">2025-12-04 Opening - Country Link.pdf</a></li>
-        
-    <!--
-      <li><a href="CBS at FUMC audio and video notes.pdf">CBS at FUMC audio and video notes.pdf</a></li>
-      <li><a href="CBS First Day Checklist.pdf">CBS First Day Checklist.pdf</a></li>
-      -->
-      
-    </ul>
-  
-<script>
-  function copyToClipboard() {
-    // Get the text field
-    var linkText = "https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing";
-  
-    // Select the text field
-    // linkText.select();
-    // linkText.setSelectionRange(0, 99999); // For mobile devices
-  
-    // Copy the text inside the text field
-    //navigator.clipboard.writeText(linkText.value);
-    navigator.clipboard.writeText(linkText);
-  }
-</script>
-
-</body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>CBS Items</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="menu.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="CBSMenu.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h2>CBS Items</h3>
+    </header>
+    <section id="menu">
+        <ul>
+            <li v-for="item in menu" :key="item[0]">
+            <a :href="item[0]" :target="item[2]">{{ item[1] }}</a>
+            </li>
+        </ul>
+    </section>
+  </body>
 </html>

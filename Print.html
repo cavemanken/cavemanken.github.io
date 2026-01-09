@@ -1,51 +1,24 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <style>
-      body {background-color: #859B5F; /* Dark Olive Green lightened up */
-      }
-      ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        width: 300px;
-        background-color: #f1f1f1;
-      }
-    
-      li a {
-        display: block;
-        color: black;
-        padding: 8px 16px;
-        text-decoration: none;
-      }
-    
-      /* Change the link and background color on hover */
-      li a:hover {
-        background-color: DarkOliveGreen; /* #556B2F */
-        color: white;
-      }
-    </style>
-  </head>  
+    <title>Print Items</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="menu.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="PrintMenu.js" defer></script>
+  </head>
   <body>
-    <ul>
-<!--
-  <li><a href="CBSBookmark.pdf" target="_blank">CBSBookmark.pdf</a></li>
-  <li><a href="CBSBookmark2.pdf" target="_blank">CBSBookmark2.pdf</a></li>
-  <li><a href="Lesson 2_ Psalms to Deepen Our Trust.pdf" target="_blank">Lesson 2_ Psalms to Deepen Our Trust.pdf</a></li>
--->  
-      <li><a href="SuperCapeBinder.pdf" target="_blank">SuperCapeBinder.pdf</a></li>
-      <li><a href="importantprintinginstructions.pdf" target="_blank">instructions.pdf</a></li>
-      <li><a href="Safeguard Cancelation Form-1.pdf" target="_blank">Safeguard Cancelation Form-1.pdf</a></li>
-      <li><a href="Assurant Cancellation Form.pdf" target="_blank">Assurant Cancellation Form.pdf</a></li>
-      <li><a href="Wisemen2.pdf" target="_blank">Wisemen2.pdf</a></li>
-      <li><a href="2026AmbetterKen.pdf" target="_blank">2026AmbetterKen.pdf</a></li>
-      <li><a href="2026AmbetterJenny.pdf" target="_blank">2026AmbetterJenny.pdf</a></li>
-      <!--
-      <li><a href="Assets - as of 2025-09-29.pdf" target="_blank">Assets - as of 2025-09-29.pdf</a></li>
-      <li><a href="Jayco210QBLienRelease.PDF" target="_blank">Jayco210QBLienRelease.PDF</a></li>
-      <li><a href="BiblePlan2YearStraightThrough.pdf" target="_blank">BiblePlan2YearStraightThrough.pdf</a></li>
-      <li><a href="BiblePlan2YearChronological.pdf" target="_blank">BiblePlan2YearChronological.pdf</a></li>
-      <li><a href="Merry Christmas 2025 - Google Docs.pdf" target="_blank">Merry Christmas 2025 - Google Docs.pdf</a></li>
-      -->
-    </ul>    
+    <header>
+      <h2>Print Items</h3>
+    </header>
+    <section id="menu">
+        <ul>
+            <li v-for="item in menu" :key="item[0]">
+            <a :href="item[0]" :target="item[2]">{{ item[1] }}</a>
+            </li>
+        </ul>
+    </section>
   </body>
 </html>
