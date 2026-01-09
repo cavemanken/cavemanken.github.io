@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vue Basics</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="app.js" defer></script>
@@ -18,12 +14,9 @@
     </header>
     <section id="menu">
         <ul>
-        <li><a :href="cbsPrintingLink">Celestial Viewing</a></li>
-        <li><a href="Print.html">Printing</a></li>
-        <li><a href="CBS.html">CBS Printing</a></li>
-        <li><a href="Progressive Rummy Rules.pdf" target="_blank">Rules for Progressive Rummy</a></li>
-        <li><a href="RVMain.html" target="_blank">RV Main</a></li>
-        <li><a href="verses.pdf" target="_blank">God's Will For You</a></li>
+            <li v-for="item in menu" :key="item[0]">
+            <a :href="item[0]" :target="item[2]">{{ item[1] }}</a>
+            </li>
         </ul>
     </section>
   </body>

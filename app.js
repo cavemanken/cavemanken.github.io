@@ -1,7 +1,18 @@
-const app = Vue.createApp({
+const menu = Vue.createApp({
   data() {
     return {
-      cbsPrintingLink: "CBS.html",
+      menu: [
+        ["CelestialViewing.html", "Celestial Viewing", "_self"],
+        ["CBS.html", "CBS Printing", "_self"],
+        ["Print.html", "Printing", "_self"],
+        [
+          "Progressive Rummy Rules.pdf",
+          "Rules for Progressive Rummy",
+          "_blank",
+        ],
+        ["RVMain.html", "RV Main", "_blank"],
+        ["verses.pdf", "God's Will For You", "_blank"],
+      ],
     };
   },
   computed: {
@@ -40,4 +51,4 @@ const app = Vue.createApp({
   },
 });
 
-app.mount("#plan");
+menu.mount("#menu");
