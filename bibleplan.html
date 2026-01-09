@@ -18,17 +18,18 @@
       <h2>2 Year Chronological Bible Reading Plan</h3>
     </header>
     <section id="plan">
+<p>
       Day: 
         <input
             type="text"
             v-model="readingLocation"
             @keyup="updateLocalStorage"/>
-          <button @click="buildReadingList(false)">Go Back</button>
+          <button @click="buildReadingList(false)">Go Back</button></p><p>
         Days to Show:  
         <input
             type="text"
             v-model="readingListSize"
-            @keyup="updateLocalStorage"/>
+            @keyup="updateLocalStorage"/></p>
       
       <ul style="list-style-type: none;">
         <li
