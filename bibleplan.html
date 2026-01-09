@@ -19,17 +19,17 @@
     </header>
     <section id="plan">
 <p>
+        Days to Show:  
+        <input
+            type="text"
+            v-model="readingListSize"
+            @keyup="updateLocalStorage"/></p><p>
       Day: 
         <input
             type="text"
             v-model="readingLocation"
             @keyup="updateLocalStorage"/>
-          <button @click="buildReadingList(false)">Go Back</button></p><p>
-        Days to Show:  
-        <input
-            type="text"
-            v-model="readingListSize"
-            @keyup="updateLocalStorage"/></p>
+          <button @click="buildReadingList(false)">Go Back</button></p>
       
       <ul style="list-style-type: none;">
         <li
