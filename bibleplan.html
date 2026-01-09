@@ -18,7 +18,7 @@
       <h2>2 Year Chronological Bible Reading Plan</h3>
     </header>
     <section id="plan">
-      <p>Day: 
+      Day: 
         <input
             type="text"
             v-model="readingLocation"
@@ -29,7 +29,7 @@
             type="text"
             v-model="readingListSize"
             @keyup="updateLocalStorage"/>
-      </p>
+      
       <ul style="list-style-type: none;">
         <li
           v-for="(reading, index) in readingList"
