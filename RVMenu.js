@@ -5,7 +5,7 @@ const menu = Vue.createApp({
         "https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing",
       menu: [
         ["RVPreHaulChecklist.html", "Pre-haul Checklist", "_self"],
-        ["RVWinterize.html", "Winterize Steps", "_self"],
+        ["RVWinterizeChecklist.html", "Winterize Steps Checklist", "_self"],
       ],
     };
   },
