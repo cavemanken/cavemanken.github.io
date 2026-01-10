@@ -1,9 +1,24 @@
-<html>
-<body style="padding-left: 50px;">
-  <br><br>
-  <a href="RVPreHaulChecklist.html">Pre-haul Checklist</a>
-  <br><br>
-  <a href="RVWinterize.html">Winterize Steps</a>
-  <br><br>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>RV Main</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="menu.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="RVMenu.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h2>RV Items</h3>
+    </header>
+    <section id="menu">
+        <ul>
+            <li v-for="item in menu" :key="item[0]">
+            <a :href="item[0]" :target="item[2]">{{ item[1] }}</a>
+            </li>
+        </ul>
+    </section>
+  </body>
 </html>
