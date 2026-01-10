@@ -1,18 +1,25 @@
-<html>
-  <ol style="padding-left: 50px;padding-top: 50px;">
-    <li>Connect battery</li>
-    <li>Secure TV</li>
-    <li>Close bathroom vent</li>
-    <li>Close all windows</li>
-    <li>Clear countertop</li>
-    <li>Close all cupboards and drawers</li>
-    <li>Raise stabilizers</li>
-    <li>Raise stairs</li>
-    <li>Turn off propane tanks</li>
-    <li>Check tires</li>
-    <li>Connect to Sequoia</li>
-    <li>Check lights</li>
-    <li>Remove wheel chocks</li>
-    <li>Get dump station stuff ready</li>
-  </ol>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Print Items</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="checklist.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="RVPreHaulChecklist.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h2>RV Pre-Haul Checklist</h2>
+    </header>
+    <section id="checklist">
+      <ul>
+        <li v-for="item in checklist" :key="item">
+          <input type="checkbox" id="{{item}}" />
+          <label for="{{item}}">{{ item }}</label>
+        </li>
+      </ul>
+    </section>
+  </body>
 </html>
