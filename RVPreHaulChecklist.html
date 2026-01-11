@@ -16,8 +16,8 @@
     <section id="checklist">
       <ul>
         <li v-for="item in checklist" :key="item">
-          <input type="checkbox" id="{{item}}" />
-          <label for="{{item}}">{{ item }}</label>
+          <input type="checkbox" :id="item" />
+          <label :for="item">{{ item }}</label>
         </li>
       </ul>
     </section>

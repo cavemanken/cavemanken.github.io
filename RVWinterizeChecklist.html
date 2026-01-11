@@ -14,20 +14,14 @@
       <h2>RV Winterize Checklist</h2>
     </header>
     <section id="checklist">
-      <!-- <ul>
-        <li v-for="item in checklist" :key="item">
-          <input type="checkbox" id="{{item}}" />
-          <label for="{{item}}">{{ item }}</label>
-        </li>
-      </ul> -->
       <ul>
         <li v-for="item in checklist" :key="item">
-          <input type="checkbox" id="{{item.name}}" />
-          <label for="{{item.name}}">{{ item.name }}</label>
+          <input type="checkbox" :id="item.name" />
+          <label :for="item.name">{{ item.name }}</label>
           <ul v-if="item.subitems">
             <li v-for="subitem in item.subitems" :key="subitem">
-              <input type="checkbox" id="{{subitem.name}}" />
-              <label for="{{subitem.name}}">{{ subitem.name }}</label>
+              <input type="checkbox" :id="subitem.name" />
+              <label :for="subitem.name">{{ subitem.name }}</label>
             </li>
           </ul>
         </li>
