@@ -15,13 +15,15 @@
     </header>
     <section id="checklist">
       <ul>
-        <li v-for="item in checklist" :key="item">
-          <input type="checkbox" :id="item.name" />
-          <label :for="item.name">{{ item.name }}</label>
+        <li v-for="(item,index) in checklist" :key="item">
+          <input type="checkbox" :id="item.name + index" />
+          <label :for="item.name + index">{{ item.name }}</label>
           <ul v-if="item.subitems">
-            <li v-for="subitem in item.subitems" :key="subitem">
-              <input type="checkbox" :id="subitem.name" />
-              <label :for="subitem.name">{{ subitem.name }}</label>
+            <li v-for="(subitem,subindex) in item.subitems" :key="subitem">
+              <input type="checkbox" :id="subitem.name + index + subindex" />
+              <label :for="subitem.name + index + subindex"
+                >{{ subitem.name }}</label
+              >
             </li>
           </ul>
         </li>

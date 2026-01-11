@@ -23,7 +23,6 @@
 }
 
 #checklist label {
-  font-size: 24px;
   vertical-align: middle;
 }
 
@@ -32,4 +31,10 @@
   height: 25px;
   border: 1px solid black;
   vertical-align: middle;
+}
+
+/* Change the link and background color on hover */
+#checklist li:hover {
+  background-color: DarkOliveGreen; /* #556B2F */
+  color: white;
 }
