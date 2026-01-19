@@ -1,1 +1,24 @@
-aoeu
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMK63.ORG</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="menu.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="menu.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h2>CMK63.ORG</h3>
+    </header>
+    <section id="menu">
+        <ul>
+            <li v-for="item in menu" :key="item[0]">
+            <a :href="item[0]" :target="item[2]">{{ item[1] }}</a>
+            </li>
+        </ul>
+    </section>
+  </body>
+</html>
