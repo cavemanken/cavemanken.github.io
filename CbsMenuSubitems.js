@@ -45,8 +45,8 @@ const cbsMenuSubitems = [
     target: '_blank',
   },
   {
-    link: 'Devotion For Psalm 42.pdf',
-    linkDesc: 'Devotion For Psalm 42.pdf',
+    link: 'Devotion for Psalm 42.pdf',
+    linkDesc: 'Devotion for Psalm 42.pdf',
     target: '_blank',
   },
   // add new links above here
