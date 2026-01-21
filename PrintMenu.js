@@ -17,11 +17,9 @@ const menu = Vue.createApp({
         ["Wisemen2.pdf", "Wisemen2.pdf", "_blank"],
         ["2026AmbetterKen.pdf", "2026AmbetterKen.pdf", "_blank"],
         ["2026AmbetterJenny.pdf", "2026AmbetterJenny.pdf", "_blank"],
-        ["ScienceDietCoupon.pdf", "ScienceDietCoupon.pdf", "_blank"],
       ],
     };
   },
 });
 
 menu.mount("#menu");
-

@@ -74,11 +74,6 @@ const menu = Vue.createApp({
           "2025-12-04 Opening - Country Link.pdf",
           "_blank",
         ],
-        [
-          "AsTheDeerLyrics.pdf",
-          "AsTheDeerLyrics.pdf",
-          "_blank",
-        ],
         // ***add new items above ***
         [
           "https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing",
@@ -104,4 +99,3 @@ const menu = Vue.createApp({
 });
 
 menu.mount("#menu");
-
