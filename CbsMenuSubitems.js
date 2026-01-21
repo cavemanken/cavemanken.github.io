@@ -44,6 +44,11 @@ const cbsMenuSubitems = [
     linkDesc: 'AsTheDeerLyrics.pdf',
     target: '_blank',
   },
+  {
+    link: 'Devotion For Psalm 42.pdf',
+    linkDesc: 'Devotion For Psalm 42.pdf',
+    target: '_blank',
+  },
   // add new links above here
   {
     link: 'https://drive.google.com/drive/folders/1oPPRU47CBxZvXY-_MjEFvzCTDmRE2vHY?usp=sharing',
