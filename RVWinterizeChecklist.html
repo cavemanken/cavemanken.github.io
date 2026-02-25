@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Print Items</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="checklist.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="RVWinterizeChecklist.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h2>RV Winterize Checklist</h2>
+    </header>
+    <section id="checklist">
+      <ul>
+        <li v-for="(item,index) in checklist" :key="item.name + index">
+          <input type="checkbox" :id="item.name + index" />
+          <label :for="item.name + index">{{ item.name }}</label>
+          <ul v-if="item.subitems">
+            <li
+              v-for="(subitem,subindex) in item.subitems"
+              :key="subitem.name + index + subindex"
+            >
+              <input type="checkbox" :id="subitem.name + index + subindex" />
+              <label :for="subitem.name + index + subindex"
+                >{{ subitem.name }}</label
+              >
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>
