@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Print from './components/Printing/Print.vue';
 import PrintMenu from './components/Printing/PrintMenu.vue';
 import RVCheckLists from './components/RV/RVCheckLists.vue';
@@ -9,7 +9,7 @@ import UserAuth from './pages/auth/UserAuth.vue';
 import BucketList from './components/BucketList/BucketList.vue';
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     { path: '/', redirect: '/print' },
     {
