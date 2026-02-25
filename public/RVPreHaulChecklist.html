@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Print Items</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="checklist.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="RVPreHaulChecklist.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h2>RV Pre-Haul Checklist</h2>
+    </header>
+    <section id="checklist">
+      <ul>
+        <li v-for="item in checklist" :key="item">
+          <input type="checkbox" :id="item" />
+          <label :for="item">{{ item }}</label>
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+#checklist ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 500px;
+  background-color: #f1f1f1;
+}
+
+#checklist ul li ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 455px;
+  background-color: #f1f1f1;
+}
+
+#checklist li {
+  display: block;
+  color: black;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+#checklist label {
+  vertical-align: middle;
+}
+
+#checklist input[type="checkbox"] {
+  width: 25px;
+  height: 25px;
+  border: 1px solid black;
+  vertical-align: middle;
+}
+
+/* Change the link and background color on hover */
+#checklist li:hover {
+  background-color: DarkOliveGreen; /* #556B2F */
+  color: white;
+}
