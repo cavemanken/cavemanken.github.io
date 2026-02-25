@@ -11,7 +11,7 @@ import BucketList from './components/BucketList/BucketList.vue';
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '', redirect: '' },
+    { path: '/', redirect: '/print' },
     {
       path: '/print',
       component: Print,
@@ -34,7 +34,7 @@ const router = createRouter({
     },
     { path: '/auth', component: UserAuth },
     { path: '/bucket-list', component: BucketList },
-    { path: '/:notFound(.*)', redirect: '' },
+    { path: '/:notFound(.*)', redirect: '/print' },
   ],
 
   linkActiveClass: 'active',
