@@ -1,6 +1,6 @@
 <!-- To make changes and push to my web site:
   1) Make changes to the code and test ("npm run serve")
-  2) Use github desktop to commit and push changes
+  2) Use github desktop to commit AND push changes
     a) run "npm run build" to create new dist directory
     b) Use github desktop to commit and push changes again
     c) Run "npm run deploy" to push dist changes to the gh-pages branch
