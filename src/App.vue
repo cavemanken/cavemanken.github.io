@@ -1,10 +1,12 @@
 <!-- To make changes and push to my web site:
   1) Make changes to the code and test ("npm run serve")
   2) Use github desktop to commit and push changes
-  3) run "npm run build" to create new dist directory
-  4) Use github desktop to commit and push changes again
-  5) Run "npm run deploy" to push dist changes to the gh-pages branch
-  6) gh-pages branch will automatically deploy to the website
+    a) run "npm run build" to create new dist directory
+    b) Use github desktop to commit and push changes again
+    c) Run "npm run deploy" to push dist changes to the gh-pages branch
+  ---- OR ----
+    a) run "npm run build-and-deploy" to do all of the above in one step  
+  3) gh-pages branch will automatically deploy to the website
    -->
 
 <template>
