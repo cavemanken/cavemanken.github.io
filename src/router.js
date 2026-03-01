@@ -32,8 +32,12 @@ const router = createRouter({
         { path: '/rv/Winterize', component: RVWinterizeCheckList },
       ],
     },
-    { path: '/auth', component: UserAuth },
-    { path: '/bucket-list', component: BucketList },
+    { path: '/auth', component: UserAuth, meta: { requiresUnauth: true } },
+    {
+      path: '/bucket-list',
+      component: BucketList,
+      meta: { requiresAuth: true },
+    },
     { path: '/:notFound(.*)', redirect: '/print' },
   ],
 
@@ -41,10 +45,16 @@ const router = createRouter({
 });
 
 router.beforeEach(function (to, _, next) {
+  console.log(
+    'here',
+    to.meta.requiresAuth,
+    to.meta.requiresUnauth,
+    store.getters.isAuthenticated
+  );
   if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
     next('/auth');
   } else if (to.meta.requiresUnauth && store.getters.isAuthenticated) {
-    next('/coaches');
+    next('/bucket-list');
   } else {
     next();
   }

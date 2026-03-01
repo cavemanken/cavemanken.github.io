@@ -27,11 +27,8 @@ export default {
   },
   async updateBucketListItem(context, payload) {
     console.log('async updateBucketListItem...', payload);
-    console.log('token');
-    console.log(localStorage.token);
-    console.log('here');
     const response = await fetch(
-      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${localStorage.token}`,
+      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${context.rootGetters.token}`,
       {
         method: 'PUT',
         headers: {
@@ -55,7 +52,7 @@ export default {
   },
   async createBucketListItem(context, payload) {
     console.log('async createBucketListItem...', payload);
-    const link = `${payload.firebaseProjectLink}${payload.dbName}.json?auth=${localStorage.token}`;
+    const link = `${payload.firebaseProjectLink}${payload.dbName}.json?auth=${context.rootGetters.token}`;
     const response = await fetch(link, {
       method: 'POST',
       headers: {
@@ -77,9 +74,13 @@ export default {
     }
   },
   async deleteBucketListItem(context, payload) {
-    console.log('async deleteBucketListItem...', payload, localStorage.token);
+    console.log(
+      'async deleteBucketListItem...',
+      payload,
+      context.rootGetters.token
+    );
     const response = await fetch(
-      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${localStorage.token}`,
+      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${context.rootGetters.token}`,
       {
         method: 'DELETE',
         headers: {

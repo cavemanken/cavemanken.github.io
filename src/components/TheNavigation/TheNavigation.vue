@@ -4,17 +4,22 @@
       <ul>
         <li><router-link to="/print">Print</router-link></li>
         <li><router-link to="/rv">RV</router-link></li>
-        <li><router-link to="/bucket-list">Bucket List New</router-link></li>
+        <li v-if="$store.getters.isAuthenticated">
+          <router-link to="/bucket-list">Bucket List</router-link>
+        </li>
         <!-- <li>
           <router-link to="/prog-rummy-rules">Prog Rummy Rules</router-link>
         </li> -->
         <li>
-          <base-button v-if="!$store.state.auth.token" @click="login"
+          <base-button v-if="!$store.getters.isAuthenticated" @click="login"
             >Login</base-button
           >
         </li>
         <li>
-          <base-button v-if="$store.state.auth.token" @click="clearToken">
+          <base-button
+            v-if="$store.getters.isAuthenticated"
+            @click="logout($store)"
+          >
             Logout
           </base-button>
         </li>
@@ -26,6 +31,15 @@
 <script>
 export default {
   methods: {
+    logout(context) {
+      context.commit('setUser', {
+        token: null,
+        userId: null,
+        tokenExpiration: null,
+      });
+      // go to a page that doesn't require auth, otherwise user gets stuck on a page they can't access
+      this.$router.push('/print');
+    },
     clearToken() {
       // ??? correct way to clear?
       this.$store.dispatch('logout');

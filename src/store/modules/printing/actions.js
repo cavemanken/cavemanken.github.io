@@ -96,14 +96,14 @@ export default {
   async updateMenuItem(context, payload) {
     console.log('async updateMenuItem...', payload);
     console.log('token');
-    console.log(localStorage.token);
+    console.log(context.rootGetters.token);
     // if (!payload.forceRefresh && !context.getters.shouldUpdate) {
     //   console.log('returning...');
     //   return;
     // }
     console.log('here');
     const response = await fetch(
-      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${localStorage.token}`,
+      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${context.rootGetters.token}`,
       {
         method: 'PUT',
         headers: {
@@ -131,7 +131,7 @@ export default {
     //   return;
     // }
     const response = await fetch(
-      `${payload.firebaseProjectLink}${payload.dbName}.json?auth=${localStorage.token}`,
+      `${payload.firebaseProjectLink}${payload.dbName}.json?auth=${context.rootGetters.token}`,
       {
         method: 'POST',
         headers: {
@@ -159,7 +159,7 @@ export default {
     //   return;
     // }
     const response = await fetch(
-      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${localStorage.token}`,
+      `${payload.firebaseProjectLink}${payload.dbName}/${payload.key}.json?auth=${context.rootGetters.token}`,
       {
         method: 'DELETE',
         headers: {
