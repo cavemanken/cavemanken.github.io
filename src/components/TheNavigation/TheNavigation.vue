@@ -4,7 +4,7 @@
       <ul>
         <li><router-link to="/print">Print</router-link></li>
         <li><router-link to="/rv">RV</router-link></li>
-        <li><router-link to="/bucket-list">Bucket List</router-link></li>
+        <li><router-link to="/bucket-list">Bucket List New</router-link></li>
         <!-- <li>
           <router-link to="/prog-rummy-rules">Prog Rummy Rules</router-link>
         </li> -->
