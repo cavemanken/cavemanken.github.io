@@ -10,21 +10,15 @@
         </header>
         <table>
           <tr>
-            <th align="right">Description</th>
+            <th align="right">Title</th>
             <td>
-              <input type="text" v-model="desc" />
+              <input type="text" v-model="title" />
             </td>
           </tr>
           <tr>
-            <th align="right">Goal Date</th>
+            <th align="right">Date</th>
             <td>
-              <input type="date" v-model="goalDate" />
-            </td>
-          </tr>
-          <tr>
-            <th align="right">Completed Date</th>
-            <td>
-              <input type="date" v-model="completedDate" />
+              <input type="date" v-model="date" />
             </td>
           </tr>
           <tr>
@@ -54,16 +48,14 @@ export default {
     const blogListItem = this.$store.getters['bloglist/blogListItems'].filter(
       (item) => item.key === this.editKey
     );
-    this.desc = blogListItem[0].desc;
+    this.title = blogListItem[0].title;
+    this.date = blogListItem[0].date;
     this.comments = blogListItem[0].comments;
-    this.goalDate = blogListItem[0].goalDate;
-    this.completedDate = blogListItem[0].completedDate;
   },
   data() {
     return {
-      desc: '',
-      goalDate: '',
-      completedDate: '',
+      title: '',
+      date: '',
       comments: '',
     };
   },
@@ -84,15 +76,14 @@ export default {
       this.$emit('cancel-save');
     },
     trySave() {
-      if (this.desc.trim() === '') {
-        alert('Description is required.');
+      if (this.title.trim() === '' || this.date.trim() === '') {
+        alert('Title and Date are required.');
       } else {
         this.$emit(
           'save-item',
           this.editKey,
-          this.desc,
-          this.goalDate,
-          this.completedDate,
+          this.title,
+          this.date,
           this.comments
         );
       }

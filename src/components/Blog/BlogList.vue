@@ -33,10 +33,9 @@
       >
       <blog-item
         :item-key="item.key"
-        :desc="item.desc"
+        :title="item.title"
         :comments="item.comments"
-        :goalDate="item.goalDate"
-        :completedDate="item.completedDate"
+        :date="item.date"
       ></blog-item>
     </div>
     <base-button @click="addNewItem" v-if="adminMode">Add New</base-button>
@@ -64,9 +63,9 @@ export default {
         this.tryingToMakeChanges = true;
       }
     },
-    saveItem(editKey, desc, goalDate, completedDate, comments) {
+    saveItem(editKey, title, date, comments) {
       this.editMode = false;
-      this.updateBlogListItem(editKey, desc, goalDate, completedDate, comments);
+      this.updateBlogListItem(editKey, title, date, comments);
     },
     cancelSave() {
       this.editMode = false;
@@ -76,8 +75,8 @@ export default {
         this.deleteBlogListItem(key);
       }
     },
-    addItem(desc, goalDate, completedDate, comments) {
-      this.createBlogListItem(desc, goalDate, completedDate, comments);
+    addItem(title, date, comments) {
+      this.createBlogListItem(title, date, comments);
       this.showAdd = false;
     },
     cancelAdd() {
@@ -95,16 +94,15 @@ export default {
       }
     },
     // ******************************************************************************
-    async updateBlogListItem(key, desc, goalDate, completedDate, comments) {
+    async updateBlogListItem(key, title, date, comments) {
       this.isLoading = true;
       try {
         await this.$store.dispatch('bloglist/updateBlogListItem', {
           firebaseProjectLink: this.firebaseProjectLink,
           dbName: this.dbName,
           key: key,
-          desc: desc,
-          goalDate: goalDate,
-          completedDate: completedDate,
+          title: title,
+          date: date,
           comments: comments,
         });
         this.getBlogList();
@@ -116,15 +114,14 @@ export default {
       this.isLoading = false;
     },
     // ******************************************************************************
-    async createBlogListItem(desc, goalDate, completedDate, comments) {
+    async createBlogListItem(title, data, comments) {
       this.isLoading = true;
       try {
         await this.$store.dispatch('bloglist/createBlogListItem', {
           firebaseProjectLink: this.firebaseProjectLink,
           dbName: this.dbName,
-          desc: desc,
-          goalDate: goalDate,
-          completedDate: completedDate,
+          title: title,
+          date: data,
           comments: comments,
         });
         this.getBlogList();

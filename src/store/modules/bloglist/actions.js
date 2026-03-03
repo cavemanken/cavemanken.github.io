@@ -15,9 +15,8 @@ export default {
     for (const key in responseData) {
       const blogListItem = {
         key: key,
-        desc: responseData[key].desc,
-        goalDate: responseData[key].goalDate,
-        completedDate: responseData[key].completedDate,
+        title: responseData[key].title,
+        date: responseData[key].date,
         comments: responseData[key].comments,
       };
       blogListItems.push(blogListItem);
@@ -35,9 +34,8 @@ export default {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          desc: payload.desc,
-          goalDate: payload.goalDate,
-          completedDate: payload.completedDate,
+          title: payload.title,
+          date: payload.date,
           comments: payload.comments,
         }),
       }
@@ -59,9 +57,8 @@ export default {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        desc: payload.desc,
-        goalDate: payload.goalDate,
-        completedDate: payload.completedDate,
+        title: payload.title,
+        date: payload.date,
         comments: payload.comments,
       }),
     });

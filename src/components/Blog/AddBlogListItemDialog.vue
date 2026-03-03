@@ -10,21 +10,15 @@
         </header>
         <table>
           <tr>
-            <th align="right">Description</th>
+            <th align="right">Title</th>
             <td>
-              <input type="text" v-model="desc" />
+              <input type="text" v-model="title" />
             </td>
           </tr>
           <tr>
-            <th align="right">Goal Date</th>
+            <th align="right">Date</th>
             <td>
-              <input type="date" v-model="goalDate" />
-            </td>
-          </tr>
-          <tr>
-            <th align="right">Completed Date</th>
-            <td>
-              <input type="date" v-model="completedDate" />
+              <input type="date" v-model="date" />
             </td>
           </tr>
           <tr>
@@ -52,9 +46,8 @@
 export default {
   data() {
     return {
-      desc: '',
-      goalDate: '',
-      completedDate: '',
+      title: '',
+      date: '',
       comments: '',
     };
   },
@@ -67,20 +60,13 @@ export default {
   emits: ['addItem', 'cancelAdd'],
   methods: {
     tryAdd() {
-      if (this.desc.trim() === '') {
-        alert('Description is required.');
+      if (this.title.trim() === '' || this.date.trim() === '') {
+        alert('Title and Date are required.');
       } else {
-        this.$emit(
-          'add-item',
-          this.desc,
-          this.goalDate,
-          this.completedDate,
-          this.comments
-        );
+        this.$emit('add-item', this.title, this.date, this.comments);
         // clear them
-        this.desc = '';
-        this.goalDate = '';
-        this.completedDate = '';
+        this.title = '';
+        this.date = '';
         this.comments = '';
       }
     },

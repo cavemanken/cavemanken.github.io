@@ -1,8 +1,7 @@
 <template>
-  <base-button @click="toggleDetails">Details</base-button>{{ desc }}
+  <base-button @click="toggleDetails">Details</base-button>{{ title }}
   <div v-if="viewDetails">
-    {{ goalDate }}
-    {{ completedDate }}
+    {{ date }}
     {{ comments }}
   </div>
 </template>
@@ -21,10 +20,9 @@ export default {
   },
   props: {
     itemKey: { type: String, required: true, default: '' },
-    desc: { type: String, required: true, default: '' },
+    title: { type: String, required: true, default: '' },
     comments: { type: String, required: false, default: '' },
-    goalDate: { type: String, required: true, default: '' },
-    completedDate: { type: String, required: false, default: '' },
+    date: { type: String, required: true, default: '' },
   },
 };
 </script>
