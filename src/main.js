@@ -10,6 +10,7 @@ import BaseSpinner from './components/ui/BaseSpinner.vue';
 import BaseDialog from './components/ui/BaseDialog.vue';
 import PrintLink from './components/Printing/PrintLink.vue';
 import BucketItem from './components/BucketList/BucketItem.vue';
+import BlogItem from './components/Blog/BlogItem.vue';
 
 const app = createApp(App);
 
@@ -24,5 +25,5 @@ app.component('base-spinner', BaseSpinner);
 app.component('base-dialog', BaseDialog);
 app.component('print-link', PrintLink);
 app.component('bucket-item', BucketItem);
-
+app.component('blog-item', BlogItem);
 app.mount('#app');

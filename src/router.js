@@ -7,6 +7,7 @@ import RVWinterizeCheckList from './components/RV/RVWinterizeCheckList.vue';
 import store from './store/index.js';
 import UserAuth from './pages/auth/UserAuth.vue';
 import BucketList from './components/BucketList/BucketList.vue';
+import BlogList from './components/Blog/BlogList.vue';
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -37,6 +38,11 @@ const router = createRouter({
       path: '/bucket-list',
       component: BucketList,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/blog-list',
+      component: BlogList,
+      meta: { requiresAuth: false },
     },
     { path: '/:notFound(.*)', redirect: '/print' },
   ],
