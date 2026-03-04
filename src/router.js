@@ -42,7 +42,7 @@ const router = createRouter({
     {
       path: '/blog-list',
       component: BlogList,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
     },
     { path: '/:notFound(.*)', redirect: '/print' },
   ],
