@@ -24,7 +24,7 @@
           <tr>
             <th align="right">Comments</th>
             <td>
-              <input type="text" v-model="comments" />
+              <textarea rows="8" cols="60" v-model="comments"></textarea>
             </td>
           </tr>
         </table>
@@ -56,8 +56,13 @@ export default {
       type: Boolean,
       required: true,
     },
+    fixed: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
-  emits: ['addItem', 'cancelAdd'],
+  emits: ['add-item', 'cancel-add'],
   methods: {
     tryAdd() {
       if (this.title.trim() === '' || this.date.trim() === '') {

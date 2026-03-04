@@ -22,9 +22,9 @@
             </td>
           </tr>
           <tr>
-            <th align="right">Comments</th>
+            <th align="right">Commentsuuu</th>
             <td>
-              <input type="text" v-model="comments" />
+              <textarea rows="8" cols="60" v-model="comments"></textarea>
             </td>
           </tr>
         </table>

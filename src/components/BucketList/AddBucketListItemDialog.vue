@@ -63,8 +63,13 @@ export default {
       type: Boolean,
       required: true,
     },
+    fixed: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
-  emits: ['addItem', 'cancelAdd'],
+  emits: ['add-item', 'cancel-add'],
   methods: {
     tryAdd() {
       if (this.desc.trim() === '') {
