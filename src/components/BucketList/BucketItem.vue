@@ -1,5 +1,7 @@
 <template>
-  <base-button @click="toggleDetails">Details</base-button>{{ desc }}
+  <base-button @click="toggleDetails" :class="{ active: viewDetails }"
+    >Details</base-button
+  >{{ desc }}
   <div v-if="viewDetails">
     {{ goalDate }}
     {{ completedDate }}
@@ -29,4 +31,11 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+button.active {
+  /* color: #f1a80a; */
+  color: #fff;
+  border-color: #f1a80a;
+  background-color: #1a037e;
+}
+</style>
