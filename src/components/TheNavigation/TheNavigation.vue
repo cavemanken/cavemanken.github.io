@@ -5,10 +5,10 @@
         <li><router-link to="/print">Print</router-link></li>
         <li><router-link to="/rv">RV</router-link></li>
         <li>
-          <router-link to="/bucket-list">Bucket List</router-link>
+          <router-link to="/bucket-list">Bucket</router-link>
         </li>
         <li>
-          <router-link to="/blog-list">Blog List</router-link>
+          <router-link to="/blog-list">Blog</router-link>
         </li>
         <!-- <li>
           <router-link to="/prog-rummy-rules">Prog Rummy Rules</router-link>
