@@ -55,7 +55,7 @@ export default {
   },
   data() {
     return {
-      linkPrefix: '../',
+      linkPrefix: '/print/',
       editMode: false,
       updatedLink: this.link,
       updatedLinkDesc: this.linkDesc,
