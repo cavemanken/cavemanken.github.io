@@ -50,17 +50,17 @@ const router = createRouter({
   linkActiveClass: 'active',
 });
 
-router.beforeEach(function (to, _, next) {
-  console.log(
-    'here',
-    to.meta.requiresAuth,
-    to.meta.requiresUnauth,
-    store.getters.isAuthenticated
-  );
+router.beforeEach(function (to, from, next) {
+  // console.log(
+  //   'hereiiiiiiiiiiiiiiiiiiiiiii',
+  //   to.meta.requiresAuth,
+  //   to.meta.requiresUnauth,
+  //   store.getters.isAuthenticated,
+  //   from.fullPath,
+  //   to.fullPath
+  // );
   if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
-    next('/auth');
-  } else if (to.meta.requiresUnauth && store.getters.isAuthenticated) {
-    next('/bucket-list');
+    next('/auth?redirect=' + to.fullPath);
   } else {
     next();
   }

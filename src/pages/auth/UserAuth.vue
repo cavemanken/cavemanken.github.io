@@ -12,6 +12,7 @@
     </base-dialog>
     <base-card>
       <form @submit.prevent="submitForm">
+        <div><h3>Please login to see requested content...</h3></div>
         <div class="form-control">
           <label for="email">Your Email</label>
           <input type="email" id="email" v-model.trim="email" required />
@@ -80,6 +81,11 @@ export default {
             email: this.email,
             password: this.password,
           });
+          // for some reason this path is getting hit twice, when they login
+          if (this.$route.fullPath.startsWith('/auth?redirect=')) {
+            const redirectPath = this.$route.query.redirect || '/';
+            this.$router.replace(redirectPath);
+          }
         } else {
           // send http request
           await this.$store.dispatch('signup', {
