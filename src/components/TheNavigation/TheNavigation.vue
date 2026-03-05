@@ -13,11 +13,12 @@
         <!-- <li>
           <router-link to="/prog-rummy-rules">Prog Rummy Rules</router-link>
         </li> -->
-        <li>
+        <!-- Don't need to show this since they'll automatically be redirected to the login page if they try to access certain pages without being authenticated -->
+        <!-- <li>
           <base-button v-if="!$store.getters.isAuthenticated" @click="login"
             >Login</base-button
           >
-        </li>
+        </li> -->
         <li>
           <base-button
             v-if="$store.getters.isAuthenticated"

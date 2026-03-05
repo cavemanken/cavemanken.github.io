@@ -1,3 +1,5 @@
+<!-- If you've restored a backup that does not have the node-modules folder, then run "npm install" -->
+
 <!-- To make changes and push to my web site:
   1) Make changes to the code and test ("npm run serve")
   2) Use github desktop to commit AND push your code changes

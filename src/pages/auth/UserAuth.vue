@@ -43,6 +43,10 @@
 </template>
 <script>
 export default {
+  mounted() {
+    console.log('mounted user auth');
+    document.getElementById('email').focus();
+  },
   data() {
     return {
       email: '',
@@ -133,7 +137,7 @@ label {
 input,
 textarea {
   display: block;
-  width: 100%;
+  width: 50%;
   font: inherit;
   border: 1px solid #ccc;
   padding: 0.15rem;
