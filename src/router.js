@@ -8,11 +8,21 @@ import store from './store/index.js';
 import UserAuth from './pages/auth/UserAuth.vue';
 import BucketList from './components/BucketList/BucketList.vue';
 import BlogList from './components/Blog/BlogList.vue';
+import HomePage from './pages/home/HomePage.vue';
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', redirect: '/print' },
+    { path: '/', redirect: '/home' },
+    {
+      path: '/home',
+      component: HomePage,
+    },
+    {
+      path: '/bucket-list',
+      component: BucketList,
+      meta: { requiresAuth: true },
+    },
     {
       path: '/print',
       component: Print,

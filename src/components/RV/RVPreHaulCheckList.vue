@@ -30,6 +30,7 @@ export default {
         'Connect to Sequoia',
         'Check lights',
         'Remove wheel chocks',
+        'Close/lock battery compartment',
         'Get dump station stuff ready',
       ],
     };

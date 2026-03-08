@@ -3,6 +3,9 @@
     <nav>
       <ul>
         <li>
+          <router-link to="/home">Home</router-link>
+        </li>
+        <li>
           <router-link to="/blog-list">Blog</router-link>
         </li>
         <li>
