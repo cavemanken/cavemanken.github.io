@@ -5,6 +5,7 @@
         <li>
           <router-link to="/home">Home</router-link>
         </li>
+        <li style="border-right: 1px solid white">|</li>
         <li>
           <router-link to="/blog-list">Blog</router-link>
         </li>
