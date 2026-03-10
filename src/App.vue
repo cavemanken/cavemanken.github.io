@@ -32,6 +32,9 @@ import TheNavigation from './components/TheNavigation/TheNavigation.vue';
 // import IsAuthenticated from './components/IsAuthenticated.vue';
 
 export default {
+  mounted() {
+    document.title = 'cmk63.org';
+  },
   components: {
     // TheHeader,
     TheNavigation,
