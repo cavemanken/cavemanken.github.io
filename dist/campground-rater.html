@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampLog — Rate Your Site</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bark: #2C1A0E;
+    --pine: #2D4A2D;
+    --sage: #7A9E7E;
+    --amber: #D4820A;
+    --cream: #F5EDD8;
+    --smoke: #E8DFC8;
+    --ember: #C94A1A;
+    --sky: #6B9FAA;
+    --gold: #E8B84B;
+    --mist: #B8CCC0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bark);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, rgba(45,74,45,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(212,130,10,0.15) 0%, transparent 50%);
+  }
+
+  /* HEADER */
+  header {
+    padding: 2rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(245,237,216,0.1);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: -0.02em;
+  }
+
+  .logo-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--sage);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  /* FORM PANEL */
+  .form-panel {
+    background: rgba(245,237,216,0.04);
+    border: 1px solid rgba(245,237,216,0.1);
+    border-radius: 4px;
+    padding: 2rem;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(122,158,126,0.3);
+  }
+
+  .field-group {
+    margin-bottom: 1.6rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--mist);
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.03em;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    background: rgba(245,237,216,0.06);
+    border: 1px solid rgba(245,237,216,0.15);
+    border-radius: 3px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.85rem;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--sage);
+    background: rgba(245,237,216,0.1);
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+  }
+
+  select option { background: #2a1f12; }
+
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* STAR RATING */
+  .rating-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .rating-item label {
+    margin-bottom: 0.5rem;
+  }
+
+  .stars {
+    display: flex;
+    gap: 4px;
+  }
+
+  .stars input { display: none; }
+
+  .stars label {
+    font-size: 1.4rem;
+    color: rgba(245,237,216,0.2);
+    cursor: pointer;
+    margin: 0;
+    transition: color 0.15s, transform 0.1s;
+    line-height: 1;
+  }
+
+  .stars label:hover,
+  .stars label:hover ~ label,
+  .stars input:checked ~ label {
+    color: rgba(245,237,216,0.2);
+  }
+
+  /* Reversed star logic using CSS (RTL trick) */
+  .stars {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+
+  .stars label:hover,
+  .stars label:hover ~ label {
+    color: var(--gold);
+    transform: scale(1.1);
+  }
+
+  .stars input:checked ~ label {
+    color: var(--gold);
+  }
+
+  /* AMENITY CHECKBOXES */
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .amenity-check {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+  }
+
+  .amenity-check input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(245,237,216,0.25);
+    border-radius: 2px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+  }
+
+  .amenity-check input[type="checkbox"]:checked {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+
+  .amenity-check input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    left: 1px;
+    font-size: 12px;
+    color: var(--bark);
+    font-weight: 700;
+  }
+
+  .amenity-check span {
+    font-size: 0.8rem;
+    color: var(--smoke);
+    margin: 0;
+  }
+
+  /* WOULD RETURN */
+  .return-toggle {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .return-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid rgba(245,237,216,0.2);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--smoke);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .return-btn:hover { border-color: var(--sage); color: var(--cream); }
+  .return-btn.active-yes { background: rgba(45,74,45,0.5); border-color: var(--sage); color: var(--sage); }
+  .return-btn.active-no { background: rgba(201,74,26,0.15); border-color: var(--ember); color: #e07050; }
+
+  /* SUBMIT */
+  .submit-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--amber);
+    border: none;
+    border-radius: 3px;
+    color: var(--bark);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .submit-btn:hover { background: var(--gold); }
+  .submit-btn:active { transform: scale(0.99); }
+
+  /* SUCCESS TOAST */
+  .toast {
+    display: none;
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--pine);
+    border: 1px solid var(--sage);
+    color: var(--cream);
+    padding: 0.85rem 1.8rem;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    z-index: 999;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* RATINGS PANEL */
+  .ratings-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+
+  .ratings-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--sage);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(245,237,216,0.15);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--smoke);
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-chip:hover, .filter-chip.active {
+    background: rgba(122,158,126,0.2);
+    border-color: var(--sage);
+    color: var(--sage);
+  }
+
+  /* REVIEW CARDS */
+  .reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 680px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+
+  .reviews-list::-webkit-scrollbar { width: 4px; }
+  .reviews-list::-webkit-scrollbar-track { background: transparent; }
+  .reviews-list::-webkit-scrollbar-thumb { background: rgba(122,158,126,0.4); border-radius: 2px; }
+
+  .review-card {
+    background: rgba(245,237,216,0.04);
+    border: 1px solid rgba(245,237,216,0.08);
+    border-radius: 4px;
+    padding: 1.1rem 1.2rem;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  .card-site {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+
+  .card-stars {
+    font-size: 0.85rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.7rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    padding: 0.18rem 0.55rem;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .pill-type { border-color: rgba(107,159,170,0.4); color: var(--sky); }
+  .pill-date { border-color: rgba(245,237,216,0.15); color: rgba(245,237,216,0.5); }
+  .pill-return-yes { border-color: rgba(122,158,126,0.4); color: var(--sage); }
+  .pill-return-no { border-color: rgba(201,74,26,0.4); color: #e07050; }
+
+  .card-comment {
+    font-size: 0.83rem;
+    color: var(--smoke);
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  .card-amenities {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.65rem;
+  }
+
+  .amenity-tag {
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    background: rgba(45,74,45,0.4);
+    color: var(--mist);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .sub-ratings {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(245,237,216,0.07);
+    flex-wrap: wrap;
+  }
+
+  .sub-item {
+    font-size: 0.68rem;
+    font-family: 'DM Mono', monospace;
+    color: rgba(245,237,216,0.4);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .sub-item .sub-stars { color: var(--gold); opacity: 0.7; font-size: 0.6rem; }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: rgba(245,237,216,0.25);
+  }
+
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.82rem; line-height: 1.6; }
+
+  @media (max-width: 768px) {
+    main { grid-template-columns: 1fr; }
+    .rating-grid { grid-template-columns: 1fr 1fr; }
+    .amenities-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CampLog</div>
+  <span class="logo-tag">// Site Journal</span>
+</header>
+
+<main>
+  <!-- FORM -->
+  <div class="form-panel">
+    <div class="section-label">// Log a Site</div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>Campground Name</label>
+        <input type="text" id="campground" placeholder="e.g. Natchez Trace SP">
+      </div>
+      <div class="field-group">
+        <label>Site Number / Name</label>
+        <input type="text" id="siteNum" placeholder="e.g. A-14, Loop B">
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>Site Type</label>
+        <select id="siteType">
+          <option value="">— Select —</option>
+          <option>Full Hookup (W/E/S)</option>
+          <option>Electric & Water</option>
+          <option>Electric Only</option>
+          <option>Primitive / Dry</option>
+          <option>Pull-Through</option>
+          <option>Back-In</option>
+          <option>Tent Only</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Date Visited</label>
+        <input type="date" id="visitDate">
+      </div>
+    </div>
+
+    <!-- OVERALL STARS -->
+    <div class="field-group">
+      <label>Overall Rating</label>
+      <div class="stars" id="overallStars" data-rating="0">
+        <input type="radio" name="overall" id="s5" value="5"><label for="s5">★</label>
+        <input type="radio" name="overall" id="s4" value="4"><label for="s4">★</label>
+        <input type="radio" name="overall" id="s3" value="3"><label for="s3">★</label>
+        <input type="radio" name="overall" id="s2" value="2"><label for="s2">★</label>
+        <input type="radio" name="overall" id="s1" value="1"><label for="s1">★</label>
+      </div>
+    </div>
+
+    <!-- SUB-RATINGS -->
+    <div class="rating-grid">
+      <div class="rating-item">
+        <label>Shade / Privacy</label>
+        <div class="stars">
+          <input type="radio" name="shade" id="sh5" value="5"><label for="sh5">★</label>
+          <input type="radio" name="shade" id="sh4" value="4"><label for="sh4">★</label>
+          <input type="radio" name="shade" id="sh3" value="3"><label for="sh3">★</label>
+          <input type="radio" name="shade" id="sh2" value="2"><label for="sh2">★</label>
+          <input type="radio" name="shade" id="sh1" value="1"><label for="sh1">★</label>
+        </div>
+      </div>
+      <div class="rating-item">
+        <label>Level / Surface</label>
+        <div class="stars">
+          <input type="radio" name="level" id="lv5" value="5"><label for="lv5">★</label>
+          <input type="radio" name="level" id="lv4" value="4"><label for="lv4">★</label>
+          <input type="radio" name="level" id="lv3" value="3"><label for="lv3">★</label>
+          <input type="radio" name="level" id="lv2" value="2"><label for="lv2">★</label>
+          <input type="radio" name="level" id="lv1" value="1"><label for="lv1">★</label>
+        </div>
+      </div>
+      <div class="rating-item">
+        <label>Quiet / Noise</label>
+        <div class="stars">
+          <input type="radio" name="quiet" id="qu5" value="5"><label for="qu5">★</label>
+          <input type="radio" name="quiet" id="qu4" value="4"><label for="qu4">★</label>
+          <input type="radio" name="quiet" id="qu3" value="3"><label for="qu3">★</label>
+          <input type="radio" name="quiet" id="qu2" value="2"><label for="qu2">★</label>
+          <input type="radio" name="quiet" id="qu1" value="1"><label for="qu1">★</label>
+        </div>
+      </div>
+      <div class="rating-item">
+        <label>Bathrooms / Facilities</label>
+        <div class="stars">
+          <input type="radio" name="bath" id="bt5" value="5"><label for="bt5">★</label>
+          <input type="radio" name="bath" id="bt4" value="4"><label for="bt4">★</label>
+          <input type="radio" name="bath" id="bt3" value="3"><label for="bt3">★</label>
+          <input type="radio" name="bath" id="bt2" value="2"><label for="bt2">★</label>
+          <input type="radio" name="bath" id="bt1" value="1"><label for="bt1">★</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMENITIES -->
+    <div class="field-group">
+      <label>Amenities Present</label>
+    </div>
+    <div class="amenities-grid">
+      <label class="amenity-check"><input type="checkbox" value="WiFi"><span>WiFi</span></label>
+      <label class="amenity-check"><input type="checkbox" value="Sewer"><span>Sewer</span></label>
+      <label class="amenity-check"><input type="checkbox" value="Fire Ring"><span>Fire Ring</span></label>
+      <label class="amenity-check"><input type="checkbox" value="Picnic Table"><span>Picnic Table</span></label>
+      <label class="amenity-check"><input type="checkbox" value="Water"><span>Water</span></label>
+      <label class="amenity-check"><input type="checkbox" value="30-amp"><span>30-amp</span></label>
+      <label class="amenity-check"><input type="checkbox" value="50-amp"><span>50-amp</span></label>
+      <label class="amenity-check"><input type="checkbox" value="Dog-Friendly"><span>Dog-Friendly</span></label>
+      <label class="amenity-check"><input type="checkbox" value="Paved Pad"><span>Paved Pad</span></label>
+    </div>
+
+    <!-- WOULD RETURN -->
+    <div class="field-group">
+      <label>Would You Return?</label>
+      <div class="return-toggle">
+        <button class="return-btn" id="yes-btn" onclick="setReturn(true)">👍 Yes</button>
+        <button class="return-btn" id="no-btn" onclick="setReturn(false)">👎 No</button>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="field-group">
+      <label>Notes & Tips</label>
+      <textarea id="notes" placeholder="Slide-out clearance, cell signal, anything worth knowing…"></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="submitReview()">Log This Site →</button>
+  </div>
+
+  <!-- RATINGS PANEL -->
+  <div class="ratings-panel">
+    <h2>Site Journal</h2>
+    <div class="ratings-count" id="countLabel">0 sites logged</div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-chip" onclick="setFilter('5', this)">★ 5</button>
+      <button class="filter-chip" onclick="setFilter('4', this)">★ 4</button>
+      <button class="filter-chip" onclick="setFilter('3', this)">★ 3</button>
+      <button class="filter-chip" onclick="setFilter('return', this)">Would Return</button>
+    </div>
+
+    <div class="reviews-list" id="reviewsList">
+      <div class="empty-state">
+        <div class="icon">🏕</div>
+        <p>Your site log is empty.<br>Rate your first campground to get started.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">✓ Site logged successfully</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ── Firebase config ──────────────────────────────────────────────
+  const app = initializeApp({
+    apiKey: "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
+    databaseURL: "https://cmk63project-default-rtdb.firebaseio.com"
+  });
+  const db = getDatabase(app);
+  const reviewsRef = ref(db, 'camplog_reviews');
+
+  // ── State ────────────────────────────────────────────────────────
+  let reviews = [];
+  let returnVal = null;
+  let activeFilter = 'all';
+
+  // ── Live listener — syncs from Firebase in real time ─────────────
+  onValue(reviewsRef, (snapshot) => {
+    reviews = [];
+    if (snapshot.exists()) {
+      snapshot.forEach(child => {
+        reviews.push({ _key: child.key, ...child.val() });
+      });
+      // Newest first (by timestamp)
+      reviews.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    }
+    renderReviews();
+  });
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  window.setReturn = function(val) {
+    returnVal = val;
+    document.getElementById('yes-btn').className = 'return-btn' + (val === true ? ' active-yes' : '');
+    document.getElementById('no-btn').className  = 'return-btn' + (val === false ? ' active-no'  : '');
+  };
+
+  function getStars(name) {
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    return checked ? parseInt(checked.value) : 0;
+  }
+
+  function starStr(n, total = 5) {
+    return '★'.repeat(n) + '☆'.repeat(total - n);
+  }
+
+  // ── Submit ───────────────────────────────────────────────────────
+  window.submitReview = async function() {
+    const campground = document.getElementById('campground').value.trim();
+    const siteNum    = document.getElementById('siteNum').value.trim();
+    const overall    = getStars('overall');
+
+    if (!campground || !siteNum) { alert('Please enter a campground name and site number.'); return; }
+    if (!overall)                { alert('Please give an overall star rating.'); return; }
+
+    const amenities = [...document.querySelectorAll('.amenities-grid input:checked')].map(el => el.value);
+
+    const review = {
+      campground,
+      siteNum,
+      siteType:    document.getElementById('siteType').value,
+      visitDate:   document.getElementById('visitDate').value,
+      overall,
+      shade:       getStars('shade'),
+      level:       getStars('level'),
+      quiet:       getStars('quiet'),
+      bath:        getStars('bath'),
+      amenities,
+      wouldReturn: returnVal,
+      notes:       document.getElementById('notes').value.trim(),
+      createdAt:   Date.now()
+    };
+
+    const btn = document.querySelector('.submit-btn');
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+
+    try {
+      await push(reviewsRef, review);
+      resetForm();
+      showToast();
+    } catch (err) {
+      alert('Firebase error: ' + err.message);
+    } finally {
+      btn.textContent = 'Log This Site →';
+      btn.disabled = false;
+    }
+  };
+
+  // ── Reset ────────────────────────────────────────────────────────
+  function resetForm() {
+    document.getElementById('campground').value = '';
+    document.getElementById('siteNum').value    = '';
+    document.getElementById('siteType').value   = '';
+    document.getElementById('visitDate').value  = '';
+    document.getElementById('notes').value      = '';
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.amenities-grid input').forEach(c => c.checked = false);
+    returnVal = null;
+    document.getElementById('yes-btn').className = 'return-btn';
+    document.getElementById('no-btn').className  = 'return-btn';
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2500);
+  }
+
+  // ── Filter ───────────────────────────────────────────────────────
+  window.setFilter = function(val, el) {
+    activeFilter = val;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderReviews();
+  };
+
+  // ── Render ───────────────────────────────────────────────────────
+  function renderReviews() {
+    const list  = document.getElementById('reviewsList');
+    const label = document.getElementById('countLabel');
+
+    let filtered = reviews;
+    if      (activeFilter === '5')      filtered = reviews.filter(r => r.overall === 5);
+    else if (activeFilter === '4')      filtered = reviews.filter(r => r.overall === 4);
+    else if (activeFilter === '3')      filtered = reviews.filter(r => r.overall === 3);
+    else if (activeFilter === 'return') filtered = reviews.filter(r => r.wouldReturn === true);
+
+    label.textContent = `${reviews.length} site${reviews.length !== 1 ? 's' : ''} logged`;
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">${reviews.length ? '🔍' : '🏕'}</div><p>${reviews.length ? 'No sites match this filter.' : 'Your site log is empty.<br>Rate your first campground to get started.'}</p></div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(r => {
+      const subRatings = [
+        r.shade ? `<span class="sub-item">Shade <span class="sub-stars">${starStr(r.shade)}</span></span>` : '',
+        r.level ? `<span class="sub-item">Level <span class="sub-stars">${starStr(r.level)}</span></span>` : '',
+        r.quiet ? `<span class="sub-item">Quiet <span class="sub-stars">${starStr(r.quiet)}</span></span>` : '',
+        r.bath  ? `<span class="sub-item">Baths <span class="sub-stars">${starStr(r.bath)}</span></span>`  : '',
+      ].filter(Boolean).join('');
+
+      const am = Array.isArray(r.amenities) ? r.amenities : [];
+
+      return `
+      <div class="review-card">
+        <div class="card-header">
+          <div>
+            <div class="card-name">${r.campground}</div>
+            <div class="card-site">Site ${r.siteNum}</div>
+          </div>
+          <div class="card-stars">${starStr(r.overall)}</div>
+        </div>
+        <div class="card-meta">
+          ${r.siteType  ? `<span class="meta-pill pill-type">${r.siteType}</span>` : ''}
+          ${r.visitDate ? `<span class="meta-pill pill-date">${r.visitDate}</span>` : ''}
+          ${r.wouldReturn === true  ? '<span class="meta-pill pill-return-yes">↩ Would Return</span>' : ''}
+          ${r.wouldReturn === false ? '<span class="meta-pill pill-return-no">✗ Wouldn\'t Return</span>' : ''}
+        </div>
+        ${r.notes ? `<div class="card-comment">"${r.notes}"</div>` : ''}
+        ${am.length ? `<div class="card-amenities">${am.map(a => `<span class="amenity-tag">${a}</span>`).join('')}</div>` : ''}
+        ${subRatings ? `<div class="sub-ratings">${subRatings}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+</script>
+</body>
+</html>
