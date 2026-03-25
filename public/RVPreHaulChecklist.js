@@ -15,6 +15,7 @@ const checklist = Vue.createApp({
         "Connect to Sequoia",
         "Check lights",
         "Remove wheel chocks",
+"Grandkids crossing sign",
         "Get dump station stuff ready",
       ],
     };
