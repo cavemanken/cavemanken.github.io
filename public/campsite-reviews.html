@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Campsite Reviews</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap');
+
+      :root {
+        --bark: #2c1f0e;
+        --pine: #1e3a2a;
+        --moss: #3d5a3e;
+        --sage: #7a9e7e;
+        --straw: #d4b896;
+        --ember: #c75b2a;
+        --sky: #8bb4c5;
+        --paper: #f0e8d8;
+        --smoke: #b5a898;
+        --ash: #8a7e74;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--pine);
+        color: var(--paper);
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+      }
+
+      /* ── HEADER ── */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--bark);
+        border-bottom: 2px solid var(--ember);
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .logo {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 26px;
+        letter-spacing: 2px;
+        color: var(--straw);
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo-icon { font-size: 20px; }
+
+      .site-counter {
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        color: var(--smoke);
+        text-align: right;
+        line-height: 1.4;
+      }
+      .site-counter strong {
+        font-size: 18px;
+        color: var(--straw);
+        font-weight: 500;
+        display: block;
+      }
+
+      /* ── MAIN ── */
+      main {
+        flex: 1;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        max-width: 520px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      /* ── SITE ID ROW ── */
+      .site-id-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .campground-label {
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+        font-size: 13px;
+        color: var(--sage);
+        white-space: nowrap;
+      }
+
+      .campground-input {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 32px;
+        letter-spacing: 3px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid var(--moss);
+        color: var(--straw);
+        width: 300px;
+        padding: 2px 4px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .campground-input:focus { border-bottom-color: var(--ember); }
+      .campground-input::placeholder { color: var(--ash); }
+
+      .site-id-label {
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+        font-size: 13px;
+        color: var(--sage);
+        white-space: nowrap;
+      }
+
+      .site-id-input {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 32px;
+        letter-spacing: 3px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid var(--moss);
+        color: var(--straw);
+        width: 120px;
+        padding: 2px 4px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .site-id-input:focus { border-bottom-color: var(--ember); }
+      .site-id-input::placeholder { color: var(--ash); }
+
+      /* ── STAR RATING ── */
+      .rating-section {
+        background: rgba(0,0,0,0.2);
+        border-radius: 12px;
+        padding: 14px 16px;
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+
+      .section-label {
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+        font-size: 12px;
+        color: var(--sage);
+        margin-bottom: 10px;
+      }
+
+      .stars {
+        display: flex;
+        gap: 8px;
+      }
+
+      .star-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 36px;
+        line-height: 1;
+        color: var(--ash);
+        transition: transform 0.1s, color 0.15s;
+        padding: 4px;
+        filter: grayscale(0.3);
+      }
+      .star-btn.active {
+        color: #f5b731;
+        filter: none;
+      }
+      .star-btn:active { transform: scale(1.3); }
+
+      .rating-label {
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        color: var(--smoke);
+        margin-top: 8px;
+        min-height: 16px;
+        transition: opacity 0.2s;
+      }
+
+      /* ── QUICK TAGS ── */
+      .tags-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag-btn {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: var(--straw);
+        border-radius: 20px;
+        padding: 7px 14px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .tag-btn:active { transform: scale(0.95); }
+      .tag-btn.selected {
+        background: var(--ember);
+        border-color: var(--ember);
+        color: white;
+      }
+
+      /* ── NOTES ── */
+      .notes-area {
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--paper);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        resize: none;
+        outline: none;
+        min-height: 80px;
+        transition: border-color 0.2s;
+        line-height: 1.5;
+      }
+      .notes-area::placeholder { color: var(--ash); }
+      .notes-area:focus { border-color: var(--sage); }
+
+      /* ── SAVE BUTTON ── */
+      .save-btn {
+        background: var(--ember);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 16px;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 22px;
+        letter-spacing: 3px;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.15s, transform 0.1s;
+        position: relative;
+        overflow: hidden;
+      }
+      .save-btn:active {
+        transform: scale(0.98);
+        background: #a34820;
+      }
+      .save-btn.saved { background: var(--moss); }
+
+      /* ── LOG ── */
+      .log-section { margin-top: 4px; }
+
+      .log-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .log-title {
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+        font-size: 16px;
+        color: var(--straw);
+      }
+
+      .export-btn {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: var(--smoke);
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .export-btn:hover {
+        background: rgba(255,255,255,0.14);
+        color: var(--paper);
+      }
+
+      /* ── FILTER PANEL ── */
+      .filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+        user-select: none;
+        margin-bottom: 0;
+      }
+      .filter-toggle:hover {
+        background: rgba(0,0,0,0.3);
+        border-color: rgba(255,255,255,0.15);
+      }
+      .filter-toggle.active {
+        border-color: var(--ember);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .filter-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+        font-size: 14px;
+        color: var(--straw);
+      }
+
+      .filter-active-count {
+        background: var(--ember);
+        color: white;
+        border-radius: 10px;
+        padding: 1px 7px;
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        display: none;
+      }
+      .filter-active-count.visible { display: inline-block; }
+
+      .filter-chevron {
+        color: var(--sage);
+        font-size: 13px;
+        transition: transform 0.25s ease;
+      }
+      .filter-toggle.active .filter-chevron { transform: rotate(180deg); }
+
+      .filter-panel {
+        background: rgba(0,0,0,0.25);
+        border: 1px solid var(--ember);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        padding: 14px;
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 10px;
+      }
+      .filter-panel.open { display: flex; }
+
+      .filter-group-label {
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 2px;
+        font-size: 11px;
+        color: var(--sage);
+        margin-bottom: 7px;
+      }
+
+      /* Campground filter — select styled */
+      .filter-select {
+        width: 100%;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 8px;
+        color: var(--straw);
+        font-family: 'DM Mono', monospace;
+        font-size: 13px;
+        padding: 8px 10px;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9e7e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px;
+        transition: border-color 0.15s;
+      }
+      .filter-select:focus { border-color: var(--sage); }
+      .filter-select option {
+        background: #1e3a2a;
+        color: var(--straw);
+      }
+
+      /* Star rating filter */
+      .filter-stars {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .filter-star-btn {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: var(--smoke);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .filter-star-btn:active { transform: scale(0.95); }
+      .filter-star-btn.selected {
+        background: rgba(245,183,49,0.2);
+        border-color: #f5b731;
+        color: #f5b731;
+      }
+
+      /* Tag filter chips */
+      .filter-tags-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .filter-tag-chip {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: var(--smoke);
+        border-radius: 16px;
+        padding: 5px 11px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .filter-tag-chip:active { transform: scale(0.95); }
+      .filter-tag-chip.selected {
+        background: rgba(199,91,42,0.25);
+        border-color: var(--ember);
+        color: var(--straw);
+      }
+
+      /* Has notes toggle */
+      .filter-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .filter-toggle-label {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: var(--smoke);
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        cursor: pointer;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+      .toggle-track {
+        position: absolute;
+        inset: 0;
+        background: rgba(255,255,255,0.1);
+        border-radius: 11px;
+        border: 1px solid rgba(255,255,255,0.15);
+        transition: background 0.2s, border-color 0.2s;
+      }
+      .toggle-thumb {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--ash);
+        top: 3px;
+        left: 3px;
+        transition: transform 0.2s, background 0.2s;
+      }
+      .toggle-switch input:checked ~ .toggle-track {
+        background: rgba(199,91,42,0.35);
+        border-color: var(--ember);
+      }
+      .toggle-switch input:checked ~ .toggle-thumb {
+        transform: translateX(18px);
+        background: var(--ember);
+      }
+
+      /* Clear filters button */
+      .filter-clear-btn {
+        background: none;
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--ash);
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.15s;
+        text-align: center;
+      }
+      .filter-clear-btn:hover {
+        border-color: var(--ember);
+        color: var(--smoke);
+      }
+
+      /* Filtered count badge */
+      .log-count {
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        color: var(--ash);
+        margin-bottom: 8px;
+      }
+      .log-count span {
+        color: var(--sage);
+        font-weight: 500;
+      }
+
+      .log-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding-right: 2px;
+      }
+
+      .log-entry {
+        background: rgba(0,0,0,0.25);
+        border-radius: 10px;
+        padding: 12px 14px;
+        border-left: 3px solid var(--moss);
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: slideIn 0.25s ease;
+      }
+      .log-entry.top { border-left-color: #f5b731; }
+      .log-entry.bad { border-left-color: var(--ember); }
+
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+
+      .log-site {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 22px;
+        letter-spacing: 2px;
+        color: var(--straw);
+        min-width: 44px;
+        line-height: 1;
+      }
+
+      .log-campground {
+        font-family: 'DM Mono', monospace;
+        font-size: 10px;
+        color: var(--sage);
+        letter-spacing: 1px;
+        margin-top: 1px;
+      }
+
+      .log-details { flex: 1; min-width: 0; }
+
+      .log-stars { font-size: 13px; letter-spacing: 1px; }
+
+      .log-tags {
+        font-size: 11px;
+        color: var(--smoke);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .log-notes {
+        font-size: 12px;
+        color: var(--ash);
+        margin-top: 3px;
+        font-style: italic;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .log-delete {
+        background: none;
+        border: none;
+        color: var(--ash);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 2px;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: color 0.15s;
+      }
+      .log-delete:hover { color: var(--ember); }
+
+      .empty-log {
+        text-align: center;
+        color: var(--ash);
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        padding: 24px;
+        border: 1px dashed rgba(255,255,255,0.1);
+        border-radius: 10px;
+      }
+
+      /* ── TOAST ── */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(60px);
+        background: var(--bark);
+        border: 1px solid var(--ember);
+        color: var(--straw);
+        padding: 10px 20px;
+        border-radius: 24px;
+        font-family: 'DM Mono', monospace;
+        font-size: 13px;
+        z-index: 200;
+        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        white-space: nowrap;
+      }
+      .toast.show { transform: translateX(-50%) translateY(0); }
+
+      .divider {
+        height: 1px;
+        background: rgba(255,255,255,0.07);
+        margin: 2px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <span class="logo-icon">⛺</span>
+        CAMPSITE REVIEWS
+      </div>
+      <div class="site-counter">
+        <strong id="totalCount">0</strong>
+        SITES LOGGED
+      </div>
+    </header>
+
+    <main>
+      <!-- Campground -->
+      <div class="campground-row">
+        <span class="campground-label">Campground</span>
+        <input
+          class="campground-input"
+          id="campground"
+          type="text"
+          maxlength="30"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <!-- Site ID -->
+      <div class="site-id-row">
+        <span class="site-id-label">SITE #</span>
+        <input
+          class="site-id-input"
+          id="siteId"
+          type="text"
+          placeholder="A1"
+          maxlength="6"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <!-- Star Rating -->
+      <div class="rating-section">
+        <div class="section-label">⭐ OVERALL RATING</div>
+        <div class="stars" id="stars">
+          <button class="star-btn" data-val="1">★</button>
+          <button class="star-btn" data-val="2">★</button>
+          <button class="star-btn" data-val="3">★</button>
+          <button class="star-btn" data-val="4">★</button>
+          <button class="star-btn" data-val="5">★</button>
+        </div>
+        <div class="rating-label" id="ratingLabel">tap to rate</div>
+      </div>
+
+      <!-- Quick Tags -->
+      <div class="rating-section">
+        <div class="section-label">🏷 QUICK TAGS</div>
+        <div class="tags-grid" id="tagsGrid">
+          <button class="tag-btn" data-tag="level">📐 Level</button>
+          <button class="tag-btn" data-tag="shade">🌳 Shady</button>
+          <button class="tag-btn" data-tag="private">🌿 Private</button>
+          <button class="tag-btn" data-tag="water">💧 Water Hookup</button>
+          <button class="tag-btn" data-tag="paved">🚗 Paved Pad</button>
+          <button class="tag-btn" data-tag="firepit">🔥 Fire Ring</button>
+          <button class="tag-btn" data-tag="picnic">🍽 Picnic Table</button>
+          <button class="tag-btn" data-tag="electric">⚡ Electric</button>
+          <button class="tag-btn" data-tag="tight">😬 Tight Fit</button>
+          <button class="tag-btn" data-tag="noisy">🔊 Noisy</button>
+          <button class="tag-btn" data-tag="double">Double Site</button>
+          <button class="tag-btn" data-tag="premium">Premium Site</button>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <div class="section-label" style="margin-bottom:8px">📝 NOTES</div>
+        <textarea class="notes-area" id="notes" rows="3"></textarea>
+      </div>
+
+      <!-- Save -->
+      <button class="save-btn" id="saveBtn" onclick="saveEntry()">
+        SAVE SITE →
+      </button>
+
+      <div class="divider"></div>
+
+      <!-- Log -->
+      <div class="log-section">
+        <div class="log-header">
+          <span class="log-title">📋 SITE LOG</span>
+          <button class="export-btn" onclick="exportCSV()">⬇ EXPORT CSV</button>
+        </div>
+
+        <!-- Filter Toggle -->
+        <div class="filter-toggle" id="filterToggle" onclick="toggleFilterPanel()">
+          <div class="filter-toggle-left">
+            🔍 FILTER LOG
+            <span class="filter-active-count" id="filterActiveCount">0</span>
+          </div>
+          <span class="filter-chevron">▼</span>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel" id="filterPanel">
+
+          <!-- Campground -->
+          <div>
+            <div class="filter-group-label">CAMPGROUND</div>
+            <select class="filter-select" id="filterCampground" onchange="applyFilters()">
+              <option value="">All campgrounds</option>
+            </select>
+          </div>
+
+          <!-- Star Rating -->
+          <div>
+            <div class="filter-group-label">MINIMUM RATING</div>
+            <div class="filter-stars" id="filterStars">
+              <button class="filter-star-btn" data-min="1" onclick="setFilterRating(1)">★ 1+</button>
+              <button class="filter-star-btn" data-min="2" onclick="setFilterRating(2)">★★ 2+</button>
+              <button class="filter-star-btn" data-min="3" onclick="setFilterRating(3)">★★★ 3+</button>
+              <button class="filter-star-btn" data-min="4" onclick="setFilterRating(4)">★★★★ 4+</button>
+              <button class="filter-star-btn" data-min="5" onclick="setFilterRating(5)">★★★★★ 5</button>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <div class="filter-group-label">HAS TAG</div>
+            <div class="filter-tags-grid" id="filterTagsGrid">
+              <button class="filter-tag-chip" data-tag="level" onclick="toggleFilterTag('level')">📐 Level</button>
+              <button class="filter-tag-chip" data-tag="shade" onclick="toggleFilterTag('shade')">🌳 Shady</button>
+              <button class="filter-tag-chip" data-tag="private" onclick="toggleFilterTag('private')">🌿 Private</button>
+              <button class="filter-tag-chip" data-tag="water" onclick="toggleFilterTag('water')">💧 Water</button>
+              <button class="filter-tag-chip" data-tag="paved" onclick="toggleFilterTag('paved')">🚗 Paved</button>
+              <button class="filter-tag-chip" data-tag="firepit" onclick="toggleFilterTag('firepit')">🔥 Fire Ring</button>
+              <button class="filter-tag-chip" data-tag="picnic" onclick="toggleFilterTag('picnic')">🍽 Picnic</button>
+              <button class="filter-tag-chip" data-tag="electric" onclick="toggleFilterTag('electric')">⚡ Electric</button>
+              <button class="filter-tag-chip" data-tag="tight" onclick="toggleFilterTag('tight')">😬 Tight Fit</button>
+              <button class="filter-tag-chip" data-tag="noisy" onclick="toggleFilterTag('noisy')">🔊 Noisy</button>
+              <button class="filter-tag-chip" data-tag="double" onclick="toggleFilterTag('double')">Double Site</button>
+              <button class="filter-tag-chip" data-tag="premium" onclick="toggleFilterTag('premium')">Premium Site</button>
+            </div>
+          </div>
+
+          <!-- Has Notes -->
+          <div>
+            <div class="filter-toggle-row">
+              <span class="filter-toggle-label">Has notes only</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="filterHasNotes" onchange="applyFilters()" />
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Clear -->
+          <button class="filter-clear-btn" onclick="clearFilters()">✕ CLEAR ALL FILTERS</button>
+        </div>
+
+        <!-- Result count -->
+        <div class="log-count" id="logCount" style="display:none">
+          Showing <span id="logCountNum">0</span> of <span id="logCountTotal">0</span> sites
+        </div>
+
+        <div class="log-list" id="logList">
+          <div class="empty-log">
+            No sites logged yet.<br />Walk the loop and start reviewing!
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+      import {
+        getDatabase, ref, push, remove, onValue,
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
+        authDomain: 'cmk63project.firebaseapp.com',
+        databaseURL: 'https://cmk63project-default-rtdb.firebaseio.com',
+        projectId: 'cmk63project',
+        storageBucket: 'cmk63project.firebasestorage.app',
+        messagingSenderId: '520150418866',
+        appId: '1:520150418866:web:5bd7d2aa561b987b1b90ab',
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const sitesRef = ref(db, 'campsites');
+
+      const RATING_LABELS = ['', 'Skip it', 'Below average', 'Decent', 'Really good', 'Top pick!'];
+
+      let currentRating = 0;
+      let selectedTags = new Set();
+      let entries = [];
+
+      // ── FILTER STATE ──
+      let filterCampground = '';
+      let filterMinRating = 0;
+      let filterTags = new Set();
+      let filterHasNotes = false;
+      let filterPanelOpen = false;
+
+      // ── FIREBASE SYNC ──
+      onValue(sitesRef, (snapshot) => {
+        entries = [];
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            entries.push({ firebaseKey: child.key, ...child.val() });
+          });
+          entries.sort((a, b) => b.id - a.id);
+        }
+        updateCampgroundFilterOptions();
+        renderLog();
+      }, (err) => {
+        showToast('⚠ DB error: ' + err.message);
+      });
+
+      // ── FILTER PANEL TOGGLE ──
+      window.toggleFilterPanel = function () {
+        filterPanelOpen = !filterPanelOpen;
+        const toggle = document.getElementById('filterToggle');
+        const panel = document.getElementById('filterPanel');
+        toggle.classList.toggle('active', filterPanelOpen);
+        panel.classList.toggle('open', filterPanelOpen);
+      };
+
+      // ── CAMPGROUND FILTER OPTIONS ──
+      function updateCampgroundFilterOptions() {
+        const select = document.getElementById('filterCampground');
+        const current = select.value;
+        const campgrounds = [...new Set(entries.map(e => e.campground).filter(Boolean))].sort();
+        select.innerHTML = '<option value="">All campgrounds</option>';
+        campgrounds.forEach(cg => {
+          const opt = document.createElement('option');
+          opt.value = cg;
+          opt.textContent = cg;
+          if (cg === current) opt.selected = true;
+          select.appendChild(opt);
+        });
+      }
+
+      // ── STAR RATING FILTER ──
+      window.setFilterRating = function (min) {
+        if (filterMinRating === min) {
+          filterMinRating = 0;
+          document.querySelectorAll('.filter-star-btn').forEach(b => b.classList.remove('selected'));
+        } else {
+          filterMinRating = min;
+          document.querySelectorAll('.filter-star-btn').forEach(b => {
+            b.classList.toggle('selected', +b.dataset.min === min);
+          });
+        }
+        applyFilters();
+      };
+
+      // ── TAG FILTER ──
+      window.toggleFilterTag = function (tag) {
+        const btn = document.querySelector(`.filter-tag-chip[data-tag="${tag}"]`);
+        if (filterTags.has(tag)) {
+          filterTags.delete(tag);
+          btn.classList.remove('selected');
+        } else {
+          filterTags.add(tag);
+          btn.classList.add('selected');
+        }
+        applyFilters();
+      };
+
+      // ── APPLY FILTERS ──
+      window.applyFilters = function () {
+        filterCampground = document.getElementById('filterCampground').value;
+        filterHasNotes = document.getElementById('filterHasNotes').checked;
+        updateFilterBadge();
+        renderLog();
+      };
+
+      function getActiveFilterCount() {
+        let count = 0;
+        if (filterCampground) count++;
+        if (filterMinRating > 0) count++;
+        if (filterTags.size > 0) count++;
+        if (filterHasNotes) count++;
+        return count;
+      }
+
+      function updateFilterBadge() {
+        const n = getActiveFilterCount();
+        const badge = document.getElementById('filterActiveCount');
+        badge.textContent = n;
+        badge.classList.toggle('visible', n > 0);
+      }
+
+      // ── CLEAR FILTERS ──
+      window.clearFilters = function () {
+        filterCampground = '';
+        filterMinRating = 0;
+        filterTags.clear();
+        filterHasNotes = false;
+
+        document.getElementById('filterCampground').value = '';
+        document.querySelectorAll('.filter-star-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('.filter-tag-chip').forEach(b => b.classList.remove('selected'));
+        document.getElementById('filterHasNotes').checked = false;
+
+        updateFilterBadge();
+        renderLog();
+      };
+
+      function filterEntries(all) {
+        return all.filter(e => {
+          if (filterCampground && e.campground !== filterCampground) return false;
+          if (filterMinRating > 0 && (e.rating || 0) < filterMinRating) return false;
+          if (filterTags.size > 0) {
+            const entryTags = new Set(e.tags || []);
+            for (const t of filterTags) {
+              if (!entryTags.has(t)) return false;
+            }
+          }
+          if (filterHasNotes && !(e.notes && e.notes.trim())) return false;
+          return true;
+        });
+      }
+
+      // ── STARS (entry form) ──
+      document.getElementById('stars').addEventListener('click', (e) => {
+        const btn = e.target.closest('.star-btn');
+        if (!btn) return;
+        const val = +btn.dataset.val;
+        currentRating = currentRating === val ? 0 : val;
+        renderStars();
+      });
+
+      function renderStars() {
+        document.querySelectorAll('.star-btn').forEach((b) => {
+          b.classList.toggle('active', +b.dataset.val <= currentRating);
+        });
+        document.getElementById('ratingLabel').textContent = currentRating
+          ? RATING_LABELS[currentRating]
+          : 'tap to rate';
+      }
+
+      // ── TAGS (entry form) ──
+      document.getElementById('tagsGrid').addEventListener('click', (e) => {
+        const btn = e.target.closest('.tag-btn');
+        if (!btn) return;
+        const tag = btn.dataset.tag;
+        if (selectedTags.has(tag)) {
+          selectedTags.delete(tag);
+          btn.classList.remove('selected');
+        } else {
+          selectedTags.add(tag);
+          btn.classList.add('selected');
+        }
+      });
+
+      // ── SAVE ──
+      window.saveEntry = async function () {
+        const campground = document.getElementById('campground').value.trim().toUpperCase();
+        const siteId = document.getElementById('siteId').value.trim().toUpperCase();
+        if (!campground) {
+          showToast('Enter a campground!');
+          document.getElementById('campground').focus();
+          return;
+        }
+        if (!siteId) {
+          showToast('Enter a site number!');
+          document.getElementById('siteId').focus();
+          return;
+        }
+        if (!currentRating) {
+          showToast('Tap a star to rate this site!');
+          document.getElementById('stars').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.textContent = 'SAVING…';
+        saveBtn.disabled = true;
+
+        const entry = {
+          campground,
+          id: Date.now(),
+          site: siteId,
+          rating: currentRating,
+          tags: [...selectedTags],
+          status: null,
+          notes: document.getElementById('notes').value.trim(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          timestamp: new Date().toISOString(),
+        };
+
+        try {
+          await push(sitesRef, entry);
+          const nextId = autoAdvanceSite(siteId);
+          currentRating = 0;
+          renderStars();
+          selectedTags.clear();
+          document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('selected'));
+          document.getElementById('notes').value = '';
+          document.getElementById('siteId').value = nextId;
+          document.getElementById('campground').value = campground;
+
+          saveBtn.textContent = '✓ SAVED!';
+          saveBtn.classList.add('saved');
+          setTimeout(() => {
+            saveBtn.textContent = 'SAVE SITE →';
+            saveBtn.classList.remove('saved');
+            saveBtn.disabled = false;
+          }, 1200);
+
+          showToast(`Site ${siteId} saved ✓`);
+        } catch (err) {
+          showToast('⚠ Save failed: ' + err.message);
+          saveBtn.textContent = 'SAVE SITE →';
+          saveBtn.disabled = false;
+        }
+      };
+
+      function autoAdvanceSite(id) {
+        const match = id.match(/^([A-Z]*)(\d+)$/);
+        if (match) return match[1] + (parseInt(match[2]) + 1);
+        return '';
+      }
+
+      // ── LOG ──
+      function renderLog() {
+        const list = document.getElementById('logList');
+        document.getElementById('totalCount').textContent = entries.length;
+
+        const filtered = filterEntries(entries);
+        const activeFilters = getActiveFilterCount();
+
+        // Show/hide count bar
+        const countEl = document.getElementById('logCount');
+        if (activeFilters > 0) {
+          countEl.style.display = 'block';
+          document.getElementById('logCountNum').textContent = filtered.length;
+          document.getElementById('logCountTotal').textContent = entries.length;
+        } else {
+          countEl.style.display = 'none';
+        }
+
+        if (!filtered.length) {
+          list.innerHTML = entries.length
+            ? '<div class="empty-log">No sites match your filters.<br>Try adjusting or clearing them.</div>'
+            : '<div class="empty-log">No sites logged yet.<br>Walk the loop and start reviewing!</div>';
+          return;
+        }
+
+        list.innerHTML = filtered.map((e) => {
+          const stars = e.rating ? '★'.repeat(e.rating) + '☆'.repeat(5 - e.rating) : '—';
+          const cls = e.rating >= 5 ? 'top' : e.status === 'damaged' ? 'bad' : '';
+          const tags = (e.tags || []).filter(Boolean).join(' · ');
+          return `<div class="log-entry ${cls}">
+            <div>
+              <div class="log-site">${e.site}</div>
+              ${e.campground ? `<div class="log-campground">${e.campground}</div>` : ''}
+            </div>
+            <div class="log-details">
+              <div class="log-stars">${stars} <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ash)">${e.time}</span></div>
+              ${tags ? `<div class="log-tags">${tags}</div>` : ''}
+              ${e.notes ? `<div class="log-notes">${e.notes}</div>` : ''}
+            </div>
+            <button class="log-delete" onclick="deleteEntry('${e.firebaseKey}')" title="Delete">✕</button>
+          </div>`;
+        }).join('');
+      }
+
+      window.deleteEntry = async function (firebaseKey) {
+        try {
+          await remove(ref(db, `campsites/${firebaseKey}`));
+          showToast('Entry deleted');
+        } catch (err) {
+          showToast('⚠ Delete failed: ' + err.message);
+        }
+      };
+
+      // ── EXPORT ──
+      window.exportCSV = function () {
+        if (!entries.length) { showToast('Nothing to export yet!'); return; }
+        const filtered = filterEntries(entries);
+        const toExport = getActiveFilterCount() > 0 ? filtered : entries;
+        const cols = ['Campground', 'Site', 'Time', 'Timestamp', 'Rating', 'Tags', 'Notes'];
+        const rows = toExport.map((e) =>
+          [
+            e.campground,
+            e.site,
+            e.time,
+            e.timestamp || '',
+            e.rating || '',
+            (e.tags || []).join('; '),
+            (e.notes || '').replace(/"/g, '""'),
+          ].map(v => `"${v}"`).join(',')
+        );
+        const csv = [cols.join(','), ...rows].join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        a.download = `campcheck-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        showToast(getActiveFilterCount() > 0 ? `CSV: ${toExport.length} filtered sites` : 'CSV downloaded!');
+      };
+
+      // ── TOAST ──
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      }
+
+      // ── INIT ──
+      document.getElementById('campground').focus();
+    </script>
+  </body>
+</html>
