@@ -1081,7 +1081,19 @@
       <div class="log-section">
         <div class="log-header">
           <span class="log-title">📋 Recorded Sites</span>
-          <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+          <div style="display: flex; gap: 6px; align-items: center">
+            <button
+              class="export-btn"
+              id="sortBtn"
+              onclick="toggleSort()"
+              title="Sort by site #"
+            >
+              ⇅ SITE #
+            </button>
+            <button class="export-btn" onclick="exportCSV()">
+              ⬇ EXPORT CSV
+            </button>
+          </div>
         </div>
 
         <div
@@ -1479,6 +1491,7 @@
       let filterTags = new Set();
       let filterHasNotes = false;
       let filterPanelOpen = false;
+      let sortBySite = false;
 
       onValue(
         sitesRef,
@@ -1666,6 +1679,13 @@
             .scrollIntoView({ behavior: "smooth", block: "center" });
           return;
         }
+        const duplicate = entries.find(
+          (e) => e.campground === campground && e.site === siteId,
+        );
+        if (duplicate) {
+          showToast(`Site ${siteId} at ${campground} already logged!`);
+          return;
+        }
 
         const saveBtn = document.getElementById("saveBtn");
         saveBtn.textContent = "Saving…";
@@ -1720,10 +1740,33 @@
         return "";
       }
 
+      window.toggleSort = function () {
+        sortBySite = !sortBySite;
+        const btn = document.getElementById("sortBtn");
+        btn.textContent = sortBySite ? "⇅ NEWEST" : "⇅ SITE #";
+        btn.style.borderColor = sortBySite ? "var(--ember)" : "";
+        btn.style.color = sortBySite ? "var(--straw)" : "";
+        renderLog();
+      };
+
+      function sortEntries(list) {
+        if (!sortBySite) return list;
+        return [...list].sort((a, b) => {
+          // Natural sort: split prefix letters and numeric suffix
+          const parse = (s) => {
+            const m = (s || "").match(/^([A-Z]*)(\d*)(.*)$/i);
+            return [m[1] || "", parseInt(m[2]) || 0, m[3] || ""];
+          };
+          const [aL, aN, aR] = parse(a.site);
+          const [bL, bN, bR] = parse(b.site);
+          return aL.localeCompare(bL) || aN - bN || aR.localeCompare(bR);
+        });
+      }
+
       function renderLog() {
         const list = document.getElementById("logList");
         document.getElementById("totalCount").textContent = entries.length;
-        const filtered = filterEntries(entries);
+        const filtered = sortEntries(filterEntries(entries));
         const activeFilters = getActiveFilterCount();
 
         const countEl = document.getElementById("logCount");
