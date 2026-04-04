@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bucket List</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f5efe3;
+    --cream: #ede4d0;
+    --amber: #c8892a;
+    --amber-light: #e8a83a;
+    --rust: #9b3a1a;
+    --sage: #4a6741;
+    --line: rgba(26,18,8,0.12);
+    --shadow: rgba(26,18,8,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--paper);
+    background-image: repeating-linear-gradient(
+      0deg, transparent, transparent 27px,
+      var(--line) 27px, var(--line) 28px
+    );
+    min-height: 100vh;
+    font-family: 'DM Mono', monospace;
+    color: var(--ink);
+    padding: 0 0 80px 0;
+  }
+
+  /* ── SIGN-IN OVERLAY ─────────────────────────────────── */
+  #auth-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.82);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #auth-overlay.open { display: flex; }
+  .auth-box {
+    background: var(--paper);
+    background-image: repeating-linear-gradient(
+      0deg, transparent, transparent 27px,
+      var(--line) 27px, var(--line) 28px
+    );
+    width: 100%;
+    max-width: 420px;
+    border: 1.5px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 40px 36px 36px;
+    animation: modalIn 0.2s ease;
+  }
+  .auth-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 10px;
+  }
+  .auth-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .auth-title em { font-style: italic; color: var(--amber-light); }
+  .auth-field { margin-bottom: 18px; }
+  .auth-field label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .auth-field input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--ink);
+    padding: 6px 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .auth-field input:focus { border-color: var(--amber); }
+  .auth-error {
+    font-size: 11px;
+    color: var(--rust);
+    margin-bottom: 14px;
+    min-height: 16px;
+    display: none;
+  }
+  .auth-error.visible { display: block; }
+  .auth-actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+  .auth-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1.5px solid var(--ink);
+    transition: all 0.15s;
+    background: var(--ink);
+    color: var(--paper);
+    flex: 1;
+  }
+  .auth-btn:hover { background: var(--rust); }
+  .auth-btn.secondary {
+    background: transparent;
+    color: var(--ink);
+  }
+  .auth-btn.secondary:hover { background: var(--cream); }
+  .auth-toggle {
+    margin-top: 18px;
+    font-size: 11px;
+    color: rgba(26,18,8,0.5);
+    text-align: center;
+  }
+  .auth-toggle a {
+    color: var(--amber);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .auth-mode-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(26,18,8,0.4);
+    margin-bottom: 4px;
+  }
+
+  /* ── HEADER ──────────────────────────────────────────── */
+  header {
+    background: var(--ink);
+    padding: 36px 48px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 8px,
+      rgba(200,137,42,0.06) 8px, rgba(200,137,42,0.06) 9px
+    );
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 700;
+    color: var(--paper);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--amber-light); }
+  .header-sub {
+    font-size: 11px;
+    color: rgba(245,239,227,0.45);
+    margin-top: 10px;
+    letter-spacing: 0.08em;
+  }
+  .header-right {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .header-stats { display: flex; gap: 28px; }
+  .stat { display: flex; flex-direction: column; align-items: flex-end; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--amber-light);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,239,227,0.4);
+    margin-top: 3px;
+  }
+  /* User info + sign-out */
+  .user-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-email {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: rgba(245,239,227,0.45);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .signout-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid rgba(200,137,42,0.5);
+    color: var(--amber);
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .signout-btn:hover { border-color: var(--amber); background: rgba(200,137,42,0.1); }
+
+  /* ── MAIN ────────────────────────────────────────────── */
+  main { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+  /* Loading spinner */
+  #loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: rgba(26,18,8,0.4);
+  }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid var(--line);
+    border-top-color: var(--amber);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .add-bar {
+    padding: 28px 0 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-add {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .btn-add::before {
+    content: '';
+    position: absolute;
+    bottom: -3px; right: -3px;
+    width: 100%; height: 100%;
+    border: 1.5px solid var(--amber);
+    transition: transform 0.15s;
+  }
+  .btn-add:hover { background: var(--rust); transform: translate(-1px, -1px); }
+  .btn-add:hover::before { transform: translate(2px, 2px); }
+  .btn-add svg { width: 14px; height: 14px; }
+
+  /* ── MODAL ───────────────────────────────────────────── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.65);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--paper);
+    background-image: repeating-linear-gradient(
+      0deg, transparent, transparent 27px,
+      var(--line) 27px, var(--line) 28px
+    );
+    width: 100%;
+    max-width: 560px;
+    border: 1.5px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 36px 36px 32px;
+    position: relative;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-title span.pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: var(--ink);
+    padding: 3px 8px;
+    font-weight: 500;
+  }
+  .field-group { margin-bottom: 20px; }
+  .field-group label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .field-group input,
+  .field-group textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--ink);
+    padding: 6px 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    resize: none;
+  }
+  .field-group input:focus,
+  .field-group textarea:focus { border-color: var(--amber); }
+  .field-group textarea { min-height: 72px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1.5px solid var(--ink);
+    transition: all 0.15s;
+  }
+  .btn-cancel { background: transparent; color: var(--ink); }
+  .btn-cancel:hover { background: var(--cream); }
+  .btn-save { background: var(--ink); color: var(--paper); }
+  .btn-save:hover { background: var(--rust); }
+
+  /* ── FILTER BAR ──────────────────────────────────────── */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    padding: 20px 0 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(26,18,8,0.4);
+    margin-right: 4px;
+  }
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.12s;
+  }
+  .filter-btn.active { background: var(--ink); color: var(--paper); }
+  .filter-btn:hover:not(.active) { background: var(--cream); }
+
+  /* ── ITEM CARDS ──────────────────────────────────────── */
+  .list-section { margin-top: 8px; }
+  .section-header {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(26,18,8,0.35);
+    padding: 18px 0 8px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header::after {
+    content: ''; flex: 1; height: 1px; background: var(--line);
+  }
+  .item-card {
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    margin-bottom: 12px;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+    overflow: hidden;
+  }
+  .item-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--amber);
+    transition: width 0.2s;
+  }
+  .item-card.done::before { background: var(--sage); }
+  .item-card:hover { transform: translate(-2px,-2px); box-shadow: 3px 3px 0 var(--ink); }
+  .item-inner {
+    padding: 16px 18px 16px 22px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .item-card.done .item-name { text-decoration: line-through; opacity: 0.55; }
+  .item-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 6px; }
+  .meta-pair { display: flex; flex-direction: column; gap: 1px; }
+  .meta-key {
+    font-size: 8px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 500;
+  }
+  .item-card.done .meta-key { color: var(--sage); }
+  .meta-val { font-size: 11px; color: var(--ink); opacity: 0.75; }
+  .item-notes {
+    font-size: 11px;
+    color: var(--ink);
+    opacity: 0.6;
+    font-style: italic;
+    line-height: 1.5;
+    margin-top: 4px;
+    border-top: 1px dashed var(--line);
+    padding-top: 6px;
+  }
+  .item-actions { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; }
+  .icon-btn {
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+    color: var(--ink);
+  }
+  .icon-btn:hover { border-color: var(--ink); background: var(--cream); }
+  .icon-btn.complete-btn:hover { border-color: var(--sage); color: var(--sage); }
+  .icon-btn.delete-btn:hover { border-color: var(--rust); color: var(--rust); }
+  .icon-btn svg { width: 13px; height: 13px; }
+  .done-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 500;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    opacity: 0.5;
+  }
+  .empty-state p:first-child {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+  .empty-state p:last-child { font-size: 11px; letter-spacing: 0.1em; }
+
+  @media (max-width: 600px) {
+    header { padding: 28px 20px 24px; }
+    .header-right { display: none; }
+    main { padding: 0 16px; }
+    .modal { padding: 24px 20px 20px; }
+    .field-row { grid-template-columns: 1fr; gap: 0; }
+    .auth-box { padding: 28px 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIGN-IN OVERLAY ───────────────────────────────────── -->
+<div id="auth-overlay" class="open">
+  <div class="auth-box">
+    <div class="auth-eyebrow">✦ Before I'm Gone</div>
+    <div class="auth-title">My <em>Bucket</em> List</div>
+    <div class="auth-mode-label" id="auth-mode-label">Sign in to your account</div>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="auth-actions">
+      <button class="auth-btn" id="auth-primary-btn" onclick="authPrimary()">Sign In</button>
+    </div>
+    <div class="auth-toggle" id="auth-toggle">
+      No account? <a onclick="toggleAuthMode()">Create one</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ──────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="header-eyebrow">✦ Before I'm Gone</div>
+    <h1>My <em>Bucket</em><br>List</h1>
+    <div class="header-sub">Dreams, goals &amp; adventures worth chasing</div>
+    <div class="header-right">
+      <div class="user-bar">
+        <span class="user-email" id="user-email-display"></span>
+        <button class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+      <div class="header-stats">
+        <div class="stat">
+          <span class="stat-num" id="stat-total">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="stat-done">0</span>
+          <span class="stat-label">Done</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="loading-state">
+    <div class="spinner"></div>
+    Loading your list…
+  </div>
+
+  <div id="app-content" style="display:none">
+    <div class="add-bar">
+      <button class="btn-add" onclick="openModal()">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add a goal
+      </button>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-label">Show:</span>
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" data-filter="active" onclick="setFilter('active',this)">In Progress</button>
+      <button class="filter-btn" data-filter="done" onclick="setFilter('done',this)">Completed</button>
+    </div>
+    <div class="list-section" id="list-container"></div>
+  </div>
+</main>
+
+<!-- ── GOAL MODAL ────────────────────────────────────────── -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">New Goal</span>
+      <span class="pill" id="modal-pill">Add</span>
+    </div>
+    <input type="hidden" id="edit-id">
+    <div class="field-group">
+      <label>Goal / Dream *</label>
+      <input type="text" id="f-name" placeholder="e.g. See the Northern Lights" maxlength="120">
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label>Target Date</label>
+        <input type="date" id="f-goal-date">
+      </div>
+      <div class="field-group">
+        <label>Completed Date</label>
+        <input type="date" id="f-done-date">
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Notes</label>
+      <textarea id="f-notes" placeholder="Details, plans, memories..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-save" onclick="saveItem()">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FIREBASE ──────────────────────────────────────────── -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as fbSignOut
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  set,
+  update,
+  remove,
+  onValue,
+  off
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+// ── Firebase config ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
+  authDomain: "cmk63project.firebaseapp.com",
+  databaseURL: "https://cmk63project-default-rtdb.firebaseio.com",
+  projectId: "cmk63project",
+  storageBucket: "cmk63project.firebasestorage.app",
+  messagingSenderId: "520150418866",
+  appId: "1:520150418866:web:5bd7d2aa561b987b1b90ab"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getDatabase(app);
+
+// ── State ────────────────────────────────────────────────
+let items = [];
+let currentFilter = 'all';
+let editingId = null;
+let currentUser = null;
+let dbListener = null;
+let isRegisterMode = false;
+
+// ── Expose helpers to global scope for onclick handlers ──
+window.authPrimary    = authPrimary;
+window.toggleAuthMode = toggleAuthMode;
+window.signOut        = doSignOut;
+window.openModal      = openModal;
+window.closeModal     = closeModal;
+window.handleBackdropClick = handleBackdropClick;
+window.saveItem       = saveItem;
+window.deleteItem     = deleteItem;
+window.toggleDone     = toggleDone;
+window.setFilter      = setFilter;
+
+// ── Auth UI ──────────────────────────────────────────────
+function toggleAuthMode() {
+  isRegisterMode = !isRegisterMode;
+  document.getElementById('auth-mode-label').textContent =
+    isRegisterMode ? 'Create a new account' : 'Sign in to your account';
+  document.getElementById('auth-primary-btn').textContent =
+    isRegisterMode ? 'Create Account' : 'Sign In';
+  document.getElementById('auth-toggle').innerHTML =
+    isRegisterMode
+      ? 'Already have one? <a onclick="toggleAuthMode()">Sign in</a>'
+      : 'No account? <a onclick="toggleAuthMode()">Create one</a>';
+  clearAuthError();
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function clearAuthError() {
+  const el = document.getElementById('auth-error');
+  el.textContent = '';
+  el.classList.remove('visible');
+}
+
+async function authPrimary() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-password').value;
+  clearAuthError();
+  if (!email || !pass) { showAuthError('Please enter email and password.'); return; }
+  try {
+    if (isRegisterMode) {
+      await createUserWithEmailAndPassword(auth, email, pass);
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+  } catch (err) {
+    const msgs = {
+      'auth/invalid-email':          'Invalid email address.',
+      'auth/user-not-found':         'No account found. Try creating one.',
+      'auth/wrong-password':         'Incorrect password.',
+      'auth/email-already-in-use':   'That email is already registered.',
+      'auth/weak-password':          'Password must be at least 6 characters.',
+      'auth/too-many-requests':      'Too many attempts. Try again later.',
+      'auth/invalid-credential':     'Invalid email or password.',
+    };
+    showAuthError(msgs[err.code] || err.message);
+  }
+}
+
+// Allow Enter key in auth fields
+document.getElementById('auth-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('auth-password').focus();
+});
+document.getElementById('auth-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') authPrimary();
+});
+
+// ── Auth state watcher ───────────────────────────────────
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('auth-overlay').classList.remove('open');
+    document.getElementById('user-email-display').textContent = user.email;
+    document.getElementById('loading-state').style.display = 'block';
+    document.getElementById('app-content').style.display = 'none';
+    subscribeToData(user.uid);
+  } else {
+    document.getElementById('auth-overlay').classList.add('open');
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('app-content').style.display = 'none';
+    unsubscribeData();
+    items = [];
+    render();
+  }
+});
+
+// ── Sign out ─────────────────────────────────────────────
+async function doSignOut() {
+  await fbSignOut(auth);
+}
+
+// ── Realtime DB ──────────────────────────────────────────
+function userRef(uid) {
+  return ref(db, `bucketlist/${uid}/items`);
+}
+
+function subscribeToData(uid) {
+  unsubscribeData();
+  const r = userRef(uid);
+  dbListener = onValue(r, snapshot => {
+    const val = snapshot.val() || {};
+    items = Object.entries(val).map(([key, data]) => ({ id: key, ...data }));
+    items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+    render();
+  }, err => {
+    console.error('DB error:', err);
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+  });
+}
+
+function unsubscribeData() {
+  if (dbListener && currentUser) {
+    off(userRef(currentUser.uid));
+    dbListener = null;
+  }
+}
+
+// ── CRUD ─────────────────────────────────────────────────
+async function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('f-name').focus(); return; }
+  const data = {
+    name,
+    goalDate: document.getElementById('f-goal-date').value || '',
+    doneDate: document.getElementById('f-done-date').value || '',
+    notes:    document.getElementById('f-notes').value.trim(),
+    done:     !!document.getElementById('f-done-date').value,
+  };
+  const uid = currentUser.uid;
+  if (editingId) {
+    await update(ref(db, `bucketlist/${uid}/items/${editingId}`), data);
+  } else {
+    const newRef = push(userRef(uid));
+    await set(newRef, { ...data, createdAt: Date.now() });
+  }
+  closeModal();
+}
+
+async function deleteItem(id) {
+  if (!confirm('Remove this goal from your list?')) return;
+  await remove(ref(db, `bucketlist/${currentUser.uid}/items/${id}`));
+}
+
+async function toggleDone(id) {
+  const item = items.find(i => i.id === id);
+  const nowDone = !item.done;
+  const doneDate = nowDone
+    ? (item.doneDate || new Date().toISOString().slice(0,10))
+    : '';
+  await update(ref(db, `bucketlist/${currentUser.uid}/items/${id}`), {
+    done: nowDone,
+    doneDate,
+  });
+}
+
+// ── Modal ─────────────────────────────────────────────────
+function openModal(id) {
+  editingId = id || null;
+  if (id) {
+    const item = items.find(i => i.id === id);
+    document.getElementById('modal-title-text').textContent = 'Edit Goal';
+    document.getElementById('modal-pill').textContent = 'Edit';
+    document.getElementById('f-name').value      = item.name;
+    document.getElementById('f-goal-date').value = item.goalDate || '';
+    document.getElementById('f-done-date').value = item.doneDate || '';
+    document.getElementById('f-notes').value     = item.notes || '';
+  } else {
+    document.getElementById('modal-title-text').textContent = 'New Goal';
+    document.getElementById('modal-pill').textContent = 'Add';
+    document.getElementById('f-name').value      = '';
+    document.getElementById('f-goal-date').value = '';
+    document.getElementById('f-done-date').value = '';
+    document.getElementById('f-notes').value     = '';
+  }
+  document.getElementById('modal-backdrop').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  editingId = null;
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+}
+
+// ── Filters & Render ──────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const [y, m, d] = str.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render() {
+  const active = items.filter(i => !i.done);
+  const done   = items.filter(i =>  i.done);
+  document.getElementById('stat-total').textContent = items.length;
+  document.getElementById('stat-done').textContent  = done.length;
+
+  let filtered;
+  if (currentFilter === 'active')    filtered = { active, done: [] };
+  else if (currentFilter === 'done') filtered = { active: [], done };
+  else                               filtered = { active, done };
+
+  const container = document.getElementById('list-container');
+  container.innerHTML = '';
+
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty-state"><p>No goals yet.</p><p>Add something worth chasing.</p></div>`;
+    return;
+  }
+
+  if (filtered.active.length > 0) {
+    const sec = document.createElement('div');
+    sec.innerHTML = `<div class="section-header">In Progress — ${filtered.active.length}</div>`;
+    filtered.active.forEach(item => sec.appendChild(buildCard(item)));
+    container.appendChild(sec);
+  }
+  if (filtered.done.length > 0) {
+    const sec = document.createElement('div');
+    sec.innerHTML = `<div class="section-header">Completed — ${filtered.done.length}</div>`;
+    filtered.done.forEach(item => sec.appendChild(buildCard(item)));
+    container.appendChild(sec);
+  }
+  if (filtered.active.length === 0 && filtered.done.length === 0) {
+    container.innerHTML = `<div class="empty-state"><p>Nothing here.</p><p>Try a different filter.</p></div>`;
+  }
+}
+
+function buildCard(item) {
+  const card = document.createElement('div');
+  card.className = 'item-card' + (item.done ? ' done' : '');
+  const completeSvg = item.done
+    ? `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`
+    : `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12" opacity="0.3"/></svg>`;
+  card.innerHTML = `
+    <div class="item-inner">
+      <div>
+        <div class="item-name">${escHtml(item.name)}${item.done ? '<span class="done-badge"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Done</span>' : ''}</div>
+        <div class="item-meta">
+          ${item.goalDate ? `<div class="meta-pair"><span class="meta-key">Target</span><span class="meta-val">${formatDate(item.goalDate)}</span></div>` : ''}
+          ${item.doneDate ? `<div class="meta-pair"><span class="meta-key">Completed</span><span class="meta-val">${formatDate(item.doneDate)}</span></div>` : ''}
+        </div>
+        ${item.notes ? `<div class="item-notes">${escHtml(item.notes)}</div>` : ''}
+      </div>
+      <div class="item-actions">
+        <button class="icon-btn complete-btn" title="${item.done ? 'Mark incomplete' : 'Mark complete'}" onclick="toggleDone('${item.id}')">${completeSvg}</button>
+        <button class="icon-btn edit-btn" title="Edit" onclick="openModal('${item.id}')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn delete-btn" title="Delete" onclick="deleteItem('${item.id}')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>`;
+  return card;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
