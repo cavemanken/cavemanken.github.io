@@ -1,11 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Campsite Reviews</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap');
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap");
       :root {
         --bark: #2c1f0e;
         --pine: #1e3a2a;
@@ -18,9 +21,14 @@
         --smoke: #b5a898;
         --ash: #8a7e74;
       }
-      * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
       body {
-        font-family: 'DM Sans', sans-serif;
+        font-family: "DM Sans", sans-serif;
         background: var(--pine);
         color: var(--paper);
         min-height: 100dvh;
@@ -29,7 +37,7 @@
         overflow-x: hidden;
       }
       body::before {
-        content: '';
+        content: "";
         position: fixed;
         inset: 0;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
@@ -49,10 +57,12 @@
         justify-content: center;
         padding: 24px;
       }
-      #authScreen.visible { display: flex; }
+      #authScreen.visible {
+        display: flex;
+      }
       .auth-box {
-        background: rgba(0,0,0,0.35);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-top: 2px solid var(--ember);
         border-radius: 16px;
         padding: 28px 24px;
@@ -66,14 +76,14 @@
         text-align: center;
       }
       .auth-logo-title {
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         font-size: 34px;
         letter-spacing: 3px;
         color: var(--straw);
         line-height: 1;
       }
       .auth-logo-sub {
-        font-family: 'DM Mono', monospace;
+        font-family: "DM Mono", monospace;
         font-size: 11px;
         color: var(--sage);
         letter-spacing: 1px;
@@ -83,14 +93,14 @@
         display: flex;
         border-radius: 8px;
         overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
       .auth-tab {
         flex: 1;
         padding: 9px;
         background: transparent;
         border: none;
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         font-size: 15px;
         letter-spacing: 2px;
         color: var(--ash);
@@ -101,44 +111,62 @@
         background: var(--ember);
         color: white;
       }
-      .auth-fields { display: flex; flex-direction: column; gap: 12px; }
-      .auth-field { display: flex; flex-direction: column; gap: 5px; }
+      .auth-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .auth-field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
       .auth-label {
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         font-size: 11px;
         letter-spacing: 2px;
         color: var(--sage);
       }
       .auth-input {
-        background: rgba(0,0,0,0.3);
-        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         color: var(--paper);
-        font-family: 'DM Sans', sans-serif;
+        font-family: "DM Sans", sans-serif;
         font-size: 15px;
         padding: 11px 13px;
         outline: none;
         width: 100%;
         transition: border-color 0.2s;
       }
-      .auth-input:focus { border-color: var(--sage); }
+      .auth-input:focus {
+        border-color: var(--sage);
+      }
       .auth-submit {
         background: var(--ember);
         color: white;
         border: none;
         border-radius: 10px;
         padding: 14px;
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         font-size: 20px;
         letter-spacing: 3px;
         cursor: pointer;
         width: 100%;
-        transition: background 0.15s, transform 0.1s;
+        transition:
+          background 0.15s,
+          transform 0.1s;
       }
-      .auth-submit:active { transform: scale(0.98); background: #a34820; }
-      .auth-submit:disabled { background: var(--moss); cursor: default; }
+      .auth-submit:active {
+        transform: scale(0.98);
+        background: #a34820;
+      }
+      .auth-submit:disabled {
+        background: var(--moss);
+        cursor: default;
+      }
       .auth-error {
-        font-family: 'DM Mono', monospace;
+        font-family: "DM Mono", monospace;
         font-size: 12px;
         color: #f87171;
         text-align: center;
@@ -147,12 +175,20 @@
       }
 
       /* ── APP (hidden until authed) ── */
-      #appShell { display: none; flex-direction: column; min-height: 100dvh; }
-      #appShell.visible { display: flex; }
+      #appShell {
+        display: none;
+        flex-direction: column;
+        min-height: 100dvh;
+      }
+      #appShell.visible {
+        display: flex;
+      }
 
       /* ── HEADER ── */
       header {
-        position: sticky; top: 0; z-index: 100;
+        position: sticky;
+        top: 0;
+        z-index: 100;
         background: var(--bark);
         border-bottom: 2px solid var(--ember);
         padding: 10px 16px;
@@ -162,7 +198,7 @@
         gap: 12px;
       }
       .logo {
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: "Bebas Neue", sans-serif;
         font-size: 26px;
         letter-spacing: 2px;
         color: var(--straw);
@@ -171,9 +207,14 @@
         align-items: center;
         gap: 8px;
       }
-      .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+      .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 3px;
+      }
       .site-counter {
-        font-family: 'DM Mono', monospace;
+        font-family: "DM Mono", monospace;
         font-size: 11px;
         color: var(--smoke);
         text-align: right;
@@ -184,7 +225,7 @@
         color: var(--straw);
         font-weight: 500;
         display: block;
-        font-family: 'DM Mono', monospace;
+        font-family: "DM Mono", monospace;
       }
       .user-row {
         display: flex;
@@ -192,7 +233,7 @@
         gap: 7px;
       }
       .user-email {
-        font-family: 'DM Mono', monospace;
+        font-family: "DM Mono", monospace;
         font-size: 10px;
         color: var(--ash);
         max-width: 120px;
@@ -201,226 +242,749 @@
         white-space: nowrap;
       }
       .signout-btn {
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         color: var(--smoke);
         padding: 3px 9px;
         border-radius: 5px;
-        font-family: 'DM Mono', monospace;
+        font-family: "DM Mono", monospace;
         font-size: 10px;
         cursor: pointer;
         transition: all 0.15s;
         white-space: nowrap;
       }
-      .signout-btn:hover { background: rgba(255,255,255,0.14); color: var(--paper); }
+      .signout-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: var(--paper);
+      }
 
       /* ── MAIN ── */
       main {
-        flex: 1; padding: 16px;
-        display: flex; flex-direction: column; gap: 14px;
-        position: relative; z-index: 1;
-        max-width: 520px; width: 100%; margin: 0 auto;
+        flex: 1;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        max-width: 520px;
+        width: 100%;
+        margin: 0 auto;
       }
       .card {
-        background: rgba(0,0,0,0.2);
-        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 12px;
         padding: 14px 16px;
       }
       .section-label {
-        font-family: 'Bebas Neue', sans-serif;
-        letter-spacing: 2px; font-size: 12px;
-        color: var(--sage); margin-bottom: 10px; display: block;
+        font-family: "Bebas Neue", sans-serif;
+        letter-spacing: 2px;
+        font-size: 12px;
+        color: var(--sage);
+        margin-bottom: 10px;
+        display: block;
       }
-      .field-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-      .field-group { display: flex; flex-direction: column; gap: 4px; }
+      .field-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
       .field-label {
-        font-family: 'Bebas Neue', sans-serif;
-        letter-spacing: 2px; font-size: 13px; color: var(--sage); white-space: nowrap;
+        font-family: "Bebas Neue", sans-serif;
+        letter-spacing: 2px;
+        font-size: 13px;
+        color: var(--sage);
+        white-space: nowrap;
       }
       .field-input {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 32px; letter-spacing: 3px;
-        background: transparent; border: none;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 32px;
+        letter-spacing: 3px;
+        background: transparent;
+        border: none;
         border-bottom: 2px solid var(--moss);
-        color: var(--straw); padding: 2px 4px;
-        outline: none; transition: border-color 0.2s; width: 100%; border-radius: 0;
+        color: var(--straw);
+        padding: 2px 4px;
+        outline: none;
+        transition: border-color 0.2s;
+        width: 100%;
+        border-radius: 0;
       }
-      .field-input:focus { border-bottom-color: var(--ember); }
-      .field-input::placeholder { color: var(--ash); font-size: 32px; }
-      .field-group.campground { flex: 1; min-width: 160px; }
-      .field-group.site { width: 130px; }
-      .stars { display: flex; gap: 8px; }
+      .field-input:focus {
+        border-bottom-color: var(--ember);
+      }
+      .field-input::placeholder {
+        color: var(--ash);
+        font-size: 32px;
+      }
+      .field-group.campground {
+        flex: 1;
+        min-width: 160px;
+      }
+      .field-group.site {
+        width: 130px;
+      }
+      .stars {
+        display: flex;
+        gap: 8px;
+      }
       .star-btn {
-        background: none; border: none; cursor: pointer;
-        font-size: 36px; line-height: 1; color: var(--ash);
-        transition: transform 0.1s, color 0.15s; padding: 4px; filter: grayscale(0.3);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 36px;
+        line-height: 1;
+        color: var(--ash);
+        transition:
+          transform 0.1s,
+          color 0.15s;
+        padding: 4px;
+        filter: grayscale(0.3);
       }
-      .star-btn.active { color: #f5b731; filter: none; }
-      .star-btn:active { transform: scale(1.3); }
+      .star-btn.active {
+        color: #f5b731;
+        filter: none;
+      }
+      .star-btn:active {
+        transform: scale(1.3);
+      }
       .rating-label {
-        font-family: 'DM Mono', monospace; font-size: 12px;
-        color: var(--smoke); margin-top: 8px; min-height: 16px;
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        color: var(--smoke);
+        margin-top: 8px;
+        min-height: 16px;
       }
-      .tags-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+      .tags-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
       .tag-btn {
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.12);
-        color: var(--straw); border-radius: 20px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--straw);
+        border-radius: 20px;
         padding: 7px 14px;
-        font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-        cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
-        display: flex; align-items: center; gap: 5px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s,
+          transform 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
       }
-      .tag-btn:active { transform: scale(0.95); }
-      .tag-btn.selected { background: var(--ember); border-color: var(--ember); color: white; }
+      .tag-btn:active {
+        transform: scale(0.95);
+      }
+      .tag-btn.selected {
+        background: var(--ember);
+        border-color: var(--ember);
+        color: white;
+      }
       .notes-area {
         width: 100%;
-        background: rgba(0,0,0,0.2);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 12px; padding: 12px 14px;
-        color: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 14px;
-        resize: none; outline: none; min-height: 80px; transition: border-color 0.2s; line-height: 1.5;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--paper);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        resize: none;
+        outline: none;
+        min-height: 80px;
+        transition: border-color 0.2s;
+        line-height: 1.5;
       }
-      .notes-area::placeholder { color: var(--ash); }
-      .notes-area:focus { border-color: var(--sage); }
+      .notes-area::placeholder {
+        color: var(--ash);
+      }
+      .notes-area:focus {
+        border-color: var(--sage);
+      }
       .save-btn {
-        background: var(--ember); color: white; border: none;
-        border-radius: 12px; padding: 16px;
-        font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px;
-        cursor: pointer; width: 100%; transition: background 0.15s, transform 0.1s;
+        background: var(--ember);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 16px;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 22px;
+        letter-spacing: 3px;
+        cursor: pointer;
+        width: 100%;
+        transition:
+          background 0.15s,
+          transform 0.1s;
       }
-      .save-btn:active { transform: scale(0.98); background: #a34820; }
-      .save-btn.saved { background: var(--moss); }
-      .divider { height: 1px; background: rgba(255,255,255,0.07); margin: 2px 0; }
-      .log-section { margin-top: 4px; }
-      .log-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-      .log-title { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 16px; color: var(--straw); }
+      .save-btn:active {
+        transform: scale(0.98);
+        background: #a34820;
+      }
+      .save-btn.saved {
+        background: var(--moss);
+      }
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.07);
+        margin: 2px 0;
+      }
+      .log-section {
+        margin-top: 4px;
+      }
+      .log-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .log-title {
+        font-family: "Bebas Neue", sans-serif;
+        letter-spacing: 2px;
+        font-size: 16px;
+        color: var(--straw);
+      }
       .export-btn {
-        background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-        color: var(--smoke); padding: 5px 12px; border-radius: 6px;
-        font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: background 0.15s;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: var(--smoke);
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background 0.15s;
       }
-      .export-btn:hover { background: rgba(255,255,255,0.14); color: var(--paper); }
+      .export-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: var(--paper);
+      }
       .filter-toggle {
-        display: flex; align-items: center; justify-content: space-between;
-        background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px; padding: 10px 14px; cursor: pointer;
-        transition: background 0.15s, border-color 0.15s; user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+        user-select: none;
       }
-      .filter-toggle:hover { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.15); }
-      .filter-toggle.active { border-color: var(--ember); border-bottom-color: transparent; border-radius: 10px 10px 0 0; }
+      .filter-toggle:hover {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .filter-toggle.active {
+        border-color: var(--ember);
+        border-bottom-color: transparent;
+        border-radius: 10px 10px 0 0;
+      }
       .filter-toggle-left {
-        display: flex; align-items: center; gap: 8px;
-        font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 14px; color: var(--straw);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Bebas Neue", sans-serif;
+        letter-spacing: 2px;
+        font-size: 14px;
+        color: var(--straw);
       }
       .filter-active-count {
-        background: var(--ember); color: white; border-radius: 10px;
-        padding: 1px 7px; font-family: 'DM Mono', monospace; font-size: 11px; display: none;
+        background: var(--ember);
+        color: white;
+        border-radius: 10px;
+        padding: 1px 7px;
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        display: none;
       }
-      .filter-active-count.visible { display: inline-block; }
-      .filter-chevron { color: var(--sage); font-size: 13px; transition: transform 0.25s ease; }
-      .filter-toggle.active .filter-chevron { transform: rotate(180deg); }
+      .filter-active-count.visible {
+        display: inline-block;
+      }
+      .filter-chevron {
+        color: var(--sage);
+        font-size: 13px;
+        transition: transform 0.25s ease;
+      }
+      .filter-toggle.active .filter-chevron {
+        transform: rotate(180deg);
+      }
       .filter-panel {
-        background: rgba(0,0,0,0.25); border: 1px solid var(--ember); border-top: none;
-        border-radius: 0 0 10px 10px; padding: 14px;
-        display: none; flex-direction: column; gap: 14px; margin-bottom: 10px;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--ember);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        padding: 14px;
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 10px;
       }
-      .filter-panel.open { display: flex; }
-      .filter-group-label { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 11px; color: var(--sage); margin-bottom: 7px; }
+      .filter-panel.open {
+        display: flex;
+      }
+      .filter-group-label {
+        font-family: "Bebas Neue", sans-serif;
+        letter-spacing: 2px;
+        font-size: 11px;
+        color: var(--sage);
+        margin-bottom: 7px;
+      }
       .filter-select {
-        width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 8px; color: var(--straw); font-family: 'DM Mono', monospace; font-size: 13px;
-        padding: 8px 10px; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        color: var(--straw);
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        padding: 8px 10px;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9e7e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px;
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px;
       }
-      .filter-select:focus { border-color: var(--sage); }
-      .filter-select option { background: #1e3a2a; color: var(--straw); }
-      .filter-stars { display: flex; gap: 6px; flex-wrap: wrap; }
+      .filter-select:focus {
+        border-color: var(--sage);
+      }
+      .filter-select option {
+        background: #1e3a2a;
+        color: var(--straw);
+      }
+      .filter-stars {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
       .filter-star-btn {
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-        color: var(--smoke); border-radius: 8px; padding: 6px 12px;
-        font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.15s;
-        display: flex; align-items: center; gap: 4px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--smoke);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
       }
-      .filter-star-btn.selected { background: rgba(245,183,49,0.2); border-color: #f5b731; color: #f5b731; }
-      .filter-tags-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+      .filter-star-btn.selected {
+        background: rgba(245, 183, 49, 0.2);
+        border-color: #f5b731;
+        color: #f5b731;
+      }
+      .filter-tags-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
       .filter-tag-chip {
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-        color: var(--smoke); border-radius: 16px; padding: 5px 11px;
-        font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--smoke);
+        border-radius: 16px;
+        padding: 5px 11px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
       }
-      .filter-tag-chip.selected { background: rgba(199,91,42,0.25); border-color: var(--ember); color: var(--straw); }
-      .filter-toggle-row { display: flex; align-items: center; justify-content: space-between; }
-      .filter-toggle-label { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--smoke); }
-      .toggle-switch { position: relative; width: 40px; height: 22px; cursor: pointer; }
-      .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-      .toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 11px; border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s; }
-      .toggle-thumb { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--ash); top: 3px; left: 3px; transition: transform 0.2s, background 0.2s; }
-      .toggle-switch input:checked ~ .toggle-track { background: rgba(199,91,42,0.35); border-color: var(--ember); }
-      .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); background: var(--ember); }
+      .filter-tag-chip.selected {
+        background: rgba(199, 91, 42, 0.25);
+        border-color: var(--ember);
+        color: var(--straw);
+      }
+      .filter-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .filter-toggle-label {
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        color: var(--smoke);
+      }
+      .toggle-switch {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        cursor: pointer;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+      .toggle-track {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 11px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.2s;
+      }
+      .toggle-thumb {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--ash);
+        top: 3px;
+        left: 3px;
+        transition:
+          transform 0.2s,
+          background 0.2s;
+      }
+      .toggle-switch input:checked ~ .toggle-track {
+        background: rgba(199, 91, 42, 0.35);
+        border-color: var(--ember);
+      }
+      .toggle-switch input:checked ~ .toggle-thumb {
+        transform: translateX(18px);
+        background: var(--ember);
+      }
       .filter-clear-btn {
-        background: none; border: 1px solid rgba(255,255,255,0.1); color: var(--ash);
-        border-radius: 8px; padding: 7px 14px; font-family: 'DM Mono', monospace; font-size: 11px;
-        cursor: pointer; width: 100%; transition: all 0.15s; text-align: center;
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--ash);
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.15s;
+        text-align: center;
       }
-      .filter-clear-btn:hover { border-color: var(--ember); color: var(--smoke); }
-      .log-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ash); margin-bottom: 8px; }
-      .log-count span { color: var(--sage); }
-      .log-list { flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 2px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+      .filter-clear-btn:hover {
+        border-color: var(--ember);
+        color: var(--smoke);
+      }
+      .log-count {
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        color: var(--ash);
+        margin-bottom: 8px;
+      }
+      .log-count span {
+        color: var(--sage);
+      }
+      .log-list {
+        flex-direction: column;
+        gap: 8px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding-right: 2px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+      }
       .log-entry {
-        background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px 14px;
-        border-left: 3px solid var(--moss); border-bottom: 1px solid rgba(255,255,255,0.48);
-        display: flex; gap: 12px; align-items: flex-start;
-        animation: slideIn 0.25s ease; position: relative;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 10px;
+        padding: 12px 14px;
+        border-left: 3px solid var(--moss);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: slideIn 0.25s ease;
+        position: relative;
       }
-      .log-entry.top { border-left-color: #f5b731; }
-      .log-entry.bad { border-left-color: var(--ember); }
-      @keyframes slideIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
-      .log-site-col { min-width: 44px; }
-      .log-site { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--straw); line-height: 1; }
-      .log-campground { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--sage); letter-spacing: 1px; margin-top: 2px; }
-      .log-details { flex: 1; min-width: 0; }
-      .log-stars { font-size: 13px; letter-spacing: 1px; color: var(--straw); }
-      .log-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ash); margin-left: 5px; }
-      .log-tags { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--smoke); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .log-notes { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ash); margin-top: 3px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .log-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-      .log-edit, .log-delete { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px 3px; line-height: 1; transition: color 0.15s; font-family: 'DM Sans', sans-serif; }
-      .log-edit { color: var(--ash); }
-      .log-edit:hover { color: var(--sage); }
-      .log-delete { color: var(--ash); }
-      .log-delete:hover { color: var(--ember); }
-      .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
-      .modal-backdrop.open { display: flex; }
-      .modal { background: var(--bark); border: 1px solid rgba(255,255,255,0.08); border-top: 2px solid var(--ember); border-radius: 16px; padding: 20px; width: 100%; max-width: 440px; max-height: 90dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-      .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--straw); }
-      .modal-field { display: flex; flex-direction: column; gap: 5px; }
-      .modal-label { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--sage); }
-      .modal-input, .modal-textarea { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 9px 12px; outline: none; width: 100%; transition: border-color 0.2s; }
-      .modal-input:focus, .modal-textarea:focus { border-color: var(--sage); }
-      .modal-textarea { resize: none; min-height: 70px; line-height: 1.5; }
-      .modal-stars { display: flex; gap: 6px; }
-      .modal-star { background: none; border: none; cursor: pointer; font-size: 32px; color: var(--ash); transition: color 0.15s, transform 0.1s; padding: 2px; line-height: 1; filter: grayscale(0.3); }
-      .modal-star.active { color: #f5b731; filter: none; }
-      .modal-star:active { transform: scale(1.3); }
-      .modal-tags-grid { display: flex; flex-wrap: wrap; gap: 7px; }
-      .modal-tag { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--straw); border-radius: 16px; padding: 6px 12px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 4px; }
-      .modal-tag.selected { background: var(--ember); border-color: var(--ember); color: white; }
-      .modal-row { display: flex; gap: 10px; }
-      .modal-btn { flex: 1; padding: 13px; border: none; border-radius: 10px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; transition: all 0.15s; }
-      .modal-btn-save { background: var(--ember); color: white; }
-      .modal-btn-save:hover { background: #a34820; }
-      .modal-btn-cancel { background: rgba(255,255,255,0.08); color: var(--smoke); border: 1px solid rgba(255,255,255,0.12); }
-      .modal-btn-cancel:hover { background: rgba(255,255,255,0.14); color: var(--paper); }
-      .empty-log { text-align: center; color: var(--ash); font-family: 'DM Mono', monospace; font-size: 12px; padding: 24px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 10px; line-height: 1.6; }
-      .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--bark); border: 1px solid var(--ember); color: var(--straw); padding: 10px 20px; border-radius: 24px; font-family: 'DM Mono', monospace; font-size: 13px; z-index: 600; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap; }
-      .toast.show { transform: translateX(-50%) translateY(0); }
+      .log-entry.top {
+        border-left-color: #f5b731;
+      }
+      .log-entry.bad {
+        border-left-color: var(--ember);
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .log-site-col {
+        min-width: 44px;
+      }
+      .log-site {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 22px;
+        letter-spacing: 2px;
+        color: var(--straw);
+        line-height: 1;
+      }
+      .log-campground {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        color: var(--sage);
+        letter-spacing: 1px;
+        margin-top: 2px;
+      }
+      .log-details {
+        flex: 1;
+        min-width: 0;
+      }
+      .log-stars {
+        font-size: 13px;
+        letter-spacing: 1px;
+        color: var(--straw);
+      }
+      .log-time {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        color: var(--ash);
+        margin-left: 5px;
+      }
+      .log-tags {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        color: var(--smoke);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .log-notes {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        color: var(--ash);
+        margin-top: 3px;
+        font-style: italic;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .log-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .log-edit,
+      .log-delete {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 2px 3px;
+        line-height: 1;
+        transition: color 0.15s;
+        font-family: "DM Sans", sans-serif;
+      }
+      .log-edit {
+        color: var(--ash);
+      }
+      .log-edit:hover {
+        color: var(--sage);
+      }
+      .log-delete {
+        color: var(--ash);
+      }
+      .log-delete:hover {
+        color: var(--ember);
+      }
+      .modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 300;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-backdrop.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--bark);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 2px solid var(--ember);
+        border-radius: 16px;
+        padding: 20px;
+        width: 100%;
+        max-width: 440px;
+        max-height: 90dvh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .modal-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 20px;
+        letter-spacing: 2px;
+        color: var(--straw);
+      }
+      .modal-field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .modal-label {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 11px;
+        letter-spacing: 2px;
+        color: var(--sage);
+      }
+      .modal-input,
+      .modal-textarea {
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: var(--paper);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        padding: 9px 12px;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.2s;
+      }
+      .modal-input:focus,
+      .modal-textarea:focus {
+        border-color: var(--sage);
+      }
+      .modal-textarea {
+        resize: none;
+        min-height: 70px;
+        line-height: 1.5;
+      }
+      .modal-stars {
+        display: flex;
+        gap: 6px;
+      }
+      .modal-star {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 32px;
+        color: var(--ash);
+        transition:
+          color 0.15s,
+          transform 0.1s;
+        padding: 2px;
+        line-height: 1;
+        filter: grayscale(0.3);
+      }
+      .modal-star.active {
+        color: #f5b731;
+        filter: none;
+      }
+      .modal-star:active {
+        transform: scale(1.3);
+      }
+      .modal-tags-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      .modal-tag {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--straw);
+        border-radius: 16px;
+        padding: 6px 12px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .modal-tag.selected {
+        background: var(--ember);
+        border-color: var(--ember);
+        color: white;
+      }
+      .modal-row {
+        display: flex;
+        gap: 10px;
+      }
+      .modal-btn {
+        flex: 1;
+        padding: 13px;
+        border: none;
+        border-radius: 10px;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 18px;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .modal-btn-save {
+        background: var(--ember);
+        color: white;
+      }
+      .modal-btn-save:hover {
+        background: #a34820;
+      }
+      .modal-btn-cancel {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--smoke);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .modal-btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: var(--paper);
+      }
+      .empty-log {
+        text-align: center;
+        color: var(--ash);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 24px;
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        line-height: 1.6;
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(60px);
+        background: var(--bark);
+        border: 1px solid var(--ember);
+        color: var(--straw);
+        padding: 10px 20px;
+        border-radius: 24px;
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        z-index: 600;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        white-space: nowrap;
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
     </style>
   </head>
   <body>
-
     <!-- ── AUTH SCREEN ── -->
     <div id="authScreen" class="visible">
       <div class="auth-box">
@@ -429,21 +993,47 @@
           <div class="auth-logo-sub">Sign in to your review log</div>
         </div>
         <div class="auth-tabs">
-          <button class="auth-tab active" id="tabSignIn" onclick="switchTab('signin')">Sign In</button>
-          <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+          <button
+            class="auth-tab active"
+            id="tabSignIn"
+            onclick="switchTab('signin')"
+          >
+            Sign In
+          </button>
+          <button
+            class="auth-tab"
+            id="tabRegister"
+            onclick="switchTab('register')"
+          >
+            Create Account
+          </button>
         </div>
         <div class="auth-fields">
           <div class="auth-field">
             <label class="auth-label">Email</label>
-            <input class="auth-input" id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+            <input
+              class="auth-input"
+              id="authEmail"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+            />
           </div>
           <div class="auth-field">
             <label class="auth-label">Password</label>
-            <input class="auth-input" id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <input
+              class="auth-input"
+              id="authPassword"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
           </div>
         </div>
         <div class="auth-error" id="authError"></div>
-        <button class="auth-submit" id="authSubmit" onclick="handleAuth()">Sign In</button>
+        <button class="auth-submit" id="authSubmit" onclick="handleAuth()">
+          Sign In
+        </button>
       </div>
     </div>
 
@@ -461,21 +1051,41 @@
           </div>
           <div class="user-row">
             <span class="user-email" id="userEmail"></span>
-            <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
+            <button class="signout-btn" onclick="handleSignOut()">
+              Sign Out
+            </button>
           </div>
         </div>
       </header>
       <main>
         <div class="card">
-          <div class="section-label">📍 Location</div>
+          <!-- <div class="section-label">📍 Location</div> -->
           <div class="field-row">
             <div class="field-group campground">
               <span class="field-label">Campground</span>
-              <input class="field-input" id="campground" type="text" placeholder="Name" maxlength="30" autocomplete="off" autocorrect="off" spellcheck="false" />
+              <input
+                class="field-input"
+                id="campground"
+                type="text"
+                placeholder="Name"
+                maxlength="30"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+              />
             </div>
             <div class="field-group site">
               <span class="field-label">Site #</span>
-              <input class="field-input" id="siteId" type="text" placeholder="A1" maxlength="6" autocomplete="off" autocorrect="off" spellcheck="false" />
+              <input
+                class="field-input"
+                id="siteId"
+                type="text"
+                placeholder="A1"
+                maxlength="6"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+              />
             </div>
           </div>
         </div>
@@ -488,36 +1098,60 @@
             <button class="star-btn" data-val="4">★</button>
             <button class="star-btn" data-val="5">★</button>
           </div>
-          <div class="rating-label" id="ratingLabel">— tap to rate —</div>
+          <!-- <div class="rating-label" id="ratingLabel">— tap to rate —</div> -->
         </div>
         <div class="card">
-          <div class="section-label">🏷 Quick Tags</div>
+          <!-- <div class="section-label">🏷 Quick Tags</div> -->
           <div class="tags-grid" id="tagsGrid">
             <button class="tag-btn" data-tag="not-level">📐 Not Level</button>
             <button class="tag-btn" data-tag="sunny">☀️ Sunny</button>
-            <button class="tag-btn" data-tag="close-neighbors">🏠 Close Neighbors</button>
-            <button class="tag-btn" data-tag="no-electric">⚡ No Electric</button>
-            <button class="tag-btn" data-tag="no-water">💧 No Water</button>
-            <button class="tag-btn" data-tag="gravel">🚗 Gravel Pad</button>
-            <button class="tag-btn" data-tag="double">Double Site</button>
-            <button class="tag-btn" data-tag="premium">Premium Site</button>
+            <button class="tag-btn" data-tag="close-neighbors">
+              🏠 Close Neighbors
+            </button>
+            <button class="tag-btn" data-tag="no-electric">
+              ⚡No Electric
+            </button>
+            <button class="tag-btn" data-tag="no-water">💧No Water</button>
+            <button class="tag-btn" data-tag="gravel">🚗 Gravel</button>
+            <button class="tag-btn" data-tag="double">Double</button>
+            <button class="tag-btn" data-tag="premium">Premium</button>
           </div>
         </div>
         <div class="card">
           <div class="section-label">📝 Notes</div>
-          <textarea class="notes-area" id="notes" rows="3" placeholder="Observations, tips, warnings…"></textarea>
+          <textarea
+            class="notes-area"
+            id="notes"
+            rows="3"
+            placeholder="Observations, tips, warnings…"
+          ></textarea>
         </div>
-        <button class="save-btn" id="saveBtn" onclick="saveEntry()">✦ Log This Site ✦</button>
+        <button class="save-btn" id="saveBtn" onclick="saveEntry()">
+          ✦ Log This Site ✦
+        </button>
         <div class="divider"></div>
         <div class="log-section">
           <div class="log-header">
             <span class="log-title">📋 Recorded Sites</span>
-            <div style="display:flex;gap:6px;align-items:center">
-              <button class="export-btn" id="sortBtn" onclick="toggleSort()" title="Sort by site #">⇅ SITE #</button>
-              <button class="export-btn" onclick="exportCSV()">⬇ EXPORT CSV</button>
+            <div style="display: flex; gap: 6px; align-items: center">
+              <button
+                class="export-btn"
+                id="sortBtn"
+                onclick="toggleSort()"
+                title="Sort by site #"
+              >
+                ⇅ SITE #
+              </button>
+              <button class="export-btn" onclick="exportCSV()">
+                ⬇ EXPORT CSV
+              </button>
             </div>
           </div>
-          <div class="filter-toggle" id="filterToggle" onclick="toggleFilterPanel()">
+          <div
+            class="filter-toggle"
+            id="filterToggle"
+            onclick="toggleFilterPanel()"
+          >
             <div class="filter-toggle-left">
               🔍 Filter Log
               <span class="filter-active-count" id="filterActiveCount">0</span>
@@ -527,99 +1161,275 @@
           <div class="filter-panel" id="filterPanel">
             <div>
               <div class="filter-group-label">Campground</div>
-              <select class="filter-select" id="filterCampground" onchange="applyFilters()">
+              <select
+                class="filter-select"
+                id="filterCampground"
+                onchange="applyFilters()"
+              >
                 <option value="">All campgrounds</option>
               </select>
             </div>
             <div>
               <div class="filter-group-label">Minimum Rating</div>
               <div class="filter-stars" id="filterStars">
-                <button class="filter-star-btn" data-min="1" onclick="setFilterRating(1)">★ 1+</button>
-                <button class="filter-star-btn" data-min="2" onclick="setFilterRating(2)">★★ 2+</button>
-                <button class="filter-star-btn" data-min="3" onclick="setFilterRating(3)">★★★ 3+</button>
-                <button class="filter-star-btn" data-min="4" onclick="setFilterRating(4)">★★★★ 4+</button>
-                <button class="filter-star-btn" data-min="5" onclick="setFilterRating(5)">★★★★★ 5</button>
+                <button
+                  class="filter-star-btn"
+                  data-min="1"
+                  onclick="setFilterRating(1)"
+                >
+                  ★ 1+
+                </button>
+                <button
+                  class="filter-star-btn"
+                  data-min="2"
+                  onclick="setFilterRating(2)"
+                >
+                  ★★ 2+
+                </button>
+                <button
+                  class="filter-star-btn"
+                  data-min="3"
+                  onclick="setFilterRating(3)"
+                >
+                  ★★★ 3+
+                </button>
+                <button
+                  class="filter-star-btn"
+                  data-min="4"
+                  onclick="setFilterRating(4)"
+                >
+                  ★★★★ 4+
+                </button>
+                <button
+                  class="filter-star-btn"
+                  data-min="5"
+                  onclick="setFilterRating(5)"
+                >
+                  ★★★★★ 5
+                </button>
               </div>
             </div>
             <div>
               <div class="filter-group-label">Has Tag</div>
               <div class="filter-tags-grid" id="filterTagsGrid">
-                <button class="filter-tag-chip" data-tag="not-level" onclick="toggleFilterTag('not-level')">📐 Not Level</button>
-                <button class="filter-tag-chip" data-tag="sunny" onclick="toggleFilterTag('sunny')">☀️ Sunny</button>
-                <button class="filter-tag-chip" data-tag="close-neighbors" onclick="toggleFilterTag('close-neighbors')">🏠 Close Neighbors</button>
-                <button class="filter-tag-chip" data-tag="no-electric" onclick="toggleFilterTag('no-electric')">⚡ No Electric</button>
-                <button class="filter-tag-chip" data-tag="no-water" onclick="toggleFilterTag('no-water')">💧 No Water</button>
-                <button class="filter-tag-chip" data-tag="gravel" onclick="toggleFilterTag('gravel')">🚗 Gravel Pad</button>
-                <button class="filter-tag-chip" data-tag="double" onclick="toggleFilterTag('double')">Double Site</button>
-                <button class="filter-tag-chip" data-tag="premium" onclick="toggleFilterTag('premium')">Premium Site</button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="not-level"
+                  onclick="toggleFilterTag('not-level')"
+                >
+                  📐 Not Level
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="sunny"
+                  onclick="toggleFilterTag('sunny')"
+                >
+                  ☀️ Sunny
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="close-neighbors"
+                  onclick="toggleFilterTag('close-neighbors')"
+                >
+                  🏠 Close Neighbors
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="no-electric"
+                  onclick="toggleFilterTag('no-electric')"
+                >
+                  ⚡ No Electric
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="no-water"
+                  onclick="toggleFilterTag('no-water')"
+                >
+                  💧 No Water
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="gravel"
+                  onclick="toggleFilterTag('gravel')"
+                >
+                  🚗 Gravel Pad
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="double"
+                  onclick="toggleFilterTag('double')"
+                >
+                  Double Site
+                </button>
+                <button
+                  class="filter-tag-chip"
+                  data-tag="premium"
+                  onclick="toggleFilterTag('premium')"
+                >
+                  Premium Site
+                </button>
               </div>
             </div>
             <div>
               <div class="filter-toggle-row">
                 <span class="filter-toggle-label">Has notes only</span>
                 <label class="toggle-switch">
-                  <input type="checkbox" id="filterHasNotes" onchange="applyFilters()" />
+                  <input
+                    type="checkbox"
+                    id="filterHasNotes"
+                    onchange="applyFilters()"
+                  />
                   <div class="toggle-track"></div>
                   <div class="toggle-thumb"></div>
                 </label>
               </div>
             </div>
-            <button class="filter-clear-btn" onclick="clearFilters()">✕ Clear All Filters</button>
+            <button class="filter-clear-btn" onclick="clearFilters()">
+              ✕ Clear All Filters
+            </button>
           </div>
-          <div class="log-count" id="logCount" style="display:none">
-            Showing <span id="logCountNum">0</span> of <span id="logCountTotal">0</span> sites
+          <div class="log-count" id="logCount" style="display: none">
+            Showing <span id="logCountNum">0</span> of
+            <span id="logCountTotal">0</span> sites
           </div>
           <div class="log-list" id="logList">
-            <div class="empty-log">No sites recorded yet.<br>Walk the loop and start reviewing!</div>
+            <div class="empty-log">
+              No sites recorded yet.<br />Walk the loop and start reviewing!
+            </div>
           </div>
         </div>
       </main>
     </div>
 
     <!-- Edit Modal -->
-    <div class="modal-backdrop" id="modalBackdrop" onclick="closeEditModal(event)">
+    <div
+      class="modal-backdrop"
+      id="modalBackdrop"
+      onclick="closeEditModal(event)"
+    >
       <div class="modal">
         <div class="modal-title">✦ Edit Site Entry</div>
-        <div style="display:flex;gap:10px">
-          <div class="modal-field" style="flex:1">
+        <div style="display: flex; gap: 10px">
+          <div class="modal-field" style="flex: 1">
             <label class="modal-label">Campground</label>
-            <input class="modal-input" id="editCampground" type="text" maxlength="30" autocomplete="off" spellcheck="false" />
+            <input
+              class="modal-input"
+              id="editCampground"
+              type="text"
+              maxlength="30"
+              autocomplete="off"
+              spellcheck="false"
+            />
           </div>
-          <div class="modal-field" style="width:90px">
+          <div class="modal-field" style="width: 90px">
             <label class="modal-label">Site #</label>
-            <input class="modal-input" id="editSiteId" type="text" maxlength="6" autocomplete="off" spellcheck="false" />
+            <input
+              class="modal-input"
+              id="editSiteId"
+              type="text"
+              maxlength="6"
+              autocomplete="off"
+              spellcheck="false"
+            />
           </div>
         </div>
         <div class="modal-field">
           <label class="modal-label">Rating</label>
           <div class="modal-stars" id="editStars">
-            <button class="modal-star" data-val="1" onclick="setEditRating(1)">★</button>
-            <button class="modal-star" data-val="2" onclick="setEditRating(2)">★</button>
-            <button class="modal-star" data-val="3" onclick="setEditRating(3)">★</button>
-            <button class="modal-star" data-val="4" onclick="setEditRating(4)">★</button>
-            <button class="modal-star" data-val="5" onclick="setEditRating(5)">★</button>
+            <button class="modal-star" data-val="1" onclick="setEditRating(1)">
+              ★
+            </button>
+            <button class="modal-star" data-val="2" onclick="setEditRating(2)">
+              ★
+            </button>
+            <button class="modal-star" data-val="3" onclick="setEditRating(3)">
+              ★
+            </button>
+            <button class="modal-star" data-val="4" onclick="setEditRating(4)">
+              ★
+            </button>
+            <button class="modal-star" data-val="5" onclick="setEditRating(5)">
+              ★
+            </button>
           </div>
         </div>
         <div class="modal-field">
           <label class="modal-label">Tags</label>
           <div class="modal-tags-grid" id="editTagsGrid">
-            <button class="modal-tag" data-tag="not-level" onclick="toggleEditTag('not-level')">📐 Not Level</button>
-            <button class="modal-tag" data-tag="sunny" onclick="toggleEditTag('sunny')">☀️ Sunny</button>
-            <button class="modal-tag" data-tag="close-neighbors" onclick="toggleEditTag('close-neighbors')">🏠 Close Neighbors</button>
-            <button class="modal-tag" data-tag="no-electric" onclick="toggleEditTag('no-electric')">⚡ No Electric</button>
-            <button class="modal-tag" data-tag="no-water" onclick="toggleEditTag('no-water')">💧 No Water</button>
-            <button class="modal-tag" data-tag="gravel" onclick="toggleEditTag('gravel')">🚗 Gravel Pad</button>
-            <button class="modal-tag" data-tag="double" onclick="toggleEditTag('double')">Double Site</button>
-            <button class="modal-tag" data-tag="premium" onclick="toggleEditTag('premium')">Premium Site</button>
+            <button
+              class="modal-tag"
+              data-tag="not-level"
+              onclick="toggleEditTag('not-level')"
+            >
+              📐 Not Level
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="sunny"
+              onclick="toggleEditTag('sunny')"
+            >
+              ☀️ Sunny
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="close-neighbors"
+              onclick="toggleEditTag('close-neighbors')"
+            >
+              🏠 Close Neighbors
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="no-electric"
+              onclick="toggleEditTag('no-electric')"
+            >
+              ⚡ No Electric
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="no-water"
+              onclick="toggleEditTag('no-water')"
+            >
+              💧 No Water
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="gravel"
+              onclick="toggleEditTag('gravel')"
+            >
+              🚗 Gravel Pad
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="double"
+              onclick="toggleEditTag('double')"
+            >
+              Double Site
+            </button>
+            <button
+              class="modal-tag"
+              data-tag="premium"
+              onclick="toggleEditTag('premium')"
+            >
+              Premium Site
+            </button>
           </div>
         </div>
         <div class="modal-field">
           <label class="modal-label">Notes</label>
-          <textarea class="modal-textarea" id="editNotes" rows="3" placeholder="Observations, tips, warnings…"></textarea>
+          <textarea
+            class="modal-textarea"
+            id="editNotes"
+            rows="3"
+            placeholder="Observations, tips, warnings…"
+          ></textarea>
         </div>
         <div class="modal-row">
-          <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">Cancel</button>
-          <button class="modal-btn modal-btn-save" onclick="saveEdit()">Save Changes</button>
+          <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">
+            Cancel
+          </button>
+          <button class="modal-btn modal-btn-save" onclick="saveEdit()">
+            Save Changes
+          </button>
         </div>
       </div>
     </div>
@@ -627,25 +1437,32 @@
     <div class="toast" id="toast"></div>
 
     <script type="module">
-      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import {
-        getDatabase, ref, push, remove, onValue, update, off
-      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+        getDatabase,
+        ref,
+        push,
+        remove,
+        onValue,
+        update,
+        off,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
       import {
-        getAuth, onAuthStateChanged,
+        getAuth,
+        onAuthStateChanged,
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
-        signOut
-      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
       const firebaseConfig = {
-        apiKey: 'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
-        authDomain: 'cmk63project.firebaseapp.com',
-        databaseURL: 'https://cmk63project-default-rtdb.firebaseio.com',
-        projectId: 'cmk63project',
-        storageBucket: 'cmk63project.firebasestorage.app',
-        messagingSenderId: '520150418866',
-        appId: '1:520150418866:web:5bd7d2aa561b987b1b90ab',
+        apiKey: "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
+        authDomain: "cmk63project.firebaseapp.com",
+        databaseURL: "https://cmk63project-default-rtdb.firebaseio.com",
+        projectId: "cmk63project",
+        storageBucket: "cmk63project.firebasestorage.app",
+        messagingSenderId: "520150418866",
+        appId: "1:520150418866:web:5bd7d2aa561b987b1b90ab",
       };
 
       const app = initializeApp(firebaseConfig);
@@ -653,11 +1470,18 @@
       const auth = getAuth(app);
 
       // ── STATE ──
-      const RATING_LABELS = ['','Skip it','Below average','Decent','Really good','Top pick!'];
+      const RATING_LABELS = [
+        "",
+        "Skip it",
+        "Below average",
+        "Decent",
+        "Really good",
+        "Top pick!",
+      ];
       let currentRating = 0;
       let selectedTags = new Set();
       let entries = [];
-      let filterCampground = '';
+      let filterCampground = "";
       let filterMinRating = 0;
       let filterTags = new Set();
       let filterHasNotes = false;
@@ -668,27 +1492,36 @@
       let dbListener = null;
 
       // ── AUTH UI ──
-      let authMode = 'signin';
-      window.switchTab = function(mode) {
+      let authMode = "signin";
+      window.switchTab = function (mode) {
         authMode = mode;
-        document.getElementById('tabSignIn').classList.toggle('active', mode === 'signin');
-        document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
-        document.getElementById('authSubmit').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-        document.getElementById('authError').textContent = '';
-        document.getElementById('authPassword').autocomplete = mode === 'signin' ? 'current-password' : 'new-password';
+        document
+          .getElementById("tabSignIn")
+          .classList.toggle("active", mode === "signin");
+        document
+          .getElementById("tabRegister")
+          .classList.toggle("active", mode === "register");
+        document.getElementById("authSubmit").textContent =
+          mode === "signin" ? "Sign In" : "Create Account";
+        document.getElementById("authError").textContent = "";
+        document.getElementById("authPassword").autocomplete =
+          mode === "signin" ? "current-password" : "new-password";
       };
 
-      window.handleAuth = async function() {
-        const email = document.getElementById('authEmail').value.trim();
-        const password = document.getElementById('authPassword').value;
-        const errEl = document.getElementById('authError');
-        const btn = document.getElementById('authSubmit');
-        errEl.textContent = '';
-        if (!email || !password) { errEl.textContent = 'Please fill in both fields.'; return; }
+      window.handleAuth = async function () {
+        const email = document.getElementById("authEmail").value.trim();
+        const password = document.getElementById("authPassword").value;
+        const errEl = document.getElementById("authError");
+        const btn = document.getElementById("authSubmit");
+        errEl.textContent = "";
+        if (!email || !password) {
+          errEl.textContent = "Please fill in both fields.";
+          return;
+        }
         btn.disabled = true;
-        btn.textContent = '…';
+        btn.textContent = "…";
         try {
-          if (authMode === 'signin') {
+          if (authMode === "signin") {
             await signInWithEmailAndPassword(auth, email, password);
           } else {
             await createUserWithEmailAndPassword(auth, email, password);
@@ -696,117 +1529,144 @@
         } catch (err) {
           errEl.textContent = friendlyAuthError(err.code);
           btn.disabled = false;
-          btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
+          btn.textContent =
+            authMode === "signin" ? "Sign In" : "Create Account";
         }
       };
 
       // Allow Enter key on auth form
-      ['authEmail','authPassword'].forEach(id => {
-        document.getElementById(id).addEventListener('keydown', e => {
-          if (e.key === 'Enter') window.handleAuth();
+      ["authEmail", "authPassword"].forEach((id) => {
+        document.getElementById(id).addEventListener("keydown", (e) => {
+          if (e.key === "Enter") window.handleAuth();
         });
       });
 
-      window.handleSignOut = async function() {
-        if (dbListener && sitesRef) { off(sitesRef, 'value', dbListener); dbListener = null; }
+      window.handleSignOut = async function () {
+        if (dbListener && sitesRef) {
+          off(sitesRef, "value", dbListener);
+          dbListener = null;
+        }
         entries = [];
         await signOut(auth);
       };
 
       function friendlyAuthError(code) {
         const map = {
-          'auth/invalid-email': 'Invalid email address.',
-          'auth/user-not-found': 'No account found with that email.',
-          'auth/wrong-password': 'Incorrect password.',
-          'auth/invalid-credential': 'Incorrect email or password.',
-          'auth/email-already-in-use': 'An account already exists with that email.',
-          'auth/weak-password': 'Password must be at least 6 characters.',
-          'auth/too-many-requests': 'Too many attempts. Try again later.',
-          'auth/network-request-failed': 'Network error. Check your connection.',
+          "auth/invalid-email": "Invalid email address.",
+          "auth/user-not-found": "No account found with that email.",
+          "auth/wrong-password": "Incorrect password.",
+          "auth/invalid-credential": "Incorrect email or password.",
+          "auth/email-already-in-use":
+            "An account already exists with that email.",
+          "auth/weak-password": "Password must be at least 6 characters.",
+          "auth/too-many-requests": "Too many attempts. Try again later.",
+          "auth/network-request-failed":
+            "Network error. Check your connection.",
         };
-        return map[code] || 'Something went wrong. Please try again.';
+        return map[code] || "Something went wrong. Please try again.";
       }
 
       // ── AUTH STATE ──
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
-          document.getElementById('authScreen').classList.remove('visible');
-          document.getElementById('appShell').classList.add('visible');
-          document.getElementById('userEmail').textContent = user.email;
+          document.getElementById("authScreen").classList.remove("visible");
+          document.getElementById("appShell").classList.add("visible");
+          document.getElementById("userEmail").textContent = user.email;
           startListening(user.uid);
         } else {
-          document.getElementById('authScreen').classList.add('visible');
-          document.getElementById('appShell').classList.remove('visible');
-          document.getElementById('userEmail').textContent = '';
+          document.getElementById("authScreen").classList.add("visible");
+          document.getElementById("appShell").classList.remove("visible");
+          document.getElementById("userEmail").textContent = "";
           // Reset form
-          switchTab('signin');
-          document.getElementById('authEmail').value = '';
-          document.getElementById('authPassword').value = '';
-          document.getElementById('authError').textContent = '';
-          document.getElementById('authSubmit').disabled = false;
+          switchTab("signin");
+          document.getElementById("authEmail").value = "";
+          document.getElementById("authPassword").value = "";
+          document.getElementById("authError").textContent = "";
+          document.getElementById("authSubmit").disabled = false;
           renderLog(); // clear display
         }
       });
 
       function startListening(uid) {
-        if (dbListener && sitesRef) off(sitesRef, 'value', dbListener);
+        if (dbListener && sitesRef) off(sitesRef, "value", dbListener);
         sitesRef = ref(db, `users/${uid}/campsites`);
-        dbListener = onValue(sitesRef, (snapshot) => {
-          entries = [];
-          if (snapshot.exists()) {
-            snapshot.forEach((child) => {
-              entries.push({ firebaseKey: child.key, ...child.val() });
-            });
-            entries.sort((a, b) => b.id - a.id);
-          }
-          updateCampgroundFilterOptions();
-          renderLog();
-        }, (err) => {
-          showToast('⚠ DB error: ' + err.message);
-        });
+        dbListener = onValue(
+          sitesRef,
+          (snapshot) => {
+            entries = [];
+            if (snapshot.exists()) {
+              snapshot.forEach((child) => {
+                entries.push({ firebaseKey: child.key, ...child.val() });
+              });
+              entries.sort((a, b) => b.id - a.id);
+            }
+            updateCampgroundFilterOptions();
+            renderLog();
+          },
+          (err) => {
+            showToast("⚠ DB error: " + err.message);
+          },
+        );
       }
 
       // ── FILTER ──
-      window.toggleFilterPanel = function() {
+      window.toggleFilterPanel = function () {
         filterPanelOpen = !filterPanelOpen;
-        document.getElementById('filterToggle').classList.toggle('active', filterPanelOpen);
-        document.getElementById('filterPanel').classList.toggle('open', filterPanelOpen);
+        document
+          .getElementById("filterToggle")
+          .classList.toggle("active", filterPanelOpen);
+        document
+          .getElementById("filterPanel")
+          .classList.toggle("open", filterPanelOpen);
       };
       function updateCampgroundFilterOptions() {
-        const select = document.getElementById('filterCampground');
+        const select = document.getElementById("filterCampground");
         const current = select.value;
-        const campgrounds = [...new Set(entries.map(e => e.campground).filter(Boolean))].sort();
+        const campgrounds = [
+          ...new Set(entries.map((e) => e.campground).filter(Boolean)),
+        ].sort();
         select.innerHTML = '<option value="">All campgrounds</option>';
-        campgrounds.forEach(cg => {
-          const opt = document.createElement('option');
-          opt.value = cg; opt.textContent = cg;
+        campgrounds.forEach((cg) => {
+          const opt = document.createElement("option");
+          opt.value = cg;
+          opt.textContent = cg;
           if (cg === current) opt.selected = true;
           select.appendChild(opt);
         });
       }
-      window.setFilterRating = function(min) {
+      window.setFilterRating = function (min) {
         if (filterMinRating === min) {
           filterMinRating = 0;
-          document.querySelectorAll('.filter-star-btn').forEach(b => b.classList.remove('selected'));
+          document
+            .querySelectorAll(".filter-star-btn")
+            .forEach((b) => b.classList.remove("selected"));
         } else {
           filterMinRating = min;
-          document.querySelectorAll('.filter-star-btn').forEach(b => {
-            b.classList.toggle('selected', +b.dataset.min === min);
+          document.querySelectorAll(".filter-star-btn").forEach((b) => {
+            b.classList.toggle("selected", +b.dataset.min === min);
           });
         }
         applyFilters();
       };
-      window.toggleFilterTag = function(tag) {
-        const btn = document.querySelector(`.filter-tag-chip[data-tag="${tag}"]`);
-        if (filterTags.has(tag)) { filterTags.delete(tag); btn.classList.remove('selected'); }
-        else { filterTags.add(tag); btn.classList.add('selected'); }
+      window.toggleFilterTag = function (tag) {
+        const btn = document.querySelector(
+          `.filter-tag-chip[data-tag="${tag}"]`,
+        );
+        if (filterTags.has(tag)) {
+          filterTags.delete(tag);
+          btn.classList.remove("selected");
+        } else {
+          filterTags.add(tag);
+          btn.classList.add("selected");
+        }
         applyFilters();
       };
-      window.applyFilters = function() {
-        filterCampground = document.getElementById('filterCampground').value;
-        filterHasNotes = document.getElementById('filterHasNotes').checked;
-        updateFilterBadge(); renderLog();
+      window.applyFilters = function () {
+        filterCampground = document.getElementById("filterCampground").value;
+        filterHasNotes = document.getElementById("filterHasNotes").checked;
+        updateFilterBadge();
+        renderLog();
       };
       function getActiveFilterCount() {
         let c = 0;
@@ -818,22 +1678,32 @@
       }
       function updateFilterBadge() {
         const n = getActiveFilterCount();
-        const badge = document.getElementById('filterActiveCount');
+        const badge = document.getElementById("filterActiveCount");
         badge.textContent = n;
-        badge.classList.toggle('visible', n > 0);
+        badge.classList.toggle("visible", n > 0);
       }
-      window.clearFilters = function() {
-        filterCampground = ''; filterMinRating = 0; filterTags.clear(); filterHasNotes = false;
-        document.getElementById('filterCampground').value = '';
-        document.querySelectorAll('.filter-star-btn').forEach(b => b.classList.remove('selected'));
-        document.querySelectorAll('.filter-tag-chip').forEach(b => b.classList.remove('selected'));
-        document.getElementById('filterHasNotes').checked = false;
-        updateFilterBadge(); renderLog();
+      window.clearFilters = function () {
+        filterCampground = "";
+        filterMinRating = 0;
+        filterTags.clear();
+        filterHasNotes = false;
+        document.getElementById("filterCampground").value = "";
+        document
+          .querySelectorAll(".filter-star-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelectorAll(".filter-tag-chip")
+          .forEach((b) => b.classList.remove("selected"));
+        document.getElementById("filterHasNotes").checked = false;
+        updateFilterBadge();
+        renderLog();
       };
       function filterEntries(all) {
-        return all.filter(e => {
-          if (filterCampground && e.campground !== filterCampground) return false;
-          if (filterMinRating > 0 && (e.rating || 0) < filterMinRating) return false;
+        return all.filter((e) => {
+          if (filterCampground && e.campground !== filterCampground)
+            return false;
+          if (filterMinRating > 0 && (e.rating || 0) < filterMinRating)
+            return false;
           if (filterTags.size > 0) {
             const et = new Set(e.tags || []);
             for (const t of filterTags) if (!et.has(t)) return false;
@@ -844,207 +1714,344 @@
       }
 
       // ── STAR RATING ──
-      document.getElementById('stars').addEventListener('click', (e) => {
-        const btn = e.target.closest('.star-btn');
+      document.getElementById("stars").addEventListener("click", (e) => {
+        const btn = e.target.closest(".star-btn");
         if (!btn) return;
         const val = +btn.dataset.val;
         currentRating = currentRating === val ? 0 : val;
         renderStars();
       });
       function renderStars() {
-        document.querySelectorAll('.star-btn').forEach(b => {
-          b.classList.toggle('active', +b.dataset.val <= currentRating);
+        document.querySelectorAll(".star-btn").forEach((b) => {
+          b.classList.toggle("active", +b.dataset.val <= currentRating);
         });
-        document.getElementById('ratingLabel').textContent = currentRating ? RATING_LABELS[currentRating] : '— tap to rate —';
+        document.getElementById("ratingLabel").textContent = currentRating
+          ? RATING_LABELS[currentRating]
+          : "— tap to rate —";
       }
 
       // ── TAGS ──
-      document.getElementById('tagsGrid').addEventListener('click', (e) => {
-        const btn = e.target.closest('.tag-btn');
+      document.getElementById("tagsGrid").addEventListener("click", (e) => {
+        const btn = e.target.closest(".tag-btn");
         if (!btn) return;
         const tag = btn.dataset.tag;
-        if (selectedTags.has(tag)) { selectedTags.delete(tag); btn.classList.remove('selected'); }
-        else { selectedTags.add(tag); btn.classList.add('selected'); }
+        if (selectedTags.has(tag)) {
+          selectedTags.delete(tag);
+          btn.classList.remove("selected");
+        } else {
+          selectedTags.add(tag);
+          btn.classList.add("selected");
+        }
       });
 
       // ── SAVE ──
-      window.saveEntry = async function() {
-        if (!currentUser) { showToast('Not signed in!'); return; }
-        const campground = document.getElementById('campground').value.trim().toUpperCase();
-        const siteId = document.getElementById('siteId').value.trim().toUpperCase();
-        if (!campground) { showToast('Enter a campground!'); document.getElementById('campground').focus(); return; }
-        if (!siteId) { showToast('Enter a site number!'); document.getElementById('siteId').focus(); return; }
-        if (!currentRating) { showToast('Tap a star to rate this site!'); document.getElementById('stars').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-        const duplicate = entries.find(e => e.campground === campground && e.site === siteId);
-        if (duplicate) { showToast(`Site ${siteId} at ${campground} already logged!`); return; }
-        const saveBtn = document.getElementById('saveBtn');
-        saveBtn.textContent = 'Saving…'; saveBtn.disabled = true;
+      window.saveEntry = async function () {
+        if (!currentUser) {
+          showToast("Not signed in!");
+          return;
+        }
+        const campground = document
+          .getElementById("campground")
+          .value.trim()
+          .toUpperCase();
+        const siteId = document
+          .getElementById("siteId")
+          .value.trim()
+          .toUpperCase();
+        if (!campground) {
+          showToast("Enter a campground!");
+          document.getElementById("campground").focus();
+          return;
+        }
+        if (!siteId) {
+          showToast("Enter a site number!");
+          document.getElementById("siteId").focus();
+          return;
+        }
+        if (!currentRating) {
+          showToast("Tap a star to rate this site!");
+          document
+            .getElementById("stars")
+            .scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        const duplicate = entries.find(
+          (e) => e.campground === campground && e.site === siteId,
+        );
+        if (duplicate) {
+          showToast(`Site ${siteId} at ${campground} already logged!`);
+          return;
+        }
+        const saveBtn = document.getElementById("saveBtn");
+        saveBtn.textContent = "Saving…";
+        saveBtn.disabled = true;
         const entry = {
-          campground, id: Date.now(), site: siteId, rating: currentRating,
-          tags: [...selectedTags], status: null,
-          notes: document.getElementById('notes').value.trim(),
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          campground,
+          id: Date.now(),
+          site: siteId,
+          rating: currentRating,
+          tags: [...selectedTags],
+          status: null,
+          notes: document.getElementById("notes").value.trim(),
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
           timestamp: new Date().toISOString(),
         };
         try {
           await push(sitesRef, entry);
           const nextId = autoAdvanceSite(siteId);
-          currentRating = 0; renderStars();
+          currentRating = 0;
+          renderStars();
           selectedTags.clear();
-          document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('selected'));
-          document.getElementById('notes').value = '';
-          document.getElementById('siteId').value = nextId;
-          document.getElementById('campground').value = campground;
-          saveBtn.textContent = '✓ Logged!'; saveBtn.classList.add('saved');
-          setTimeout(() => { saveBtn.textContent = '✦ Log This Site ✦'; saveBtn.classList.remove('saved'); saveBtn.disabled = false; }, 1200);
+          document
+            .querySelectorAll(".tag-btn")
+            .forEach((b) => b.classList.remove("selected"));
+          document.getElementById("notes").value = "";
+          document.getElementById("siteId").value = nextId;
+          document.getElementById("campground").value = campground;
+          saveBtn.textContent = "✓ Logged!";
+          saveBtn.classList.add("saved");
+          setTimeout(() => {
+            saveBtn.textContent = "✦ Log This Site ✦";
+            saveBtn.classList.remove("saved");
+            saveBtn.disabled = false;
+          }, 1200);
           showToast(`Site ${siteId} recorded ✓`);
         } catch (err) {
-          showToast('⚠ Save failed: ' + err.message);
-          saveBtn.textContent = '✦ Log This Site ✦'; saveBtn.disabled = false;
+          showToast("⚠ Save failed: " + err.message);
+          saveBtn.textContent = "✦ Log This Site ✦";
+          saveBtn.disabled = false;
         }
       };
 
       function autoAdvanceSite(id) {
         const match = id.match(/^([A-Z]*)(\d+)$/);
         if (match) return match[1] + (parseInt(match[2]) + 1);
-        return '';
+        return "";
       }
 
       // ── SORT ──
-      window.toggleSort = function() {
+      window.toggleSort = function () {
         sortBySite = !sortBySite;
-        const btn = document.getElementById('sortBtn');
-        btn.textContent = sortBySite ? '⇅ NEWEST' : '⇅ SITE #';
-        btn.style.borderColor = sortBySite ? 'var(--ember)' : '';
-        btn.style.color = sortBySite ? 'var(--straw)' : '';
+        const btn = document.getElementById("sortBtn");
+        btn.textContent = sortBySite ? "⇅ NEWEST" : "⇅ SITE #";
+        btn.style.borderColor = sortBySite ? "var(--ember)" : "";
+        btn.style.color = sortBySite ? "var(--straw)" : "";
         renderLog();
       };
       function sortEntries(list) {
         if (!sortBySite) return list;
         return [...list].sort((a, b) => {
-          const parse = s => { const m = (s||'').match(/^([A-Z]*)(\d*)(.*)$/i); return [m[1]||'', parseInt(m[2])||0, m[3]||'']; };
-          const [aL,aN,aR] = parse(a.site); const [bL,bN,bR] = parse(b.site);
+          const parse = (s) => {
+            const m = (s || "").match(/^([A-Z]*)(\d*)(.*)$/i);
+            return [m[1] || "", parseInt(m[2]) || 0, m[3] || ""];
+          };
+          const [aL, aN, aR] = parse(a.site);
+          const [bL, bN, bR] = parse(b.site);
           return aL.localeCompare(bL) || aN - bN || aR.localeCompare(bR);
         });
       }
 
       // ── RENDER LOG ──
       function renderLog() {
-        const list = document.getElementById('logList');
-        document.getElementById('totalCount').textContent = entries.length;
+        const list = document.getElementById("logList");
+        document.getElementById("totalCount").textContent = entries.length;
         const filtered = sortEntries(filterEntries(entries));
         const activeFilters = getActiveFilterCount();
-        const countEl = document.getElementById('logCount');
+        const countEl = document.getElementById("logCount");
         if (activeFilters > 0) {
-          countEl.style.display = 'block';
-          document.getElementById('logCountNum').textContent = filtered.length;
-          document.getElementById('logCountTotal').textContent = entries.length;
-        } else { countEl.style.display = 'none'; }
+          countEl.style.display = "block";
+          document.getElementById("logCountNum").textContent = filtered.length;
+          document.getElementById("logCountTotal").textContent = entries.length;
+        } else {
+          countEl.style.display = "none";
+        }
         if (!filtered.length) {
           list.innerHTML = entries.length
             ? '<div class="empty-log">No sites match your filters.<br>Try adjusting or clearing them.</div>'
             : '<div class="empty-log">No sites recorded yet.<br>Walk the loop and start reviewing!</div>';
           return;
         }
-        list.innerHTML = filtered.map(e => {
-          const stars = e.rating ? '★'.repeat(e.rating) + '☆'.repeat(5 - e.rating) : '—';
-          const cls = e.rating >= 5 ? 'top' : e.status === 'damaged' ? 'bad' : '';
-          const tags = (e.tags || []).filter(Boolean).join(' · ');
-          return `<div class="log-entry ${cls}">
+        list.innerHTML = filtered
+          .map((e) => {
+            const stars = e.rating
+              ? "★".repeat(e.rating) + "☆".repeat(5 - e.rating)
+              : "—";
+            const cls =
+              e.rating >= 5 ? "top" : e.status === "damaged" ? "bad" : "";
+            const tags = (e.tags || []).filter(Boolean).join(" · ");
+            return `<div class="log-entry ${cls}">
             <div class="log-site-col">
               <div class="log-site">${e.site}</div>
-              ${e.campground ? `<div class="log-campground">${e.campground}</div>` : ''}
+              ${e.campground ? `<div class="log-campground">${e.campground}</div>` : ""}
             </div>
             <div class="log-details">
               <div class="log-stars">${stars}<span class="log-time">${e.time}</span></div>
-              ${tags ? `<div class="log-tags">${tags}</div>` : ''}
-              ${e.notes ? `<div class="log-notes">${e.notes}</div>` : ''}
+              ${tags ? `<div class="log-tags">${tags}</div>` : ""}
+              ${e.notes ? `<div class="log-notes">${e.notes}</div>` : ""}
             </div>
             <div class="log-actions">
               <button class="log-edit" onclick="openEditModal('${e.firebaseKey}')" title="Edit">✎</button>
               <button class="log-delete" onclick="deleteEntry('${e.firebaseKey}')" title="Delete">✕</button>
             </div>
           </div>`;
-        }).join('');
+          })
+          .join("");
       }
 
       // ── DELETE ──
-      window.deleteEntry = async function(firebaseKey) {
+      window.deleteEntry = async function (firebaseKey) {
         if (!currentUser) return;
         try {
-          await remove(ref(db, `users/${currentUser.uid}/campsites/${firebaseKey}`));
-          showToast('Entry removed');
-        } catch (err) { showToast('⚠ Delete failed: ' + err.message); }
+          await remove(
+            ref(db, `users/${currentUser.uid}/campsites/${firebaseKey}`),
+          );
+          showToast("Entry removed");
+        } catch (err) {
+          showToast("⚠ Delete failed: " + err.message);
+        }
       };
 
       // ── EDIT MODAL ──
-      let editKey = null, editRating = 0, editTags = new Set();
-      window.openEditModal = function(firebaseKey) {
-        const entry = entries.find(e => e.firebaseKey === firebaseKey);
+      let editKey = null,
+        editRating = 0,
+        editTags = new Set();
+      window.openEditModal = function (firebaseKey) {
+        const entry = entries.find((e) => e.firebaseKey === firebaseKey);
         if (!entry) return;
-        editKey = firebaseKey; editRating = entry.rating || 0; editTags = new Set(entry.tags || []);
-        document.getElementById('editCampground').value = entry.campground || '';
-        document.getElementById('editSiteId').value = entry.site || '';
-        document.getElementById('editNotes').value = entry.notes || '';
+        editKey = firebaseKey;
+        editRating = entry.rating || 0;
+        editTags = new Set(entry.tags || []);
+        document.getElementById("editCampground").value =
+          entry.campground || "";
+        document.getElementById("editSiteId").value = entry.site || "";
+        document.getElementById("editNotes").value = entry.notes || "";
         renderEditStars();
-        document.querySelectorAll('.modal-tag').forEach(b => b.classList.toggle('selected', editTags.has(b.dataset.tag)));
-        document.getElementById('modalBackdrop').classList.add('open');
+        document
+          .querySelectorAll(".modal-tag")
+          .forEach((b) =>
+            b.classList.toggle("selected", editTags.has(b.dataset.tag)),
+          );
+        document.getElementById("modalBackdrop").classList.add("open");
       };
-      window.closeEditModal = function(e) {
-        if (e && e.target !== document.getElementById('modalBackdrop')) return;
-        document.getElementById('modalBackdrop').classList.remove('open');
+      window.closeEditModal = function (e) {
+        if (e && e.target !== document.getElementById("modalBackdrop")) return;
+        document.getElementById("modalBackdrop").classList.remove("open");
         editKey = null;
       };
-      window.setEditRating = function(val) {
+      window.setEditRating = function (val) {
         editRating = editRating === val ? 0 : val;
         renderEditStars();
       };
       function renderEditStars() {
-        document.querySelectorAll('.modal-star').forEach(b => b.classList.toggle('active', +b.dataset.val <= editRating));
+        document
+          .querySelectorAll(".modal-star")
+          .forEach((b) =>
+            b.classList.toggle("active", +b.dataset.val <= editRating),
+          );
       }
-      window.toggleEditTag = function(tag) {
+      window.toggleEditTag = function (tag) {
         const btn = document.querySelector(`.modal-tag[data-tag="${tag}"]`);
-        if (editTags.has(tag)) { editTags.delete(tag); btn.classList.remove('selected'); }
-        else { editTags.add(tag); btn.classList.add('selected'); }
+        if (editTags.has(tag)) {
+          editTags.delete(tag);
+          btn.classList.remove("selected");
+        } else {
+          editTags.add(tag);
+          btn.classList.add("selected");
+        }
       };
-      window.saveEdit = async function() {
+      window.saveEdit = async function () {
         if (!editKey || !currentUser) return;
-        const campground = document.getElementById('editCampground').value.trim().toUpperCase();
-        const site = document.getElementById('editSiteId').value.trim().toUpperCase();
-        const notes = document.getElementById('editNotes').value.trim();
-        if (!campground) { showToast('Enter a campground!'); return; }
-        if (!site) { showToast('Enter a site number!'); return; }
-        if (!editRating) { showToast('Tap a star to rate!'); return; }
+        const campground = document
+          .getElementById("editCampground")
+          .value.trim()
+          .toUpperCase();
+        const site = document
+          .getElementById("editSiteId")
+          .value.trim()
+          .toUpperCase();
+        const notes = document.getElementById("editNotes").value.trim();
+        if (!campground) {
+          showToast("Enter a campground!");
+          return;
+        }
+        if (!site) {
+          showToast("Enter a site number!");
+          return;
+        }
+        if (!editRating) {
+          showToast("Tap a star to rate!");
+          return;
+        }
         try {
-          await update(ref(db, `users/${currentUser.uid}/campsites/${editKey}`), { campground, site, rating: editRating, tags: [...editTags], notes });
-          document.getElementById('modalBackdrop').classList.remove('open');
+          await update(
+            ref(db, `users/${currentUser.uid}/campsites/${editKey}`),
+            {
+              campground,
+              site,
+              rating: editRating,
+              tags: [...editTags],
+              notes,
+            },
+          );
+          document.getElementById("modalBackdrop").classList.remove("open");
           editKey = null;
-          showToast('Site updated ✓');
-        } catch (err) { showToast('⚠ Update failed: ' + err.message); }
+          showToast("Site updated ✓");
+        } catch (err) {
+          showToast("⚠ Update failed: " + err.message);
+        }
       };
 
       // ── EXPORT ──
-      window.exportCSV = function() {
-        if (!entries.length) { showToast('Nothing to export yet!'); return; }
-        const toExport = getActiveFilterCount() > 0 ? filterEntries(entries) : entries;
-        const cols = ['Campground','Site','Time','Timestamp','Rating','Tags','Notes'];
-        const rows = toExport.map(e =>
-          [e.campground, e.site, e.time, e.timestamp||'', e.rating||'', (e.tags||[]).join('; '), (e.notes||'').replace(/"/g,'""')]
-          .map(v => `"${v}"`).join(',')
+      window.exportCSV = function () {
+        if (!entries.length) {
+          showToast("Nothing to export yet!");
+          return;
+        }
+        const toExport =
+          getActiveFilterCount() > 0 ? filterEntries(entries) : entries;
+        const cols = [
+          "Campground",
+          "Site",
+          "Time",
+          "Timestamp",
+          "Rating",
+          "Tags",
+          "Notes",
+        ];
+        const rows = toExport.map((e) =>
+          [
+            e.campground,
+            e.site,
+            e.time,
+            e.timestamp || "",
+            e.rating || "",
+            (e.tags || []).join("; "),
+            (e.notes || "").replace(/"/g, '""'),
+          ]
+            .map((v) => `"${v}"`)
+            .join(","),
         );
-        const csv = [cols.join(','), ...rows].join('\n');
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-        a.download = `campcheck-${new Date().toISOString().slice(0,10)}.csv`;
+        const csv = [cols.join(","), ...rows].join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+        a.download = `campcheck-${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
-        showToast(getActiveFilterCount() > 0 ? `CSV: ${toExport.length} filtered sites` : 'CSV downloaded!');
+        showToast(
+          getActiveFilterCount() > 0
+            ? `CSV: ${toExport.length} filtered sites`
+            : "CSV downloaded!",
+        );
       };
 
       // ── TOAST ──
       function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg; t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2500);
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2500);
       }
     </script>
   </body>
