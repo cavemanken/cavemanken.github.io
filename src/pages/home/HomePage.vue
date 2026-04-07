@@ -1,5 +1,10 @@
 <template>
-  <base-card><h2>Welcome to cmk63.org!!</h2></base-card>
+  <base-card
+    ><h2>Welcome to cmk63.org!!+++</h2>
+    <a href="bucket-list.html">Bucket List</a>
+    <br />
+    <a href="campsite-reviews.html">Campsite Reviews</a>
+  </base-card>
 </template>
 
 <script>
