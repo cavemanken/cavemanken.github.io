@@ -1,7 +1,7 @@
 export default {
   async getBlogListItems(context, payload) {
     const response = await fetch(
-      `${payload.firebaseProjectLink}${payload.dbName}.json`
+      `${payload.firebaseProjectLink}${payload.dbName}.json?auth=${context.rootGetters.token}`
     );
     const responseData = await response.json();
 
