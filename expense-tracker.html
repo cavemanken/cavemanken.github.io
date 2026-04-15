@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -32,12 +32,11 @@
       }
 
       body {
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         background: var(--pine);
         color: var(--text);
         min-height: 100vh;
-        background-image:
-          radial-gradient(
+        background-image: radial-gradient(
             ellipse at 10% 20%,
             rgba(61, 92, 46, 0.3) 0%,
             transparent 50%
@@ -68,7 +67,7 @@
         backdrop-filter: blur(8px);
       }
       .auth-logo {
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 2.8rem;
         color: var(--fern);
         letter-spacing: 2px;
@@ -97,7 +96,7 @@
         border: 1px solid var(--border);
         border-radius: 2px;
         color: var(--text);
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.9rem;
         padding: 0.65rem 0.85rem;
         outline: none;
@@ -113,7 +112,7 @@
         border: none;
         border-radius: 2px;
         color: var(--cream);
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1.1rem;
         letter-spacing: 2px;
         padding: 0.75rem;
@@ -162,7 +161,7 @@
         z-index: 100;
       }
       .logo {
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1.8rem;
         color: var(--fern);
         letter-spacing: 2px;
@@ -200,8 +199,8 @@
       /* ── SUMMARY CARDS ── */
       .summary-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 2rem;
         margin-bottom: 2rem;
       }
       @media (max-width: 600px) {
@@ -223,7 +222,7 @@
         margin-bottom: 0.4rem;
       }
       .sum-value {
-        font-family: "DM Mono", monospace;
+        font-family: 'DM Mono', monospace;
         font-size: 1.6rem;
         font-weight: 500;
       }
@@ -246,7 +245,7 @@
         margin-bottom: 2rem;
       }
       .section-title {
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1.2rem;
         color: var(--tan);
         letter-spacing: 2px;
@@ -278,7 +277,7 @@
         border: 1px solid var(--border);
         border-radius: 2px;
         color: var(--text);
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.88rem;
         padding: 0.6rem 0.8rem;
         outline: none;
@@ -296,7 +295,7 @@
         border: none;
         border-radius: 2px;
         color: var(--cream);
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1rem;
         letter-spacing: 2px;
         padding: 0.62rem 1.4rem;
@@ -322,7 +321,7 @@
         border: 1px solid var(--border);
         border-radius: 2px;
         color: var(--text);
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.8rem;
         padding: 0.45rem 0.75rem;
         outline: none;
@@ -397,7 +396,7 @@
         font-size: 0.88rem;
       }
       td.amount {
-        font-family: "DM Mono", monospace;
+        font-family: 'DM Mono', monospace;
         font-size: 0.9rem;
         color: var(--fern);
       }
@@ -412,7 +411,7 @@
       td.date {
         color: var(--muted);
         font-size: 0.8rem;
-        font-family: "DM Mono", monospace;
+        font-family: 'DM Mono', monospace;
       }
       td.actions {
         display: flex;
@@ -539,28 +538,12 @@
       </header>
 
       <main>
-        <!-- Summary -->
-        <div class="summary-grid">
-          <div class="sum-card">
-            <div class="sum-label">This Month</div>
-            <div class="sum-value amber" id="sum-month">$0.00</div>
-          </div>
-          <div class="sum-card">
-            <div class="sum-label">Total (All Time)</div>
-            <div class="sum-value red" id="sum-total">$0.00</div>
-          </div>
-          <div class="sum-card">
-            <div class="sum-label">Entries</div>
-            <div class="sum-value green" id="sum-count">0</div>
-          </div>
-        </div>
-
         <!-- Add Expense -->
         <div class="add-section">
           <div class="section-title">Add Expense</div>
           <div class="form-row">
             <div class="form-group">
-              <label>Description</label>
+              <label>Where</label>
               <input
                 type="text"
                 id="inp-desc"
@@ -599,6 +582,18 @@
               <input type="date" id="inp-date" />
             </div>
             <button class="btn-add" onclick="addExpense()">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-grid">
+          <div class="sum-card">
+            <span class="sum-label">This Month</span>
+            <span class="sum-value amber" id="sum-month">$0.00</span>
+            <span class="sum-label">Total</span>
+            <span class="sum-value red" id="sum-total">$0.00</span>
+            <span class="sum-label">Entries</span>
+            <span class="sum-value green" id="sum-count">0</span>
           </div>
         </div>
 
@@ -649,33 +644,33 @@
 
     <!-- Firebase -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
       import {
         getAuth,
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
         signOut,
         onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
       import {
         getDatabase,
         ref,
         push,
         onValue,
         remove,
-      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
       // ── FIREBASE CONFIG ──────────────────────────────────────────────────────────
       // Replace these values with your actual Firebase config from the console:
       // Firebase Console → Project Settings → General → Your apps → SDK setup
       const firebaseConfig = {
-        apiKey: "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
-        authDomain: "cmk63project.firebaseapp.com",
-        databaseURL: "https://cmk63project-default-rtdb.firebaseio.com",
-        projectId: "cmk63project",
-        storageBucket: "cmk63project.appspot.com",
-        messagingSenderId: "520150418866",
-        appId: "1:520150418866:web:5bd7d2aa561b987b1b90ab",
+        apiKey: 'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
+        authDomain: 'cmk63project.firebaseapp.com',
+        databaseURL: 'https://cmk63project-default-rtdb.firebaseio.com',
+        projectId: 'cmk63project',
+        storageBucket: 'cmk63project.appspot.com',
+        messagingSenderId: '520150418866',
+        appId: '1:520150418866:web:5bd7d2aa561b987b1b90ab',
       };
       // ────────────────────────────────────────────────────────────────────────────
 
@@ -690,16 +685,16 @@
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUID = user.uid;
-          document.getElementById("auth-screen").style.display = "none";
-          document.getElementById("app-screen").style.display = "block";
-          document.getElementById("user-email-display").textContent =
+          document.getElementById('auth-screen').style.display = 'none';
+          document.getElementById('app-screen').style.display = 'block';
+          document.getElementById('user-email-display').textContent =
             user.email;
           listenExpenses(user.uid);
         } else {
           currentUID = null;
           expenses = {};
-          document.getElementById("auth-screen").style.display = "flex";
-          document.getElementById("app-screen").style.display = "none";
+          document.getElementById('auth-screen').style.display = 'flex';
+          document.getElementById('app-screen').style.display = 'none';
         }
       });
 
@@ -714,37 +709,37 @@
 
       // ── ADD ──────────────────────────────────────────────────────────────────────
       window.addExpense = function () {
-        const desc = document.getElementById("inp-desc").value.trim();
-        const amount = parseFloat(document.getElementById("inp-amount").value);
-        const cat = document.getElementById("inp-cat").value;
-        const date = document.getElementById("inp-date").value;
-        if (!desc) return showToast("Please enter a description.");
+        const desc = document.getElementById('inp-desc').value.trim();
+        const amount = parseFloat(document.getElementById('inp-amount').value);
+        const cat = document.getElementById('inp-cat').value;
+        const date = document.getElementById('inp-date').value;
+        if (!desc) return showToast('Please enter a description.');
         if (!amount || amount <= 0)
-          return showToast("Please enter a valid amount.");
-        if (!date) return showToast("Please select a date.");
+          return showToast('Please enter a valid amount.');
+        if (!date) return showToast('Please select a date.');
 
         const expRef = ref(db, `expenses/${currentUID}`);
         push(expRef, { desc, amount, cat, date, ts: Date.now() })
           .then(() => {
-            document.getElementById("inp-desc").value = "";
-            document.getElementById("inp-amount").value = "";
-            showToast("Expense added ✓");
+            document.getElementById('inp-desc').value = '';
+            document.getElementById('inp-amount').value = '';
+            showToast('Expense added ✓');
           })
-          .catch((e) => showToast("Error: " + e.message));
+          .catch((e) => showToast('Error: ' + e.message));
       };
 
       // ── DELETE ───────────────────────────────────────────────────────────────────
       window.deleteExpense = function (key) {
-        if (!confirm("Delete this expense?")) return;
+        if (!confirm('Delete this expense?')) return;
         remove(ref(db, `expenses/${currentUID}/${key}`))
-          .then(() => showToast("Deleted."))
-          .catch((e) => showToast("Error: " + e.message));
+          .then(() => showToast('Deleted.'))
+          .catch((e) => showToast('Error: ' + e.message));
       };
 
       // ── RENDER ───────────────────────────────────────────────────────────────────
       window.renderExpenses = function () {
-        const catFilter = document.getElementById("filter-cat").value;
-        const monthFilter = document.getElementById("filter-month").value;
+        const catFilter = document.getElementById('filter-cat').value;
+        const monthFilter = document.getElementById('filter-month').value;
 
         let filtered = Object.entries(expenses)
           .filter(([, e]) => {
@@ -758,17 +753,20 @@
         const allEntries = Object.values(expenses);
         const totalAll = allEntries.reduce((s, e) => s + e.amount, 0);
         const now = new Date();
-        const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const thisMonth = `${now.getFullYear()}-${String(
+          now.getMonth() + 1
+        ).padStart(2, '0')}`;
         const totalMonth = allEntries
           .filter((e) => e.date.startsWith(thisMonth))
           .reduce((s, e) => s + e.amount, 0);
-        document.getElementById("sum-total").textContent = fmt(totalAll);
-        document.getElementById("sum-month").textContent = fmt(totalMonth);
-        document.getElementById("sum-count").textContent = allEntries.length;
-        document.getElementById("count-badge").textContent =
-          `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"}`;
+        document.getElementById('sum-total').textContent = fmt(totalAll);
+        document.getElementById('sum-month').textContent = fmt(totalMonth);
+        document.getElementById('sum-count').textContent = allEntries.length;
+        document.getElementById('count-badge').textContent = `${
+          filtered.length
+        } entr${filtered.length === 1 ? 'y' : 'ies'}`;
 
-        const wrap = document.getElementById("table-wrap");
+        const wrap = document.getElementById('table-wrap');
         if (filtered.length === 0) {
           wrap.innerHTML = `<div class="empty-state"><div class="icon">🌲</div>No expenses yet. Add your first one above.</div>`;
           return;
@@ -786,9 +784,9 @@
           <button class="btn-del" onclick="deleteExpense('${key}')">✕</button>
         </td>
       </tr>
-    `,
+    `
           )
-          .join("");
+          .join('');
 
         wrap.innerHTML = `
       <table>
@@ -802,43 +800,45 @@
       // ── EXPORT ───────────────────────────────────────────────────────────────────
       window.exportCSV = function () {
         const entries = Object.values(expenses).sort((a, b) =>
-          a.date > b.date ? -1 : 1,
+          a.date > b.date ? -1 : 1
         );
-        const header = "Date,Description,Category,Amount\n";
+        const header = 'Date,Description,Category,Amount\n';
         const rows = entries
           .map(
             (e) =>
-              `${e.date},"${e.desc.replace(/"/g, '""')}",${e.cat},${e.amount.toFixed(2)}`,
+              `${e.date},"${e.desc.replace(/"/g, '""')}",${
+                e.cat
+              },${e.amount.toFixed(2)}`
           )
-          .join("\n");
-        const blob = new Blob([header + rows], { type: "text/csv" });
+          .join('\n');
+        const blob = new Blob([header + rows], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "expenses.csv";
+        a.download = 'expenses.csv';
         a.click();
         URL.revokeObjectURL(url);
       };
 
       // ── AUTH ACTIONS ─────────────────────────────────────────────────────────────
       window.doLogin = function () {
-        const email = document.getElementById("login-email").value.trim();
-        const pass = document.getElementById("login-password").value;
-        document.getElementById("login-error").textContent = "";
+        const email = document.getElementById('login-email').value.trim();
+        const pass = document.getElementById('login-password').value;
+        document.getElementById('login-error').textContent = '';
         signInWithEmailAndPassword(auth, email, pass).catch((e) => {
-          document.getElementById("login-error").textContent = friendlyError(
-            e.code,
+          document.getElementById('login-error').textContent = friendlyError(
+            e.code
           );
         });
       };
 
       window.doRegister = function () {
-        const email = document.getElementById("reg-email").value.trim();
-        const pass = document.getElementById("reg-password").value;
-        document.getElementById("reg-error").textContent = "";
+        const email = document.getElementById('reg-email').value.trim();
+        const pass = document.getElementById('reg-password').value;
+        document.getElementById('reg-error').textContent = '';
         createUserWithEmailAndPassword(auth, email, pass).catch((e) => {
-          document.getElementById("reg-error").textContent = friendlyError(
-            e.code,
+          document.getElementById('reg-error').textContent = friendlyError(
+            e.code
           );
         });
       };
@@ -847,51 +847,51 @@
         signOut(auth);
       };
       window.showRegister = () => {
-        document.getElementById("login-form").style.display = "none";
-        document.getElementById("register-form").style.display = "block";
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = 'block';
       };
       window.showLogin = () => {
-        document.getElementById("register-form").style.display = "none";
-        document.getElementById("login-form").style.display = "block";
+        document.getElementById('register-form').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
       };
 
       // ── HELPERS ──────────────────────────────────────────────────────────────────
       function fmt(n) {
-        return "$" + (n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return '$' + (n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       }
       function formatDate(d) {
-        const [y, m, day] = d.split("-");
+        const [y, m, day] = d.split('-');
         return `${m}/${day}/${y}`;
       }
       function esc(s) {
         return String(s)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
       }
       function friendlyError(code) {
         const m = {
-          "auth/invalid-email": "Invalid email address.",
-          "auth/wrong-password": "Incorrect password.",
-          "auth/user-not-found": "No account with that email.",
-          "auth/email-already-in-use": "Email already in use.",
-          "auth/weak-password": "Password must be at least 6 characters.",
-          "auth/too-many-requests": "Too many attempts. Try again later.",
+          'auth/invalid-email': 'Invalid email address.',
+          'auth/wrong-password': 'Incorrect password.',
+          'auth/user-not-found': 'No account with that email.',
+          'auth/email-already-in-use': 'Email already in use.',
+          'auth/weak-password': 'Password must be at least 6 characters.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.',
         };
-        return m[code] || "Something went wrong. Try again.";
+        return m[code] || 'Something went wrong. Try again.';
       }
 
       window.showToast = function (msg) {
-        const t = document.getElementById("toast");
+        const t = document.getElementById('toast');
         t.textContent = msg;
-        t.classList.add("show");
-        setTimeout(() => t.classList.remove("show"), 2800);
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
       };
 
       // Set default date to today
-      document.getElementById("inp-date").value = new Date()
+      document.getElementById('inp-date').value = new Date()
         .toISOString()
-        .split("T")[0];
+        .split('T')[0];
     </script>
   </body>
 </html>
