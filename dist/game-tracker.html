@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GameBoard — Win Tracker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Courier+Prime:wght@400;700&family=Lato:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0d0d0f;
+        --surface: #141418;
+        --card: #1a1a20;
+        --border: #2a2a35;
+        --gold: #d4a847;
+        --gold2: #f0c55a;
+        --silver: #8a9ab5;
+        --bronze: #b87333;
+        --text: #e8e4d8;
+        --muted: #5a5a6a;
+        --accent: #c0392b;
+        --green: #2ecc71;
+
+        --tom: #e74c3c;
+        --janice: #9b59b6;
+        --jenny: #3498db;
+        --ken: #27ae60;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Lato", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        background-image:
+          radial-gradient(
+            ellipse 80% 50% at 50% -10%,
+            rgba(212, 168, 71, 0.08) 0%,
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.015) 40px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.015) 40px
+          );
+      }
+
+      /* ── HEADER ── */
+      header {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+        position: relative;
+      }
+      .header-rule {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 0 auto 2rem;
+        max-width: 600px;
+      }
+      .title-eyebrow {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.7rem;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 0.75rem;
+      }
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(2.8rem, 8vw, 5rem);
+        font-weight: 900;
+        line-height: 0.95;
+        color: var(--text);
+        letter-spacing: -1px;
+      }
+      h1 span {
+        color: var(--gold);
+      }
+      .subtitle {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: 0.75rem;
+      }
+      .auth-bar {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .auth-status {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.68rem;
+        color: var(--muted);
+        letter-spacing: 1px;
+      }
+      .auth-status.logged-in {
+        color: var(--green);
+      }
+      .btn-auth {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border: 1px solid var(--border);
+        background: none;
+        color: var(--muted);
+        padding: 0.4rem 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 1px;
+      }
+      .btn-auth:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      /* ── LEADERBOARD ── */
+      .board-wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 1rem 2rem;
+      }
+
+      .board-title {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.68rem;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .board-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .leaderboard {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 3rem;
+      }
+      @media (max-width: 600px) {
+        .leaderboard {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .player-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 1.5rem 1rem 1.25rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+      }
+      .player-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+      }
+      .player-card.tom::before {
+        background: var(--tom);
+      }
+      .player-card.janice::before {
+        background: var(--janice);
+      }
+      .player-card.jenny::before {
+        background: var(--jenny);
+      }
+      .player-card.ken::before {
+        background: var(--ken);
+      }
+
+      .player-card:hover {
+        transform: translateY(-2px);
+      }
+      .player-card.rank-1 {
+        border-color: var(--gold);
+      }
+      .player-card.rank-2 {
+        border-color: var(--silver);
+      }
+      .player-card.rank-3 {
+        border-color: var(--bronze);
+      }
+
+      .rank-badge {
+        position: absolute;
+        top: 0.7rem;
+        right: 0.7rem;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.6rem;
+        letter-spacing: 1px;
+        color: var(--muted);
+      }
+      .rank-1 .rank-badge {
+        color: var(--gold);
+      }
+      .rank-2 .rank-badge {
+        color: var(--silver);
+      }
+      .rank-3 .rank-badge {
+        color: var(--bronze);
+      }
+
+      .player-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Playfair Display", serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 auto 1rem;
+      }
+      .tom .player-avatar {
+        background: var(--tom);
+      }
+      .janice .player-avatar {
+        background: var(--janice);
+      }
+      .jenny .player-avatar {
+        background: var(--jenny);
+      }
+      .ken .player-avatar {
+        background: var(--ken);
+      }
+
+      .player-name {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+      }
+      .player-wins {
+        font-family: "Playfair Display", serif;
+        font-size: 2.8rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .tom .player-wins {
+        color: var(--tom);
+      }
+      .janice .player-wins {
+        color: var(--janice);
+      }
+      .jenny .player-wins {
+        color: var(--jenny);
+      }
+      .ken .player-wins {
+        color: var(--ken);
+      }
+
+      .player-label {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.6rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-top: 0.2rem;
+      }
+      .player-streak {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+        margin-top: 0.5rem;
+      }
+
+      /* ── ADD RECORD (auth-gated) ── */
+      .add-wrap {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 1.75rem;
+        margin-bottom: 2.5rem;
+      }
+      .add-locked {
+        text-align: center;
+        padding: 0.5rem 0;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 1px;
+      }
+      .add-locked a {
+        color: var(--gold);
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .add-locked a:hover {
+        text-decoration: underline;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 0.75rem;
+        align-items: end;
+      }
+      @media (max-width: 650px) {
+        .form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .form-group label {
+        display: block;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.62rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 0.35rem;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        border-radius: 1px;
+        color: var(--text);
+        font-family: "Lato", sans-serif;
+        font-size: 0.9rem;
+        padding: 0.65rem 0.8rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        border-color: var(--gold);
+      }
+      .form-group select option {
+        background: #1a1a20;
+      }
+
+      .btn-record {
+        background: var(--gold);
+        border: none;
+        border-radius: 1px;
+        color: #0d0d0f;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 0.68rem 1.4rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+      }
+      .btn-record:hover {
+        background: var(--gold2);
+      }
+
+      /* ── HISTORY TABLE ── */
+      .history-wrap {
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead tr {
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--muted);
+        padding: 0.6rem 0.75rem;
+        text-align: left;
+      }
+      tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        transition: background 0.15s;
+        animation: rowIn 0.3s ease both;
+      }
+      @keyframes rowIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      tbody tr:hover {
+        background: rgba(255, 255, 255, 0.025);
+      }
+      td {
+        padding: 0.75rem 0.75rem;
+        font-size: 0.88rem;
+      }
+      td.td-date {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      td.td-game {
+        color: var(--text);
+        font-weight: 300;
+      }
+      td.td-winner {
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .winner-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      td.td-actions {
+      }
+      .btn-del {
+        background: none;
+        border: 1px solid rgba(192, 57, 43, 0.25);
+        color: rgba(192, 57, 43, 0.5);
+        border-radius: 1px;
+        font-size: 0.65rem;
+        font-family: "Courier Prime", monospace;
+        padding: 0.2rem 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 1px;
+      }
+      .btn-del:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3.5rem 1rem;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 2px;
+      }
+
+      /* ── AUTH MODAL ── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 500;
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 2.5rem 2rem;
+        width: 100%;
+        max-width: 360px;
+        transform: translateY(10px);
+        transition: transform 0.25s;
+      }
+      .modal-overlay.open .modal {
+        transform: none;
+      }
+      .modal-title {
+        font-family: "Playfair Display", serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+      .modal-sub {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+      }
+      .modal label {
+        display: block;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.62rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 0.3rem;
+        margin-top: 0.9rem;
+      }
+      .modal input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        border-radius: 1px;
+        color: var(--text);
+        font-family: "Lato", sans-serif;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .modal input:focus {
+        border-color: var(--gold);
+      }
+      .modal .btn-record {
+        width: 100%;
+        margin-top: 1.4rem;
+      }
+      .modal-error {
+        font-family: "Courier Prime", monospace;
+        font-size: 0.72rem;
+        color: #e07070;
+        margin-top: 0.75rem;
+        text-align: center;
+      }
+      .modal-switch {
+        text-align: center;
+        margin-top: 1rem;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+      .modal-switch a {
+        color: var(--gold);
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .modal-switch a:hover {
+        text-decoration: underline;
+      }
+      .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .modal-close:hover {
+        color: var(--text);
+      }
+      .modal {
+        position: relative;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(12px);
+        background: var(--gold);
+        color: #0d0d0f;
+        font-family: "Courier Prime", monospace;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        padding: 0.6rem 1.4rem;
+        border-radius: 1px;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 999;
+        white-space: nowrap;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="auth-bar">
+        <span class="auth-status" id="auth-status">● NOT SIGNED IN</span>
+        <button class="btn-auth" id="auth-btn" onclick="toggleAuth()">
+          Sign In
+        </button>
+      </div>
+      <div class="title-eyebrow">The Official</div>
+      <h1>Game<span>Board</span></h1>
+      <div class="subtitle">Win Tracker · Tom · Janice · Jenny · Ken</div>
+    </header>
+
+    <div class="board-wrap">
+      <!-- LEADERBOARD -->
+      <div class="board-title">Standings</div>
+      <div class="leaderboard" id="leaderboard">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- ADD RECORD -->
+      <div class="board-title">Record a Win</div>
+      <div class="add-wrap" id="add-wrap">
+        <div class="add-locked" id="add-locked">
+          <a onclick="openModal()">Sign in</a> to record a new result.
+        </div>
+        <div id="add-form" style="display: none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="inp-date" />
+            </div>
+            <div class="form-group">
+              <label>Game</label>
+              <input
+                type="text"
+                id="inp-game"
+                placeholder="e.g. Catan, Rummy…"
+                maxlength="60"
+              />
+            </div>
+            <div class="form-group">
+              <label>Winner</label>
+              <select id="inp-winner">
+                <option value="Tom">Tom</option>
+                <option value="Janice">Janice</option>
+                <option value="Jenny">Jenny</option>
+                <option value="Ken">Ken</option>
+              </select>
+            </div>
+            <button class="btn-record" onclick="addRecord()">Record Win</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="board-title">History</div>
+      <div class="history-wrap">
+        <div id="history-wrap">
+          <div class="empty-state">Loading records…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+
+        <div id="m-login">
+          <div class="modal-title">Welcome Back</div>
+          <div class="modal-sub">Sign in to record results</div>
+          <label>Email</label>
+          <input
+            type="email"
+            id="m-email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          <label>Password</label>
+          <input
+            type="password"
+            id="m-pass"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <button class="btn-record" onclick="doLogin()">Sign In</button>
+          <div class="modal-error" id="m-error"></div>
+          <div class="modal-switch">
+            No account? <a onclick="showReg()">Create one</a>
+          </div>
+        </div>
+
+        <div id="m-register" style="display: none">
+          <div class="modal-title">Create Account</div>
+          <div class="modal-sub">One-time setup</div>
+          <label>Email</label>
+          <input
+            type="email"
+            id="r-email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          <label>Password</label>
+          <input
+            type="password"
+            id="r-pass"
+            placeholder="min 6 characters"
+            autocomplete="new-password"
+          />
+          <button class="btn-record" onclick="doRegister()">
+            Create Account
+          </button>
+          <div class="modal-error" id="r-error"></div>
+          <div class="modal-switch">
+            Have an account? <a onclick="showLogin()">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        onValue,
+        remove,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+      // ── FIREBASE CONFIG ──────────────────────────────────────────────────────────
+      // Replace apiKey, messagingSenderId, appId from Firebase Console →
+      // Project Settings → General → Your apps → SDK setup & configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
+        authDomain: "cmk63project.firebaseapp.com",
+        databaseURL: "https://cmk63project-default-rtdb.firebaseio.com",
+        projectId: "cmk63project",
+        storageBucket: "cmk63project.appspot.com",
+        messagingSenderId: "520150418866",
+        appId: "1:520150418866:web:5bd7d2aa561b987b1b90ab",
+      };
+      // ────────────────────────────────────────────────────────────────────────────
+
+      const PLAYERS = ["Tom", "Janice", "Jenny", "Ken"];
+      const COLORS = {
+        Tom: "#e74c3c",
+        Janice: "#9b59b6",
+        Jenny: "#3498db",
+        Ken: "#27ae60",
+      };
+      const INITIALS = { Tom: "T", Janice: "JA", Jenny: "JE", Ken: "K" };
+      const CLASSES = {
+        Tom: "tom",
+        Janice: "janice",
+        Jenny: "jenny",
+        Ken: "ken",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getDatabase(app);
+
+      let records = {};
+      let currentUser = null;
+
+      // ── REALTIME LISTENER (public read) ─────────────────────────────────────────
+      onValue(ref(db, "gameboard/records"), (snap) => {
+        records = snap.val() || {};
+        render();
+      });
+
+      // ── AUTH STATE ───────────────────────────────────────────────────────────────
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        const statusEl = document.getElementById("auth-status");
+        const btnEl = document.getElementById("auth-btn");
+        if (user) {
+          statusEl.textContent = "● " + user.email;
+          statusEl.className = "auth-status logged-in";
+          btnEl.textContent = "Sign Out";
+          document.getElementById("add-locked").style.display = "none";
+          document.getElementById("add-form").style.display = "block";
+          closeModal();
+        } else {
+          statusEl.textContent = "● NOT SIGNED IN";
+          statusEl.className = "auth-status";
+          btnEl.textContent = "Sign In";
+          document.getElementById("add-locked").style.display = "block";
+          document.getElementById("add-form").style.display = "none";
+        }
+      });
+
+      // ── RENDER ───────────────────────────────────────────────────────────────────
+      function render() {
+        // Tally wins
+        const wins = { Tom: 0, Janice: 0, Jenny: 0, Ken: 0 };
+        Object.values(records).forEach((r) => {
+          if (wins[r.winner] !== undefined) wins[r.winner]++;
+        });
+
+        // Ranked leaderboard
+        const ranked = [...PLAYERS].sort((a, b) => wins[b] - wins[a]);
+        const lbEl = document.getElementById("leaderboard");
+        lbEl.innerHTML = ranked
+          .map((p, i) => {
+            const rank = i + 1;
+            const medal =
+              rank === 1
+                ? "🥇 #1"
+                : rank === 2
+                  ? "🥈 #2"
+                  : rank === 3
+                    ? "🥉 #3"
+                    : `#${rank}`;
+            return `
+        <div class="player-card ${CLASSES[p]} rank-${rank}">
+          <div class="rank-badge">${medal}</div>
+          <div class="player-avatar">${INITIALS[p]}</div>
+          <div class="player-name">${p}</div>
+          <div class="player-wins">${wins[p]}</div>
+          <div class="player-label">WIN${wins[p] !== 1 ? "S" : ""}</div>
+        </div>`;
+          })
+          .join("");
+
+        // History table
+        const sorted = Object.entries(records).sort((a, b) =>
+          b[1].date > a[1].date ? 1 : -1,
+        );
+
+        const hwEl = document.getElementById("history-wrap");
+        if (sorted.length === 0) {
+          hwEl.innerHTML = `<div class="empty-state">No records yet. Sign in to record the first win.</div>`;
+          return;
+        }
+
+        const rows = sorted
+          .map(([key, r]) => {
+            const col = COLORS[r.winner] || "#888";
+            const delBtn = currentUser
+              ? `<button class="btn-del" onclick="window.delRecord('${key}')">DELETE</button>`
+              : "";
+            return `<tr>
+        <td class="td-date">${formatDate(r.date)}</td>
+        <td class="td-game">${esc(r.game)}</td>
+        <td class="td-winner">
+          <span class="winner-dot" style="background:${col}"></span>
+          ${esc(r.winner)}
+        </td>
+        <td class="td-actions">${delBtn}</td>
+      </tr>`;
+          })
+          .join("");
+
+        hwEl.innerHTML = `<table>
+      <thead><tr>
+        <th>Date</th><th>Game</th><th>Winner</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+      }
+
+      // ── ADD ──────────────────────────────────────────────────────────────────────
+      window.addRecord = function () {
+        if (!currentUser) return showToast("Please sign in first.");
+        const date = document.getElementById("inp-date").value;
+        const game = document.getElementById("inp-game").value.trim();
+        const winner = document.getElementById("inp-winner").value;
+        if (!date) return showToast("Please select a date.");
+        if (!game) return showToast("Please enter a game name.");
+        push(ref(db, "gameboard/records"), {
+          date,
+          game,
+          winner,
+          ts: Date.now(),
+        })
+          .then(() => {
+            document.getElementById("inp-game").value = "";
+            showToast(`${winner}'s win recorded! 🏆`);
+          })
+          .catch((e) => showToast("Error: " + e.message));
+      };
+
+      // ── DELETE ───────────────────────────────────────────────────────────────────
+      window.delRecord = function (key) {
+        if (!currentUser) return;
+        if (!confirm("Delete this record?")) return;
+        remove(ref(db, `gameboard/records/${key}`))
+          .then(() => showToast("Record deleted."))
+          .catch((e) => showToast("Error: " + e.message));
+      };
+
+      // ── AUTH ACTIONS ─────────────────────────────────────────────────────────────
+      window.toggleAuth = function () {
+        if (currentUser) {
+          signOut(auth);
+        } else {
+          openModal();
+        }
+      };
+      window.doLogin = function () {
+        const email = document.getElementById("m-email").value.trim();
+        const pass = document.getElementById("m-pass").value;
+        document.getElementById("m-error").textContent = "";
+        signInWithEmailAndPassword(auth, email, pass).catch((e) => {
+          document.getElementById("m-error").textContent = friendlyError(
+            e.code,
+          );
+        });
+      };
+      window.doRegister = function () {
+        const email = document.getElementById("r-email").value.trim();
+        const pass = document.getElementById("r-pass").value;
+        document.getElementById("r-error").textContent = "";
+        createUserWithEmailAndPassword(auth, email, pass).catch((e) => {
+          document.getElementById("r-error").textContent = friendlyError(
+            e.code,
+          );
+        });
+      };
+      window.openModal = () =>
+        document.getElementById("modal-overlay").classList.add("open");
+      window.closeModal = () =>
+        document.getElementById("modal-overlay").classList.remove("open");
+      window.showReg = () => {
+        document.getElementById("m-login").style.display = "none";
+        document.getElementById("m-register").style.display = "block";
+      };
+      window.showLogin = () => {
+        document.getElementById("m-register").style.display = "none";
+        document.getElementById("m-login").style.display = "block";
+      };
+
+      // ── HELPERS ──────────────────────────────────────────────────────────────────
+      function formatDate(d) {
+        if (!d) return "—";
+        const [y, m, day] = d.split("-");
+        return `${m}/${day}/${y}`;
+      }
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+      function friendlyError(code) {
+        const m = {
+          "auth/invalid-email": "Invalid email.",
+          "auth/wrong-password": "Wrong password.",
+          "auth/user-not-found": "No account found.",
+          "auth/email-already-in-use": "Email already in use.",
+          "auth/weak-password": "Password must be 6+ characters.",
+          "auth/too-many-requests": "Too many attempts.",
+        };
+        return m[code] || "Something went wrong.";
+      }
+      window.showToast = function (msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2800);
+      };
+
+      // Default date
+      document.getElementById("inp-date").value = new Date()
+        .toISOString()
+        .split("T")[0];
+    </script>
+  </body>
+</html>
