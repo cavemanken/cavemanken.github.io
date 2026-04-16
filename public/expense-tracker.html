@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TrailLedger — Expense Tracker</title>
+    <title>Expense Tracker</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
@@ -530,7 +530,7 @@
     <!-- MAIN APP -->
     <div id="app-screen">
       <header>
-        <div class="logo">TrailLedger</div>
+        <div class="logo">Expenses</div>
         <div class="header-right">
           <span class="user-email" id="user-email-display"></span>
           <button class="btn-signout" onclick="doSignOut()">Sign Out</button>
@@ -585,17 +585,7 @@
           </div>
         </div>
 
-        <!-- Summary -->
-        <div class="summary-grid">
-          <div class="sum-card">
-            <span class="sum-label">This Month</span>
-            <span class="sum-value amber" id="sum-month">$0.00</span>
-            <span class="sum-label">Total</span>
-            <span class="sum-value red" id="sum-total">$0.00</span>
-            <span class="sum-label">Entries</span>
-            <span class="sum-value green" id="sum-count">0</span>
-          </div>
-        </div>
+ 
 
         <!-- Expenses List -->
         <div class="expenses-section">
@@ -633,7 +623,17 @@
             </div>
           </div>
 
-          <div id="table-wrap">
+                 <!-- Summary -->
+        <div class="summary-grid">
+          <div class="sum-card">
+            <span class="sum-label">This Month</span>
+            <span class="sum-value amber" id="sum-month">$0.00</span>
+            <span class="sum-label">Total</span>
+            <span class="sum-value red" id="sum-total">$0.00</span>
+            <span class="sum-label">Entries</span>
+            <span class="sum-value green" id="sum-count">0</span>
+          </div>
+        </div><div id="table-wrap">
             <div class="loading">Loading expenses...</div>
           </div>
         </div>
