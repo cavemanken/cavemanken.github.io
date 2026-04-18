@@ -4,6 +4,10 @@
     <a href="bucket-list.html">Bucket List</a>
     <br />
     <a href="campsite-reviews.html">Campsite Reviews</a>
+    <br />
+    <a href="expense-tracker.html">Expense Tracker</a>
+    <br />
+    <a href="game-tracker.html">Game Tracker</a>
   </base-card>
 </template>
 
