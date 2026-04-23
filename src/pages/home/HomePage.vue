@@ -8,6 +8,8 @@
     <a href="expense-tracker.html">Expense Tracker</a>
     <br />
     <a href="game-tracker.html">Game Tracker</a>
+    <br />
+    <a href="pre-haul-checklist.html">Pre-Haul Checklist</a>
   </base-card>
 </template>
 
