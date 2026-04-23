@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -33,12 +33,11 @@
       }
 
       body {
-        font-family: "Barlow", sans-serif;
+        font-family: 'Barlow', sans-serif;
         background: var(--bg);
         color: var(--text);
         min-height: 100vh;
-        background-image:
-          radial-gradient(
+        background-image: radial-gradient(
             ellipse 80% 40% at 50% -10%,
             rgba(200, 168, 75, 0.12) 0%,
             transparent 60%
@@ -79,7 +78,7 @@
         font-size: 1.5rem;
       }
       .brand-title {
-        font-family: "Black Han Sans", sans-serif;
+        font-family: 'Black Han Sans', sans-serif;
         font-size: 1.55rem;
         letter-spacing: 0.06em;
         color: var(--accent);
@@ -101,7 +100,7 @@
         gap: 0.75rem;
       }
       .btn {
-        font-family: "Barlow", sans-serif;
+        font-family: 'Barlow', sans-serif;
         font-size: 0.82rem;
         font-weight: 600;
         letter-spacing: 0.08em;
@@ -223,10 +222,7 @@
         border-radius: 6px;
         padding: 0.85rem 1rem;
         cursor: pointer;
-        transition:
-          background 0.15s,
-          border-color 0.15s,
-          opacity 0.15s;
+        transition: background 0.15s, border-color 0.15s, opacity 0.15s;
         user-select: none;
         animation: slideIn 0.25s ease both;
       }
@@ -254,7 +250,7 @@
       }
 
       .item-num {
-        font-family: "Black Han Sans", sans-serif;
+        font-family: 'Black Han Sans', sans-serif;
         font-size: 0.78rem;
         color: var(--muted);
         min-width: 1.6rem;
@@ -323,7 +319,7 @@
         font-size: 0.75rem;
         cursor: pointer;
         transition: all 0.15s;
-        font-family: "Barlow", sans-serif;
+        font-family: 'Barlow', sans-serif;
       }
       .action-btn:hover {
         color: var(--text);
@@ -364,7 +360,7 @@
         background: var(--surface2);
         border: 1px solid var(--accent);
         color: var(--text);
-        font-family: "Barlow", sans-serif;
+        font-family: 'Barlow', sans-serif;
         font-size: 0.97rem;
         padding: 0.2rem 0.5rem;
         border-radius: 4px;
@@ -386,7 +382,7 @@
         background: var(--surface);
         border: 1px solid var(--border);
         color: var(--text);
-        font-family: "Barlow", sans-serif;
+        font-family: 'Barlow', sans-serif;
         font-size: 0.95rem;
         padding: 0.6rem 0.9rem;
         border-radius: 6px;
@@ -439,7 +435,7 @@
         }
       }
       .modal h2 {
-        font-family: "Black Han Sans", sans-serif;
+        font-family: 'Black Han Sans', sans-serif;
         font-size: 1.2rem;
         letter-spacing: 0.08em;
         color: var(--accent);
@@ -462,7 +458,7 @@
         background: var(--surface2);
         border: 1px solid var(--border);
         color: var(--text);
-        font-family: "Barlow", sans-serif;
+        font-family: 'Barlow', sans-serif;
         font-size: 0.95rem;
         padding: 0.6rem 0.8rem;
         border-radius: 5px;
@@ -490,7 +486,7 @@
         color: #1a1c18;
         text-align: center;
         padding: 0.9rem;
-        font-family: "Black Han Sans", sans-serif;
+        font-family: 'Black Han Sans', sans-serif;
         letter-spacing: 0.12em;
         font-size: 1rem;
         margin-bottom: 1.5rem;
@@ -610,13 +606,13 @@
 
     <!-- Firebase -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
       import {
         getAuth,
         signInWithEmailAndPassword,
         signOut,
         onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
       import {
         getDatabase,
         ref,
@@ -626,36 +622,18 @@
         remove,
         update,
         onValue,
-      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
       // ── Firebase config ──
       const firebaseConfig = {
-        apiKey: "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
-        authDomain: "cmk63project.firebaseapp.com",
-        databaseURL: "https://cmk63project-default-rtdb.firebaseio.com",
-        projectId: "cmk63project",
-        storageBucket: "cmk63project.appspot.com",
-        messagingSenderId: "520150418866",
-        appId: "1:520150418866:web:5bd7d2aa561b987b1b90ab",
+        apiKey: 'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
+        authDomain: 'cmk63project.firebaseapp.com',
+        databaseURL: 'https://cmk63project-default-rtdb.firebaseio.com',
+        projectId: 'cmk63project',
+        storageBucket: 'cmk63project.appspot.com',
+        messagingSenderId: '520150418866',
+        appId: '1:520150418866:web:5bd7d2aa561b987b1b90ab',
       };
-
-      const DEFAULT_ITEMS = [
-        "Connect battery",
-        "Secure TV",
-        "Close bathroom vent",
-        "Close all windows",
-        "Clear countertop",
-        "Close all cupboards and drawers",
-        "Raise stabilizers",
-        "Raise stairs",
-        "Turn off propane tanks",
-        "Check tires",
-        "Connect to Sequoia",
-        "Check lights",
-        "Remove wheel chocks",
-        "Close/lock battery compartment",
-        "Get dump station stuff ready",
-      ];
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
@@ -670,75 +648,62 @@
       let dragSrcId = null;
 
       // ── DOM refs ──
-      const checklistEl = document.getElementById("checklist");
-      const loadingEl = document.getElementById("loading");
-      const progressFill = document.getElementById("progress-fill");
-      const progressCount = document.getElementById("progress-count");
-      const completeBanner = document.getElementById("complete-banner");
-      const editToggleArea = document.getElementById("edit-toggle-area");
-      const editToggleBtn = document.getElementById("edit-toggle-btn");
-      const addArea = document.getElementById("add-area");
-      const newItemInput = document.getElementById("new-item-input");
-      const addBtn = document.getElementById("add-btn");
-      const resetBtn = document.getElementById("reset-btn");
-      const signInBtn = document.getElementById("sign-in-btn");
-      const signOutBtn = document.getElementById("sign-out-btn");
-      const userInfo = document.getElementById("user-info");
-      const userEmail = document.getElementById("user-email");
-      const authModal = document.getElementById("auth-modal");
-      const authEmailEl = document.getElementById("auth-email");
-      const authPassEl = document.getElementById("auth-password");
-      const authError = document.getElementById("auth-error");
-      const doSignIn = document.getElementById("do-sign-in");
-      const closeModal = document.getElementById("close-modal");
+      const checklistEl = document.getElementById('checklist');
+      const loadingEl = document.getElementById('loading');
+      const progressFill = document.getElementById('progress-fill');
+      const progressCount = document.getElementById('progress-count');
+      const completeBanner = document.getElementById('complete-banner');
+      const editToggleArea = document.getElementById('edit-toggle-area');
+      const editToggleBtn = document.getElementById('edit-toggle-btn');
+      const addArea = document.getElementById('add-area');
+      const newItemInput = document.getElementById('new-item-input');
+      const addBtn = document.getElementById('add-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const signInBtn = document.getElementById('sign-in-btn');
+      const signOutBtn = document.getElementById('sign-out-btn');
+      const userInfo = document.getElementById('user-info');
+      const userEmail = document.getElementById('user-email');
+      const authModal = document.getElementById('auth-modal');
+      const authEmailEl = document.getElementById('auth-email');
+      const authPassEl = document.getElementById('auth-password');
+      const authError = document.getElementById('auth-error');
+      const doSignIn = document.getElementById('do-sign-in');
+      const closeModal = document.getElementById('close-modal');
 
       // ── Paths ──
-      const itemsPath = (uid) => `camper_checklist/${uid}/items`;
+      const itemsPath = `camper_checklist/items`;
 
       // ── Auth state ──
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
-          signInBtn.style.display = "none";
-          userInfo.style.display = "flex";
+          signInBtn.style.display = 'none';
+          userInfo.style.display = 'flex';
           userEmail.textContent = user.email;
-          editToggleArea.style.display = "block";
-          loadItemsFromFirebase();
+          editToggleArea.style.display = 'block';
         } else {
-          signInBtn.style.display = "";
-          userInfo.style.display = "none";
-          editToggleArea.style.display = "none";
+          signInBtn.style.display = '';
+          userInfo.style.display = 'none';
+          editToggleArea.style.display = 'none';
           if (editMode) toggleEditMode(false);
           if (unsubscribe) {
             unsubscribe();
             unsubscribe = null;
           }
-          loadDefaultItems();
         }
+        loadItemsFromFirebase();
       });
-
-      // ── Load helpers ──
-      function loadDefaultItems() {
-        items = DEFAULT_ITEMS.map((text, i) => ({
-          id: "default_" + i,
-          text,
-          order: i,
-        }));
-        checked = {};
-        loadingEl.style.display = "none";
-        render();
-      }
 
       function loadItemsFromFirebase() {
         if (unsubscribe) unsubscribe();
-        const r = ref(db, itemsPath(currentUser.uid));
+        const r = ref(db, itemsPath);
         // Check if items exist; seed defaults if first time
         get(r).then((snap) => {
           if (!snap.exists()) {
             // Seed default items
             const batch = {};
             DEFAULT_ITEMS.forEach((text, i) => {
-              const key = "item_" + Date.now() + "_" + i;
+              const key = 'item_' + Date.now() + '_' + i;
               batch[key] = { text, order: i };
             });
             set(r, batch);
@@ -746,7 +711,7 @@
         });
         // Live listener
         unsubscribe = onValue(r, (snap) => {
-          loadingEl.style.display = "none";
+          loadingEl.style.display = 'none';
           if (snap.exists()) {
             const raw = snap.val();
             items = Object.entries(raw)
@@ -761,26 +726,26 @@
 
       // ── Render ──
       function render() {
-        checklistEl.innerHTML = "";
+        checklistEl.innerHTML = '';
         const total = items.length;
         const done = items.filter((i) => checked[i.id]).length;
 
         progressCount.textContent = `${done} / ${total}`;
         const pct = total ? (done / total) * 100 : 0;
-        progressFill.style.width = pct + "%";
+        progressFill.style.width = pct + '%';
         completeBanner.style.display =
-          total > 0 && done === total ? "block" : "none";
+          total > 0 && done === total ? 'block' : 'none';
 
         items.forEach((item, idx) => {
           const isChecked = !!checked[item.id];
-          const div = document.createElement("div");
-          div.className = "item" + (isChecked ? " checked" : "");
+          const div = document.createElement('div');
+          div.className = 'item' + (isChecked ? ' checked' : '');
           div.dataset.id = item.id;
           div.dataset.idx = idx;
 
           div.innerHTML = `
       <span class="drag-handle" title="Drag to reorder">⠿</span>
-      <span class="item-num">${String(idx + 1).padStart(2, "0")}</span>
+      <span class="item-num">${String(idx + 1).padStart(2, '0')}</span>
       <div class="check-box">
         <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
           <polyline points="1,5 5,9 12,1" stroke="#1a1c18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -794,9 +759,9 @@
     `;
 
           // Toggle check (only when not in edit mode)
-          div.addEventListener("click", (e) => {
+          div.addEventListener('click', (e) => {
             if (editMode) return;
-            if (e.target.closest(".item-actions")) return;
+            if (e.target.closest('.item-actions')) return;
             checked[item.id] = !checked[item.id];
             render();
           });
@@ -805,14 +770,14 @@
         });
 
         // Edit / delete buttons
-        document.querySelectorAll(".edit-btn").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
+        document.querySelectorAll('.edit-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
             e.stopPropagation();
             startInlineEdit(btn.dataset.id);
           });
         });
-        document.querySelectorAll(".action-btn.del").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
+        document.querySelectorAll('.action-btn.del').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
             e.stopPropagation();
             deleteItem(btn.dataset.id);
           });
@@ -820,60 +785,60 @@
 
         // ── Drag and drop (edit mode only) ──
 
-        document.querySelectorAll(".item").forEach((row) => {
-          const handle = row.querySelector(".drag-handle");
+        document.querySelectorAll('.item').forEach((row) => {
+          const handle = row.querySelector('.drag-handle');
 
           // Make the whole row draggable but only initiate via handle
-          handle.addEventListener("mousedown", () => {
+          handle.addEventListener('mousedown', () => {
             row.draggable = true;
           });
           handle.addEventListener(
-            "touchstart",
+            'touchstart',
             () => {
               row.draggable = true;
             },
-            { passive: true },
+            { passive: true }
           );
-          row.addEventListener("dragend", () => {
+          row.addEventListener('dragend', () => {
             row.draggable = false;
           });
 
-          row.addEventListener("dragstart", (e) => {
+          row.addEventListener('dragstart', (e) => {
             if (!editMode) {
               e.preventDefault();
               return;
             }
             dragSrcId = row.dataset.id;
-            e.dataTransfer.effectAllowed = "move";
-            setTimeout(() => row.classList.add("dragging"), 0);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => row.classList.add('dragging'), 0);
           });
 
-          row.addEventListener("dragend", () => {
-            row.classList.remove("dragging");
+          row.addEventListener('dragend', () => {
+            row.classList.remove('dragging');
             document
-              .querySelectorAll(".item")
-              .forEach((r) => r.classList.remove("drag-over"));
+              .querySelectorAll('.item')
+              .forEach((r) => r.classList.remove('drag-over'));
             dragSrcId = null;
           });
 
-          row.addEventListener("dragover", (e) => {
+          row.addEventListener('dragover', (e) => {
             if (!editMode || !dragSrcId) return;
             e.preventDefault();
-            e.dataTransfer.dropEffect = "move";
+            e.dataTransfer.dropEffect = 'move';
             document
-              .querySelectorAll(".item")
-              .forEach((r) => r.classList.remove("drag-over"));
-            if (row.dataset.id !== dragSrcId) row.classList.add("drag-over");
+              .querySelectorAll('.item')
+              .forEach((r) => r.classList.remove('drag-over'));
+            if (row.dataset.id !== dragSrcId) row.classList.add('drag-over');
           });
 
-          row.addEventListener("dragleave", () => {
-            row.classList.remove("drag-over");
+          row.addEventListener('dragleave', () => {
+            row.classList.remove('drag-over');
           });
 
-          row.addEventListener("drop", (e) => {
+          row.addEventListener('drop', (e) => {
             e.preventDefault();
             if (!editMode || !dragSrcId || row.dataset.id === dragSrcId) return;
-            row.classList.remove("drag-over");
+            row.classList.remove('drag-over');
 
             // Reorder items array
             const fromIdx = items.findIndex((i) => i.id === dragSrcId);
@@ -898,9 +863,9 @@
         const item = items.find((i) => i.id === id);
         if (!item) return;
         const div = checklistEl.querySelector(`[data-id="${id}"]`);
-        const textSpan = div.querySelector(".item-text");
-        const input = document.createElement("input");
-        input.className = "item-input";
+        const textSpan = div.querySelector('.item-text');
+        const input = document.createElement('input');
+        input.className = 'item-input';
         input.value = item.text;
         textSpan.replaceWith(input);
         input.focus();
@@ -910,13 +875,13 @@
           if (val && val !== item.text) saveItemText(id, val, item.order);
           else render();
         };
-        input.addEventListener("blur", save);
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
             e.preventDefault();
             input.blur();
           }
-          if (e.key === "Escape") {
+          if (e.key === 'Escape') {
             render();
           }
         });
@@ -925,13 +890,13 @@
       // ── Firebase CRUD ──
       function saveItemText(id, text, order) {
         if (!currentUser) return;
-        update(ref(db, `${itemsPath(currentUser.uid)}/${id}`), { text, order });
+        update(ref(db, `${itemsPath}/${id}`), { text, order });
       }
 
       function deleteItem(id) {
         if (!currentUser) return;
-        if (!confirm("Remove this item?")) return;
-        remove(ref(db, `${itemsPath(currentUser.uid)}/${id}`));
+        if (!confirm('Remove this item?')) return;
+        remove(ref(db, `${itemsPath}/${id}`));
         delete checked[id];
       }
 
@@ -939,8 +904,7 @@
         if (!currentUser) return;
         const updates = {};
         items.forEach((item) => {
-          updates[`${itemsPath(currentUser.uid)}/${item.id}/order`] =
-            item.order;
+          updates[`${itemsPath}/${item.id}/order`] = item.order;
         });
         update(ref(db), updates);
       }
@@ -950,24 +914,24 @@
         const maxOrder = items.length
           ? Math.max(...items.map((i) => i.order)) + 1
           : 0;
-        const r = ref(db, itemsPath(currentUser.uid));
+        const r = ref(db, itemsPath);
         push(r, { text, order: maxOrder });
       }
 
       // ── Add item UI ──
-      addBtn.addEventListener("click", () => {
+      addBtn.addEventListener('click', () => {
         const val = newItemInput.value.trim();
         if (!val) return;
         addItem(val);
-        newItemInput.value = "";
+        newItemInput.value = '';
         newItemInput.focus();
       });
-      newItemInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") addBtn.click();
+      newItemInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') addBtn.click();
       });
 
       // ── Reset ──
-      resetBtn.addEventListener("click", () => {
+      resetBtn.addEventListener('click', () => {
         checked = {};
         render();
       });
@@ -975,70 +939,70 @@
       // ── Edit mode toggle ──
       function toggleEditMode(force) {
         editMode = force !== undefined ? force : !editMode;
-        document.body.classList.toggle("edit-mode", editMode);
+        document.body.classList.toggle('edit-mode', editMode);
         editToggleBtn.textContent = editMode
-          ? "✓ Done Editing"
-          : "✏️ Edit List";
+          ? '✓ Done Editing'
+          : '✏️ Edit List';
       }
-      editToggleBtn.addEventListener("click", () => toggleEditMode());
+      editToggleBtn.addEventListener('click', () => toggleEditMode());
 
       // ── Auth modal ──
-      signInBtn.addEventListener("click", () => {
-        authError.textContent = "";
-        authEmailEl.value = "";
-        authPassEl.value = "";
-        authModal.classList.add("open");
+      signInBtn.addEventListener('click', () => {
+        authError.textContent = '';
+        authEmailEl.value = '';
+        authPassEl.value = '';
+        authModal.classList.add('open');
         setTimeout(() => authEmailEl.focus(), 100);
       });
-      closeModal.addEventListener("click", () =>
-        authModal.classList.remove("open"),
+      closeModal.addEventListener('click', () =>
+        authModal.classList.remove('open')
       );
-      authModal.addEventListener("click", (e) => {
-        if (e.target === authModal) authModal.classList.remove("open");
+      authModal.addEventListener('click', (e) => {
+        if (e.target === authModal) authModal.classList.remove('open');
       });
 
-      doSignIn.addEventListener("click", async () => {
+      doSignIn.addEventListener('click', async () => {
         const email = authEmailEl.value.trim();
         const pass = authPassEl.value;
         if (!email || !pass) {
-          authError.textContent = "Please enter email and password.";
+          authError.textContent = 'Please enter email and password.';
           return;
         }
-        doSignIn.textContent = "Signing in…";
+        doSignIn.textContent = 'Signing in…';
         doSignIn.disabled = true;
         try {
           await signInWithEmailAndPassword(auth, email, pass);
-          authModal.classList.remove("open");
+          authModal.classList.remove('open');
         } catch (err) {
           authError.textContent = friendlyError(err.code);
         } finally {
-          doSignIn.textContent = "Sign In";
+          doSignIn.textContent = 'Sign In';
           doSignIn.disabled = false;
         }
       });
-      authPassEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") doSignIn.click();
+      authPassEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doSignIn.click();
       });
 
-      signOutBtn.addEventListener("click", () => signOut(auth));
+      signOutBtn.addEventListener('click', () => signOut(auth));
 
       // ── Helpers ──
       function escHtml(str) {
         return str
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
       }
       function friendlyError(code) {
         const map = {
-          "auth/user-not-found": "No account found with that email.",
-          "auth/wrong-password": "Incorrect password.",
-          "auth/invalid-email": "Invalid email address.",
-          "auth/too-many-requests": "Too many attempts. Try again later.",
-          "auth/invalid-credential": "Invalid email or password.",
+          'auth/user-not-found': 'No account found with that email.',
+          'auth/wrong-password': 'Incorrect password.',
+          'auth/invalid-email': 'Invalid email address.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.',
+          'auth/invalid-credential': 'Invalid email or password.',
         };
-        return map[code] || "Sign-in failed. Please try again.";
+        return map[code] || 'Sign-in failed. Please try again.';
       }
     </script>
   </body>
