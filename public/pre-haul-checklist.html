@@ -527,7 +527,7 @@
         <span class="brand-icon">🚐</span>
         <div>
           <div class="brand-title">HAUL READY</div>
-          <div class="brand-sub">Camper Pre-Trip Checklist</div>
+          <div class="brand-sub">Camper Pre-Haul Checklist</div>
         </div>
       </div>
       <div id="auth-area">
@@ -671,7 +671,7 @@
       const closeModal = document.getElementById('close-modal');
 
       // ── Paths ──
-      const itemsPath = `camper_checklist/items`;
+      const itemsPath = `pre_haul_checklist/items`;
 
       // ── Auth state ──
       onAuthStateChanged(auth, (user) => {
@@ -699,15 +699,15 @@
         const r = ref(db, itemsPath);
         // Check if items exist; seed defaults if first time
         get(r).then((snap) => {
-          if (!snap.exists()) {
-            // Seed default items
-            const batch = {};
-            DEFAULT_ITEMS.forEach((text, i) => {
-              const key = 'item_' + Date.now() + '_' + i;
-              batch[key] = { text, order: i };
-            });
-            set(r, batch);
-          }
+          // if (!snap.exists()) {
+          //   // Seed default items
+          //   const batch = {};
+          //   DEFAULT_ITEMS.forEach((text, i) => {
+          //     const key = 'item_' + Date.now() + '_' + i;
+          //     batch[key] = { text, order: i };
+          //   });
+          //   set(r, batch);
+          // }
         });
         // Live listener
         unsubscribe = onValue(r, (snap) => {
