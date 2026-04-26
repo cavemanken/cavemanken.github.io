@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,6 +7,12 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
+    />
+    <link
+      id="favicon"
+      rel="shortcut icon"
+      type="image/png"
+      href="dollar-sign.png"
     />
     <style>
       :root {
@@ -26,16 +32,27 @@
         --pending: #e67e22;
       }
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
       body {
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         background: var(--pine);
         color: var(--text);
         min-height: 100vh;
-        background-image:
-          radial-gradient(ellipse at 10% 20%, rgba(61,92,46,0.3) 0%, transparent 50%),
-          radial-gradient(ellipse at 90% 80%, rgba(44,31,18,0.6) 0%, transparent 50%),
+        background-image: radial-gradient(
+            ellipse at 10% 20%,
+            rgba(61, 92, 46, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 90% 80%,
+            rgba(44, 31, 18, 0.6) 0%,
+            transparent 50%
+          ),
           url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
       }
 
@@ -55,7 +72,7 @@
         flex-wrap: wrap;
       }
       .logo {
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1.8rem;
         color: var(--fern);
         letter-spacing: 2px;
@@ -63,16 +80,19 @@
       .header-right {
         display: flex;
         align-items: center;
-        gap: .75rem;
+        gap: 0.75rem;
         flex-wrap: wrap;
       }
-      .user-email { font-size: 0.75rem; color: var(--muted); }
+      .user-email {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
 
       /* Sync button */
       .btn-sync {
         display: none;
         align-items: center;
-        gap: .4rem;
+        gap: 0.4rem;
         background: none;
         border: 1px solid var(--pending);
         border-radius: 2px;
@@ -82,15 +102,20 @@
         cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-sync.visible { display: flex; }
-      .btn-sync:hover { background: var(--pending); color: #1a2e1a; }
+      .btn-sync.visible {
+        display: flex;
+      }
+      .btn-sync:hover {
+        background: var(--pending);
+        color: #1a2e1a;
+      }
       .sync-badge {
         background: var(--pending);
         color: #1a2e1a;
         border-radius: 20px;
-        font-size: .6rem;
+        font-size: 0.6rem;
         font-weight: 700;
-        padding: .1rem .4rem;
+        padding: 0.1rem 0.4rem;
         line-height: 1.4;
       }
 
@@ -104,7 +129,10 @@
         cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-signin:hover { border-color: var(--fern); color: var(--fern); }
+      .btn-signin:hover {
+        border-color: var(--fern);
+        color: var(--fern);
+      }
 
       .btn-signout {
         background: none;
@@ -116,9 +144,16 @@
         cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-signout:hover { border-color: var(--tan); color: var(--tan); }
+      .btn-signout:hover {
+        border-color: var(--tan);
+        color: var(--tan);
+      }
 
-      main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
 
       /* ── SUMMARY CARD ── */
       .summary-grid {
@@ -140,10 +175,20 @@
         color: var(--muted);
         margin-bottom: 0.4rem;
       }
-      .sum-value { font-family: "DM Mono", monospace; font-size: 1.6rem; font-weight: 500; }
-      .sum-value.green { color: var(--fern); }
-      .sum-value.amber { color: var(--amber); }
-      .sum-value.red   { color: #e07070; }
+      .sum-value {
+        font-family: 'DM Mono', monospace;
+        font-size: 1.6rem;
+        font-weight: 500;
+      }
+      .sum-value.green {
+        color: var(--fern);
+      }
+      .sum-value.amber {
+        color: var(--amber);
+      }
+      .sum-value.red {
+        color: #e07070;
+      }
 
       /* ── ADD FORM ── */
       .add-section {
@@ -154,7 +199,7 @@
         margin-bottom: 2rem;
       }
       .section-title {
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1.2rem;
         color: var(--tan);
         letter-spacing: 2px;
@@ -166,7 +211,11 @@
         gap: 0.75rem;
         align-items: end;
       }
-      @media (max-width: 650px) { .form-row { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 650px) {
+        .form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
       .form-group label {
         display: block;
         font-size: 0.68rem;
@@ -182,21 +231,25 @@
         border: 1px solid var(--border);
         border-radius: 2px;
         color: var(--text);
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.88rem;
         padding: 0.6rem 0.8rem;
         outline: none;
         transition: border-color 0.2s;
       }
       .form-group input:focus,
-      .form-group select:focus { border-color: var(--sage); }
-      .form-group select option { background: #1a2e1a; }
+      .form-group select:focus {
+        border-color: var(--sage);
+      }
+      .form-group select option {
+        background: #1a2e1a;
+      }
       .btn-add {
         background: var(--moss);
         border: none;
         border-radius: 2px;
         color: var(--cream);
-        font-family: "Bebas Neue", sans-serif;
+        font-family: 'Bebas Neue', sans-serif;
         font-size: 1rem;
         letter-spacing: 2px;
         padding: 0.62rem 1.4rem;
@@ -204,17 +257,21 @@
         transition: background 0.2s;
         white-space: nowrap;
       }
-      .btn-add:hover { background: var(--sage); }
+      .btn-add:hover {
+        background: var(--sage);
+      }
 
       /* Offline note under form */
       .offline-note {
         display: none;
-        margin-top: .85rem;
-        font-size: .72rem;
+        margin-top: 0.85rem;
+        font-size: 0.72rem;
         color: var(--pending);
-        letter-spacing: .5px;
+        letter-spacing: 0.5px;
       }
-      .offline-note.visible { display: block; }
+      .offline-note.visible {
+        display: block;
+      }
 
       /* ── FILTER BAR ── */
       .filter-bar {
@@ -230,16 +287,24 @@
         border: 1px solid var(--border);
         border-radius: 2px;
         color: var(--text);
-        font-family: "DM Sans", sans-serif;
+        font-family: 'DM Sans', sans-serif;
         font-size: 0.8rem;
         padding: 0.45rem 0.75rem;
         outline: none;
       }
-      .filter-bar select option { background: #1a2e1a; }
-      .filter-bar label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+      .filter-bar select option {
+        background: #1a2e1a;
+      }
+      .filter-bar label {
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
 
       /* ── TABLE ── */
-      .expenses-section { }
+      .expenses-section {
+      }
       .expenses-header {
         display: flex;
         justify-content: space-between;
@@ -264,10 +329,18 @@
         cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-export:hover { border-color: var(--fern); color: var(--fern); }
+      .btn-export:hover {
+        border-color: var(--fern);
+        color: var(--fern);
+      }
 
-      table { width: 100%; border-collapse: collapse; }
-      thead tr { border-bottom: 1px solid var(--border); }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead tr {
+        border-bottom: 1px solid var(--border);
+      }
       th {
         font-size: 0.65rem;
         text-transform: uppercase;
@@ -281,10 +354,21 @@
         border-bottom: 1px solid rgba(232, 223, 200, 0.05);
         transition: background 0.15s;
       }
-      tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
-      tbody tr.local-row { background: rgba(230,126,34,0.04); }
-      td { padding: 0.7rem 0.75rem; font-size: 0.88rem; }
-      td.amount { font-family: "DM Mono", monospace; font-size: 0.9rem; color: var(--fern); }
+      tbody tr:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      tbody tr.local-row {
+        background: rgba(230, 126, 34, 0.04);
+      }
+      td {
+        padding: 0.7rem 0.75rem;
+        font-size: 0.88rem;
+      }
+      td.amount {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.9rem;
+        color: var(--fern);
+      }
       td.category span {
         background: rgba(61, 92, 46, 0.3);
         border: 1px solid rgba(107, 143, 90, 0.3);
@@ -293,18 +377,26 @@
         font-size: 0.72rem;
         color: var(--sage);
       }
-      td.date { color: var(--muted); font-size: 0.8rem; font-family: "DM Mono", monospace; }
-      td.actions { display: flex; gap: 0.5rem; align-items: center; }
+      td.date {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-family: 'DM Mono', monospace;
+      }
+      td.actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
 
       .pending-pill {
-        font-size: .6rem;
-        letter-spacing: .5px;
+        font-size: 0.6rem;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
-        background: rgba(230,126,34,0.15);
+        background: rgba(230, 126, 34, 0.15);
         color: var(--pending);
-        border: 1px solid rgba(230,126,34,0.3);
+        border: 1px solid rgba(230, 126, 34, 0.3);
         border-radius: 20px;
-        padding: .12rem .5rem;
+        padding: 0.12rem 0.5rem;
         white-space: nowrap;
       }
 
@@ -318,83 +410,172 @@
         cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-del:hover { border-color: var(--red); color: var(--red); }
+      .btn-del:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
 
-      .empty-state { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.9rem; }
-      .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .empty-state .icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.4;
+      }
 
       /* ── AUTH MODAL ── */
       .modal-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.8);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 500; backdrop-filter: blur(6px);
-        opacity: 0; pointer-events: none; transition: opacity .25s;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 500;
+        backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
       }
-      .modal-overlay.open { opacity: 1; pointer-events: all; }
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
       .modal {
-        background: rgba(20,35,20,0.97);
+        background: rgba(20, 35, 20, 0.97);
         border: 1px solid var(--border);
         border-radius: 2px;
         padding: 2.5rem 2rem;
-        width: 100%; max-width: 360px;
+        width: 100%;
+        max-width: 360px;
         position: relative;
-        transform: translateY(12px); transition: transform .25s;
+        transform: translateY(12px);
+        transition: transform 0.25s;
       }
-      .modal-overlay.open .modal { transform: none; }
+      .modal-overlay.open .modal {
+        transform: none;
+      }
       .modal-logo {
-        font-family: "Bebas Neue", sans-serif;
-        font-size: 1.6rem; color: var(--fern); letter-spacing: 2px; margin-bottom: .2rem;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.6rem;
+        color: var(--fern);
+        letter-spacing: 2px;
+        margin-bottom: 0.2rem;
       }
       .modal-sub {
-        font-size: .72rem; color: var(--muted);
-        text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem;
+        font-size: 0.72rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
       }
       .modal label {
-        display: block; font-size: .72rem; color: var(--tan);
-        text-transform: uppercase; letter-spacing: 1px;
-        margin-bottom: .35rem; margin-top: 1rem;
+        display: block;
+        font-size: 0.72rem;
+        color: var(--tan);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.35rem;
+        margin-top: 1rem;
       }
       .modal input {
-        width: 100%; background: rgba(0,0,0,0.3);
-        border: 1px solid var(--border); border-radius: 2px;
-        color: var(--text); font-family: "DM Sans", sans-serif;
-        font-size: .9rem; padding: .65rem .85rem; outline: none; transition: border-color .2s;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        padding: 0.65rem 0.85rem;
+        outline: none;
+        transition: border-color 0.2s;
       }
-      .modal input:focus { border-color: var(--sage); }
+      .modal input:focus {
+        border-color: var(--sage);
+      }
       .modal .btn-primary {
-        width: 100%; margin-top: 1.5rem;
-        background: var(--moss); border: none; border-radius: 2px;
-        color: var(--cream); font-family: "Bebas Neue", sans-serif;
-        font-size: 1.1rem; letter-spacing: 2px; padding: .75rem;
-        cursor: pointer; transition: background .2s;
+        width: 100%;
+        margin-top: 1.5rem;
+        background: var(--moss);
+        border: none;
+        border-radius: 2px;
+        color: var(--cream);
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: background 0.2s;
       }
-      .modal .btn-primary:hover { background: var(--sage); }
-      .modal-error { color: #e07070; font-size: .78rem; margin-top: .75rem; text-align: center; }
-      .modal-switch { margin-top: 1rem; text-align: center; font-size: .8rem; color: var(--muted); }
-      .modal-switch a { color: var(--fern); cursor: pointer; text-decoration: none; }
-      .modal-switch a:hover { text-decoration: underline; }
+      .modal .btn-primary:hover {
+        background: var(--sage);
+      }
+      .modal-error {
+        color: #e07070;
+        font-size: 0.78rem;
+        margin-top: 0.75rem;
+        text-align: center;
+      }
+      .modal-switch {
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .modal-switch a {
+        color: var(--fern);
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .modal-switch a:hover {
+        text-decoration: underline;
+      }
       .modal-close {
-        position: absolute; top: 1rem; right: 1rem;
-        background: none; border: none; color: var(--muted);
-        font-size: 1.1rem; cursor: pointer; transition: color .2s;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: color 0.2s;
       }
-      .modal-close:hover { color: var(--text); }
+      .modal-close:hover {
+        color: var(--text);
+      }
 
       /* ── TOAST ── */
       .toast {
-        position: fixed; bottom: 1.5rem; right: 1.5rem;
-        background: var(--moss); color: var(--cream);
-        font-size: 0.82rem; padding: 0.65rem 1.2rem; border-radius: 2px;
-        opacity: 0; transform: translateY(10px); transition: all 0.3s;
-        pointer-events: none; z-index: 999;
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        background: var(--moss);
+        color: var(--cream);
+        font-size: 0.82rem;
+        padding: 0.65rem 1.2rem;
+        border-radius: 2px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 999;
       }
-      .toast.show { opacity: 1; transform: translateY(0); }
-      .toast.amber { background: var(--amber); color: #1a2e1a; }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .toast.amber {
+        background: var(--amber);
+        color: #1a2e1a;
+      }
     </style>
   </head>
   <body>
-
     <!-- MAIN APP (always visible) -->
     <header>
       <div class="logo">Expense Tracker</div>
@@ -402,9 +583,22 @@
         <button class="btn-sync" id="btn-sync" onclick="syncToFirebase()">
           ↑ Sync <span class="sync-badge" id="sync-badge">0</span>
         </button>
-        <span class="user-email" id="user-email-display" style="display:none"></span>
-        <button class="btn-signin" id="btn-signin" onclick="openModal()">Sign In</button>
-        <button class="btn-signout" id="btn-signout" style="display:none" onclick="doSignOut()">Sign Out</button>
+        <span
+          class="user-email"
+          id="user-email-display"
+          style="display: none"
+        ></span>
+        <button class="btn-signin" id="btn-signin" onclick="openModal()">
+          Sign In
+        </button>
+        <button
+          class="btn-signout"
+          id="btn-signout"
+          style="display: none"
+          onclick="doSignOut()"
+        >
+          Sign Out
+        </button>
       </div>
     </header>
 
@@ -415,11 +609,22 @@
         <div class="form-row">
           <div class="form-group">
             <label>Where</label>
-            <input type="text" id="inp-desc" placeholder="Where was it?" maxlength="80" />
+            <input
+              type="text"
+              id="inp-desc"
+              placeholder="Where was it?"
+              maxlength="80"
+            />
           </div>
           <div class="form-group">
             <label>Amount ($)</label>
-            <input type="number" id="inp-amount" placeholder="0.00" step="0.01" min="0" />
+            <input
+              type="number"
+              id="inp-amount"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
           </div>
           <div class="form-group">
             <label>Category</label>
@@ -475,25 +680,34 @@
             </div>
             <div>
               <label>Filter Month</label><br />
-              <input type="month" id="filter-month" onchange="renderExpenses()" />
+              <input
+                type="month"
+                id="filter-month"
+                onchange="renderExpenses()"
+              />
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:.75rem">
+          <div style="display: flex; align-items: center; gap: 0.75rem">
             <span class="count-badge" id="count-badge">0 entries</span>
             <button class="btn-export" onclick="exportCSV()">Export CSV</button>
           </div>
         </div>
-        <div id="table-wrap"><div class="empty-state"><div class="icon">🌲</div>No expenses yet. Add your first one above.</div></div>
+        <div id="table-wrap">
+          <div class="empty-state">
+            <div class="icon">🌲</div>
+            No expenses yet. Add your first one above.
+          </div>
+        </div>
       </div>
 
       <!-- Summary -->
-      <div class="summary-grid" style="margin-top:2rem">
+      <div class="summary-grid" style="margin-top: 2rem">
         <div class="sum-card">
           <div class="sum-label">This Month</div>
           <div class="sum-value amber" id="sum-month">$0.00</div>
-          <div class="sum-label" style="margin-top:.75rem">Total</div>
+          <div class="sum-label" style="margin-top: 0.75rem">Total</div>
           <div class="sum-value red" id="sum-total">$0.00</div>
-          <div class="sum-label" style="margin-top:.75rem">Entries</div>
+          <div class="sum-label" style="margin-top: 0.75rem">Entries</div>
           <div class="sum-value green" id="sum-count">0</div>
         </div>
       </div>
@@ -508,24 +722,50 @@
           <div class="modal-logo">TrailLedger</div>
           <div class="modal-sub">Sign in to sync your expenses</div>
           <label>Email</label>
-          <input type="email" id="m-email" placeholder="you@example.com" autocomplete="email" />
+          <input
+            type="email"
+            id="m-email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
           <label>Password</label>
-          <input type="password" id="m-pass" placeholder="••••••••" autocomplete="current-password" />
+          <input
+            type="password"
+            id="m-pass"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
           <button class="btn-primary" onclick="doLogin()">Sign In</button>
           <div class="modal-error" id="m-error"></div>
-          <div class="modal-switch">No account? <a onclick="showReg()">Create one</a></div>
+          <div class="modal-switch">
+            No account? <a onclick="showReg()">Create one</a>
+          </div>
         </div>
 
-        <div id="m-register" style="display:none">
+        <div id="m-register" style="display: none">
           <div class="modal-logo">TrailLedger</div>
           <div class="modal-sub">Create your account</div>
           <label>Email</label>
-          <input type="email" id="r-email" placeholder="you@example.com" autocomplete="email" />
+          <input
+            type="email"
+            id="r-email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
           <label>Password</label>
-          <input type="password" id="r-pass" placeholder="min 6 characters" autocomplete="new-password" />
-          <button class="btn-primary" onclick="doRegister()">Create Account</button>
+          <input
+            type="password"
+            id="r-pass"
+            placeholder="min 6 characters"
+            autocomplete="new-password"
+          />
+          <button class="btn-primary" onclick="doRegister()">
+            Create Account
+          </button>
           <div class="modal-error" id="r-error"></div>
-          <div class="modal-switch">Have an account? <a onclick="showLogin()">Sign in</a></div>
+          <div class="modal-switch">
+            Have an account? <a onclick="showLogin()">Sign in</a>
+          </div>
         </div>
       </div>
     </div>
@@ -533,67 +773,82 @@
     <div class="toast" id="toast"></div>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
       import {
-        getAuth, createUserWithEmailAndPassword,
-        signInWithEmailAndPassword, signOut, onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
       import {
-        getDatabase, ref, push, onValue, remove, off,
-      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        getDatabase,
+        ref,
+        push,
+        onValue,
+        remove,
+        off,
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
       // ── FIREBASE CONFIG ──────────────────────────────────────────────────────
       const firebaseConfig = {
-        apiKey:            "AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE",
-        authDomain:        "cmk63project.firebaseapp.com",
-        databaseURL:       "https://cmk63project-default-rtdb.firebaseio.com",
-        projectId:         "cmk63project",
-        storageBucket:     "cmk63project.appspot.com",
-        messagingSenderId: "520150418866",
-        appId:             "1:520150418866:web:5bd7d2aa561b987b1b90ab",
+        apiKey: 'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
+        authDomain: 'cmk63project.firebaseapp.com',
+        databaseURL: 'https://cmk63project-default-rtdb.firebaseio.com',
+        projectId: 'cmk63project',
+        storageBucket: 'cmk63project.appspot.com',
+        messagingSenderId: '520150418866',
+        appId: '1:520150418866:web:5bd7d2aa561b987b1b90ab',
       };
       // ────────────────────────────────────────────────────────────────────────
 
-      const LS_KEY = "expense_tracker_local";
+      const LS_KEY = 'expense_tracker_local';
 
-      const app  = initializeApp(firebaseConfig);
+      const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
-      const db   = getDatabase(app);
+      const db = getDatabase(app);
 
-      let currentUID      = null;
-      let firebaseExpenses = {};  // { firebaseKey: record }
-      let activeListener  = null; // ref being listened to
+      let currentUID = null;
+      let firebaseExpenses = {}; // { firebaseKey: record }
+      let activeListener = null; // ref being listened to
 
       // ── LOCAL STORAGE HELPERS ─────────────────────────────────────────────────
       function loadLocal() {
-        try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
-        catch { return []; }
+        try {
+          return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        } catch {
+          return [];
+        }
       }
       function saveLocal(arr) {
         localStorage.setItem(LS_KEY, JSON.stringify(arr));
       }
       function pendingLocal() {
-        return loadLocal().filter(r => !r.synced);
+        return loadLocal().filter((r) => !r.synced);
       }
 
       // ── AUTH STATE ────────────────────────────────────────────────────────────
-      onAuthStateChanged(auth, user => {
+      onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUID = user.uid;
-          document.getElementById("user-email-display").textContent = user.email;
-          document.getElementById("user-email-display").style.display = "";
-          document.getElementById("btn-signin").style.display  = "none";
-          document.getElementById("btn-signout").style.display = "";
+          document.getElementById('user-email-display').textContent =
+            user.email;
+          document.getElementById('user-email-display').style.display = '';
+          document.getElementById('btn-signin').style.display = 'none';
+          document.getElementById('btn-signout').style.display = '';
           startFirebaseListener(user.uid);
           closeModal();
         } else {
           // Tear down listener
-          if (activeListener) { off(activeListener); activeListener = null; }
+          if (activeListener) {
+            off(activeListener);
+            activeListener = null;
+          }
           currentUID = null;
           firebaseExpenses = {};
-          document.getElementById("user-email-display").style.display = "none";
-          document.getElementById("btn-signin").style.display  = "";
-          document.getElementById("btn-signout").style.display = "none";
+          document.getElementById('user-email-display').style.display = 'none';
+          document.getElementById('btn-signin').style.display = '';
+          document.getElementById('btn-signout').style.display = 'none';
           renderExpenses();
         }
       });
@@ -601,18 +856,23 @@
       // ── FIREBASE LISTENER ─────────────────────────────────────────────────────
       function startFirebaseListener(uid) {
         activeListener = ref(db, `expenses/${uid}`);
-        onValue(activeListener, snap => {
+        onValue(activeListener, (snap) => {
           firebaseExpenses = snap.val() || {};
 
           // Auto-mark local records as synced if Firebase now contains them
           // (matched via the localId we stamp on push)
           const fbLocalIds = new Set(
-            Object.values(firebaseExpenses).map(r => r.localId).filter(Boolean)
+            Object.values(firebaseExpenses)
+              .map((r) => r.localId)
+              .filter(Boolean)
           );
           const local = loadLocal();
           let changed = false;
-          local.forEach(r => {
-            if (!r.synced && fbLocalIds.has(r.id)) { r.synced = true; changed = true; }
+          local.forEach((r) => {
+            if (!r.synced && fbLocalIds.has(r.id)) {
+              r.synced = true;
+              changed = true;
+            }
           });
           if (changed) saveLocal(local);
 
@@ -621,20 +881,28 @@
       }
 
       // ── ADD EXPENSE — local-first, always available ───────────────────────────
-      window.addExpense = function() {
-        const desc   = document.getElementById("inp-desc").value.trim();
-        const amount = parseFloat(document.getElementById("inp-amount").value);
-        const cat    = document.getElementById("inp-cat").value;
-        const date   = document.getElementById("inp-date").value;
+      window.addExpense = function () {
+        const desc = document.getElementById('inp-desc').value.trim();
+        const amount = parseFloat(document.getElementById('inp-amount').value);
+        const cat = document.getElementById('inp-cat').value;
+        const date = document.getElementById('inp-date').value;
 
-        if (!desc)               return showToast("Please enter a description.");
-        if (!amount || amount <= 0) return showToast("Please enter a valid amount.");
-        if (!date)               return showToast("Please select a date.");
+        if (!desc) return showToast('Please enter a description.');
+        if (!amount || amount <= 0)
+          return showToast('Please enter a valid amount.');
+        if (!date) return showToast('Please select a date.');
 
         const record = {
-          id:     "local_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
-          desc, amount, cat, date,
-          ts:     Date.now(),
+          id:
+            'local_' +
+            Date.now() +
+            '_' +
+            Math.random().toString(36).slice(2, 7),
+          desc,
+          amount,
+          cat,
+          date,
+          ts: Date.now(),
           synced: false,
         };
 
@@ -643,132 +911,169 @@
         local.push(record);
         saveLocal(local);
 
-        document.getElementById("inp-desc").value   = "";
-        document.getElementById("inp-amount").value = "";
+        document.getElementById('inp-desc').value = '';
+        document.getElementById('inp-amount').value = '';
 
         if (currentUID) {
           // Already signed in — push straight to Firebase
-          pushOne(record).then(() => showToast("Expense added & synced ✓"));
+          pushOne(record).then(() => showToast('Expense added & synced ✓'));
         } else {
           renderExpenses();
-          showToast("Saved locally — sign in to sync", true);
+          showToast('Saved locally — sign in to sync', true);
         }
       };
 
       // ── SYNC ALL PENDING ──────────────────────────────────────────────────────
-      window.syncToFirebase = async function() {
-        if (!currentUID) { openModal(); return; }
+      window.syncToFirebase = async function () {
+        if (!currentUID) {
+          openModal();
+          return;
+        }
         const pending = pendingLocal();
-        if (!pending.length) { showToast("Nothing to sync ✓"); return; }
+        if (!pending.length) {
+          showToast('Nothing to sync ✓');
+          return;
+        }
         for (const r of pending) await pushOne(r);
-        showToast(`Synced ${pending.length} expense${pending.length !== 1 ? "s" : ""} ☁️`);
+        showToast(
+          `Synced ${pending.length} expense${
+            pending.length !== 1 ? 's' : ''
+          } ☁️`
+        );
       };
 
       async function pushOne(record) {
         try {
           await push(ref(db, `expenses/${currentUID}`), {
-            desc:    record.desc,
-            amount:  record.amount,
-            cat:     record.cat,
-            date:    record.date,
-            ts:      record.ts,
-            localId: record.id,   // lets the listener match & auto-mark synced
+            desc: record.desc,
+            amount: record.amount,
+            cat: record.cat,
+            date: record.date,
+            ts: record.ts,
+            localId: record.id, // lets the listener match & auto-mark synced
           });
           // Mark synced immediately in localStorage
           const local = loadLocal();
-          const found = local.find(r => r.id === record.id);
-          if (found) { found.synced = true; saveLocal(local); }
+          const found = local.find((r) => r.id === record.id);
+          if (found) {
+            found.synced = true;
+            saveLocal(local);
+          }
           renderExpenses();
-        } catch(e) {
-          showToast("Sync error: " + e.message);
+        } catch (e) {
+          showToast('Sync error: ' + e.message);
         }
       }
 
       // ── DELETE ────────────────────────────────────────────────────────────────
-      window.deleteExpense = function(key, isLocal) {
-        if (!confirm("Delete this expense?")) return;
+      window.deleteExpense = function (key, isLocal) {
+        if (!confirm('Delete this expense?')) return;
         if (isLocal) {
-          const local = loadLocal().filter(r => r.id !== key);
+          const local = loadLocal().filter((r) => r.id !== key);
           saveLocal(local);
           renderExpenses();
-          showToast("Removed.");
+          showToast('Removed.');
         } else {
-          if (!currentUID) return showToast("Sign in to delete synced expenses.");
+          if (!currentUID)
+            return showToast('Sign in to delete synced expenses.');
           remove(ref(db, `expenses/${currentUID}/${key}`))
-            .then(() => showToast("Deleted."))
-            .catch(e => showToast("Error: " + e.message));
+            .then(() => showToast('Deleted.'))
+            .catch((e) => showToast('Error: ' + e.message));
         }
       };
 
       // ── RENDER ────────────────────────────────────────────────────────────────
-      window.renderExpenses = function() {
-        const catFilter   = document.getElementById("filter-cat").value;
-        const monthFilter = document.getElementById("filter-month").value;
-        const localAll    = loadLocal();
-        const pending     = localAll.filter(r => !r.synced);
+      window.renderExpenses = function () {
+        const catFilter = document.getElementById('filter-cat').value;
+        const monthFilter = document.getElementById('filter-month').value;
+        const localAll = loadLocal();
+        const pending = localAll.filter((r) => !r.synced);
 
         // Update Sync button visibility
-        const syncBtn = document.getElementById("btn-sync");
-        document.getElementById("sync-badge").textContent = pending.length;
-        syncBtn.classList.toggle("visible", pending.length > 0);
+        const syncBtn = document.getElementById('btn-sync');
+        document.getElementById('sync-badge').textContent = pending.length;
+        syncBtn.classList.toggle('visible', pending.length > 0);
 
         // Offline note under form (only when logged out and have pending)
-        const note = document.getElementById("offline-note");
-        note.classList.toggle("visible", pending.length > 0 && !currentUID);
+        const note = document.getElementById('offline-note');
+        note.classList.toggle('visible', pending.length > 0 && !currentUID);
 
         // Build unified list: Firebase records + unsynced locals
         const combined = [
           ...Object.entries(firebaseExpenses).map(([key, e]) => ({
-            key, isLocal: false, synced: true,
-            desc: e.desc, amount: e.amount, cat: e.cat,
-            date: e.date, ts: e.ts || 0,
+            key,
+            isLocal: false,
+            synced: true,
+            desc: e.desc,
+            amount: e.amount,
+            cat: e.cat,
+            date: e.date,
+            ts: e.ts || 0,
           })),
-          ...pending.map(e => ({
-            key: e.id, isLocal: true, synced: false,
-            desc: e.desc, amount: e.amount, cat: e.cat,
-            date: e.date, ts: e.ts || 0,
+          ...pending.map((e) => ({
+            key: e.id,
+            isLocal: true,
+            synced: false,
+            desc: e.desc,
+            amount: e.amount,
+            cat: e.cat,
+            date: e.date,
+            ts: e.ts || 0,
           })),
-        ].sort((a,b) => b.date > a.date ? 1 : b.date < a.date ? -1 : b.ts - a.ts);
+        ].sort((a, b) =>
+          b.date > a.date ? 1 : b.date < a.date ? -1 : b.ts - a.ts
+        );
 
         // Apply filters
-        const filtered = combined.filter(e => {
-          if (catFilter   && e.cat !== catFilter)           return false;
+        const filtered = combined.filter((e) => {
+          if (catFilter && e.cat !== catFilter) return false;
           if (monthFilter && !e.date.startsWith(monthFilter)) return false;
           return true;
         });
 
         // Summaries (unfiltered)
-        const now       = new Date();
-        const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-        const totalAll  = combined.reduce((s,e) => s + e.amount, 0);
-        const monthTot  = combined.filter(e => e.date.startsWith(thisMonth)).reduce((s,e) => s + e.amount, 0);
-        document.getElementById("sum-total").textContent = fmt(totalAll);
-        document.getElementById("sum-month").textContent = fmt(monthTot);
-        document.getElementById("sum-count").textContent = combined.length;
-        document.getElementById("count-badge").textContent =
-          `${filtered.length} entr${filtered.length === 1 ? "y" : "ies"}`;
+        const now = new Date();
+        const thisMonth = `${now.getFullYear()}-${String(
+          now.getMonth() + 1
+        ).padStart(2, '0')}`;
+        const totalAll = combined.reduce((s, e) => s + e.amount, 0);
+        const monthTot = combined
+          .filter((e) => e.date.startsWith(thisMonth))
+          .reduce((s, e) => s + e.amount, 0);
+        document.getElementById('sum-total').textContent = fmt(totalAll);
+        document.getElementById('sum-month').textContent = fmt(monthTot);
+        document.getElementById('sum-count').textContent = combined.length;
+        document.getElementById('count-badge').textContent = `${
+          filtered.length
+        } entr${filtered.length === 1 ? 'y' : 'ies'}`;
 
-        const wrap = document.getElementById("table-wrap");
+        const wrap = document.getElementById('table-wrap');
         if (!filtered.length) {
           wrap.innerHTML = `<div class="empty-state"><div class="icon">🌲</div>No expenses yet. Add your first one above.</div>`;
           return;
         }
 
-        const rows = filtered.map(e => {
-          const pill   = e.synced ? "" : `<span class="pending-pill">local</span>`;
-          const delFn  = e.isLocal
-            ? `deleteExpense('${e.key}', true)`
-            : `deleteExpense('${e.key}', false)`;
-          const delBtn = (e.isLocal || currentUID)
-            ? `<button class="btn-del" onclick="${delFn}">✕</button>` : "";
-          return `<tr class="${e.isLocal ? "local-row" : ""}">
+        const rows = filtered
+          .map((e) => {
+            const pill = e.synced
+              ? ''
+              : `<span class="pending-pill">local</span>`;
+            const delFn = e.isLocal
+              ? `deleteExpense('${e.key}', true)`
+              : `deleteExpense('${e.key}', false)`;
+            const delBtn =
+              e.isLocal || currentUID
+                ? `<button class="btn-del" onclick="${delFn}">✕</button>`
+                : '';
+            return `<tr class="${e.isLocal ? 'local-row' : ''}">
             <td class="date">${formatDate(e.date)}</td>
             <td>${esc(e.desc)} ${pill}</td>
             <td class="category"><span>${esc(e.cat)}</span></td>
             <td class="amount">${fmt(e.amount)}</td>
             <td class="actions">${delBtn}</td>
           </tr>`;
-        }).join("");
+          })
+          .join('');
 
         wrap.innerHTML = `<table>
           <thead><tr>
@@ -779,86 +1084,105 @@
       };
 
       // ── EXPORT ────────────────────────────────────────────────────────────────
-      window.exportCSV = function() {
+      window.exportCSV = function () {
         const localAll = loadLocal();
-        const pending  = localAll.filter(r => !r.synced);
-        const combined = [
-          ...Object.values(firebaseExpenses),
-          ...pending,
-        ].sort((a,b) => a.date > b.date ? -1 : 1);
+        const pending = localAll.filter((r) => !r.synced);
+        const combined = [...Object.values(firebaseExpenses), ...pending].sort(
+          (a, b) => (a.date > b.date ? -1 : 1)
+        );
 
-        const header = "Date,Description,Category,Amount\n";
-        const rows   = combined.map(e =>
-          `${e.date},"${String(e.desc).replace(/"/g,'""')}",${e.cat},${Number(e.amount).toFixed(2)}`
-        ).join("\n");
-        const blob = new Blob([header + rows], { type: "text/csv" });
-        const url  = URL.createObjectURL(blob);
-        const a    = document.createElement("a");
-        a.href = url; a.download = "expenses.csv"; a.click();
+        const header = 'Date,Description,Category,Amount\n';
+        const rows = combined
+          .map(
+            (e) =>
+              `${e.date},"${String(e.desc).replace(/"/g, '""')}",${
+                e.cat
+              },${Number(e.amount).toFixed(2)}`
+          )
+          .join('\n');
+        const blob = new Blob([header + rows], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'expenses.csv';
+        a.click();
         URL.revokeObjectURL(url);
       };
 
       // ── AUTH ACTIONS ──────────────────────────────────────────────────────────
-      window.doLogin = function() {
-        const email = document.getElementById("m-email").value.trim();
-        const pass  = document.getElementById("m-pass").value;
-        document.getElementById("m-error").textContent = "";
-        signInWithEmailAndPassword(auth, email, pass)
-          .catch(e => { document.getElementById("m-error").textContent = friendlyError(e.code); });
+      window.doLogin = function () {
+        const email = document.getElementById('m-email').value.trim();
+        const pass = document.getElementById('m-pass').value;
+        document.getElementById('m-error').textContent = '';
+        signInWithEmailAndPassword(auth, email, pass).catch((e) => {
+          document.getElementById('m-error').textContent = friendlyError(
+            e.code
+          );
+        });
       };
-      window.doRegister = function() {
-        const email = document.getElementById("r-email").value.trim();
-        const pass  = document.getElementById("r-pass").value;
-        document.getElementById("r-error").textContent = "";
-        createUserWithEmailAndPassword(auth, email, pass)
-          .catch(e => { document.getElementById("r-error").textContent = friendlyError(e.code); });
+      window.doRegister = function () {
+        const email = document.getElementById('r-email').value.trim();
+        const pass = document.getElementById('r-pass').value;
+        document.getElementById('r-error').textContent = '';
+        createUserWithEmailAndPassword(auth, email, pass).catch((e) => {
+          document.getElementById('r-error').textContent = friendlyError(
+            e.code
+          );
+        });
       };
-      window.doSignOut  = () => signOut(auth);
-      window.openModal  = () => document.getElementById("modal-overlay").classList.add("open");
-      window.closeModal = () => document.getElementById("modal-overlay").classList.remove("open");
-      window.showReg    = () => {
-        document.getElementById("m-login").style.display    = "none";
-        document.getElementById("m-register").style.display = "block";
+      window.doSignOut = () => signOut(auth);
+      window.openModal = () =>
+        document.getElementById('modal-overlay').classList.add('open');
+      window.closeModal = () =>
+        document.getElementById('modal-overlay').classList.remove('open');
+      window.showReg = () => {
+        document.getElementById('m-login').style.display = 'none';
+        document.getElementById('m-register').style.display = 'block';
       };
-      window.showLogin  = () => {
-        document.getElementById("m-register").style.display = "none";
-        document.getElementById("m-login").style.display    = "block";
+      window.showLogin = () => {
+        document.getElementById('m-register').style.display = 'none';
+        document.getElementById('m-login').style.display = 'block';
       };
 
       // ── HELPERS ───────────────────────────────────────────────────────────────
       function fmt(n) {
-        return "$" + (n||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return '$' + (n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       }
       function formatDate(d) {
-        if (!d) return "—";
-        const [y,m,day] = d.split("-");
+        if (!d) return '—';
+        const [y, m, day] = d.split('-');
         return `${m}/${day}/${y}`;
       }
       function esc(s) {
-        return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
       }
       function friendlyError(code) {
         const m = {
-          "auth/invalid-email":        "Invalid email address.",
-          "auth/wrong-password":       "Incorrect password.",
-          "auth/user-not-found":       "No account with that email.",
-          "auth/email-already-in-use": "Email already in use.",
-          "auth/weak-password":        "Password must be at least 6 characters.",
-          "auth/too-many-requests":    "Too many attempts. Try again later.",
-          "auth/invalid-credential":   "Invalid email or password.",
+          'auth/invalid-email': 'Invalid email address.',
+          'auth/wrong-password': 'Incorrect password.',
+          'auth/user-not-found': 'No account with that email.',
+          'auth/email-already-in-use': 'Email already in use.',
+          'auth/weak-password': 'Password must be at least 6 characters.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.',
+          'auth/invalid-credential': 'Invalid email or password.',
         };
-        return m[code] || "Something went wrong. Try again.";
+        return m[code] || 'Something went wrong. Try again.';
       }
-      window.showToast = function(msg, amber=false) {
-        const t = document.getElementById("toast");
+      window.showToast = function (msg, amber = false) {
+        const t = document.getElementById('toast');
         t.textContent = msg;
-        t.className   = "toast" + (amber ? " amber" : "");
-        t.classList.add("show");
-        setTimeout(() => t.classList.remove("show"), 2800);
+        t.className = 'toast' + (amber ? ' amber' : '');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
       };
 
       // Default date to today
-      document.getElementById("inp-date").value = new Date().toISOString().split("T")[0];
+      document.getElementById('inp-date').value = new Date()
+        .toISOString()
+        .split('T')[0];
 
       // Initial render (shows any locally saved expenses immediately)
       renderExpenses();
