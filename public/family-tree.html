@@ -958,7 +958,7 @@
           </div>
           <div class="sidebar-section">
             <div class="sidebar-title">All Family Members</div>
-            <ul class="person-list3" id="person-list3"></ul>
+            <ul class="person-list" id="person-list"></ul>
             <div
               id="person-list-loading"
               style="
@@ -1149,8 +1149,11 @@
           li.onclick = () => selectPerson(id);
           const photo =
             p.photos && p.photos[0]
-              ? `<img src="${p.photos[0]}" alt="">`
+              ? p.photos[0].toLowerCase().includes('.pdf')
+                ? `<span style="font-size:1.1rem;">📄</span>`
+                : `<img src="${p.photos[0]}" alt="">`
               : initials(p);
+
           li.innerHTML = `
       <div class="person-avatar">${photo}</div>
       <div>
@@ -1240,9 +1243,10 @@
     <div class="empty-state">
       <div style="font-size:3rem;margin-bottom:16px;">🌳</div>
       <p>${
-        count === 0
-          ? 'Your family tree is empty. Add your first family member to begin.'
-          : 'Select a family member from the left to view their record and family tree.'
+        // count === 0
+        //   ? 'Your family tree is empty. Add your first family member to begin.'
+        //   :
+        'Select a family member from the left to view their record and family tree.'
       }</p>
       <button class="btn btn-primary" onclick="showTab('add')">+ Add Person</button>
     </div>`;
