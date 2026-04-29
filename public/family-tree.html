@@ -1420,9 +1420,16 @@ ${
     : ''
 }
             <div class="detail-section">
-          <div class="detail-section-title">Photos</div>
-          ${photoHtml}
-        </div>
+  <div class="detail-section-title" style="display:flex;align-items:center;gap:10px;">
+    Photos
+    ${
+      photos.length === 0
+        ? `<span class="text-muted" style="font-size:0.85rem;font-style:italic;text-transform:none;letter-spacing:0;font-weight:400;">No photos added.</span>`
+        : ''
+    }
+  </div>
+  ${photos.length > 0 ? photoHtml : ''}
+</div>
         <div class="detail-section">
           <div class="detail-section-title">Relationships</div>
           ${renderRelationshipSummary(id, p)}
