@@ -1162,8 +1162,20 @@
 
         dbRef.on('value', (snap) => {
           document.getElementById('person-list-loading').style.display = 'none';
-          allPeople = snap.val() || {};
-          renderPersonList(allPeople);
+          const raw = snap.val() || {};
+
+          // Sort each person's photos so PDFs come last
+          Object.values(raw).forEach((p) => {
+            if (p.photos && Array.isArray(p.photos) && p.photos.length > 1) {
+              p.photos.sort((a, b) => {
+                const aPdf = a.toLowerCase().includes('.pdf') ? 1 : 0;
+                const bPdf = b.toLowerCase().includes('.pdf') ? 1 : 0;
+                return aPdf - bPdf;
+              });
+            }
+          });
+
+          allPeople = raw;
           if (selectedPersonId && allPeople[selectedPersonId]) {
             renderPersonView(selectedPersonId);
           } else {
@@ -1251,7 +1263,22 @@
       function lifespan(p) {
         if (!p.dob && !p.dod) return '';
         const b = p.dob ? p.dob : '?';
-        const d = p.dod ? p.dod : p.dob ? 'Present' : '?';
+        let d;
+        if (p.dod) {
+          d = p.dod;
+        } else if (p.dob) {
+          // Extract a year from the dob string — handles "15 March 1945", "1945", "Abt 1880", etc.
+          const yearMatch = p.dob.match(/\b(\d{4})\b/);
+          if (yearMatch) {
+            const birthYear = parseInt(yearMatch[1], 10);
+            const age = new Date().getFullYear() - birthYear;
+            d = age < 100 ? 'Present' : 'Unknown';
+          } else {
+            d = 'Unknown';
+          }
+        } else {
+          d = '?';
+        }
         return `${b} — ${d}`;
       }
       function initials(p) {
@@ -1713,7 +1740,10 @@ ${
         parents.forEach((pid) => {
           grandparents.push(...findRelatives(pid, 'childOf'));
         });
-
+        const greatGrandparents = [];
+        grandparents.forEach((gid) => {
+          greatGrandparents.push(...findRelatives(gid, 'childOf'));
+        });
         const spouses = findSpouses(rootId);
         const children = findChildren(rootId);
         const grandchildren = [];
@@ -1734,6 +1764,14 @@ ${
     <div class="tree-container">
       <div class="tree-view-grid">`;
 
+        // Great-Grandparents
+        if (greatGrandparents.length > 0) {
+          html += `<div><div class="tree-gen-label">Great-Grandparents</div><div class="tree-generation">`;
+          [...new Set(greatGrandparents)].forEach((ggid) => {
+            html += treeCard(ggid, '');
+          });
+          html += `</div></div>`;
+        }
         // Grandparents
         if (grandparents.length > 0) {
           html += `<div><div class="tree-gen-label">Grandparents</div><div class="tree-generation">`;
@@ -2052,6 +2090,10 @@ ${
       }
 
       function removePhoto(i, mode) {
+        const confirmed = confirm(
+          'Remove this photo? This cannot be undone once you save.'
+        );
+        if (!confirmed) return;
         pendingPhotos.splice(i, 1);
         rerenderPhotoPreviews(mode);
       }
