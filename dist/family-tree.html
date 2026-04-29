@@ -472,22 +472,22 @@
       .person-detail-header {
         background: var(--ink);
         color: var(--parchment);
-        padding: 28px 32px;
+        padding: 14px 20px;
         display: flex;
         align-items: center;
-        gap: 24px;
+        gap: 16px;
       }
       .person-detail-photo {
-        width: 100px;
-        height: 100px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
-        border: 3px solid var(--sepia-light);
+        border: 2px solid var(--sepia-light);
         object-fit: cover;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5rem;
+        font-size: 1.6rem;
         color: var(--sepia-light);
         flex-shrink: 0;
         background: rgba(255, 255, 255, 0.08);
@@ -499,7 +499,7 @@
       }
       .person-detail-name {
         font-family: 'Playfair Display', serif;
-        font-size: 2rem;
+        font-size: 1.4rem;
         font-style: italic;
         line-height: 1.2;
       }
@@ -515,11 +515,11 @@
         font-style: italic;
       }
       .person-detail-body {
-        padding: 28px 32px;
+        padding: 14px 20px;
       }
 
       .detail-section {
-        margin-bottom: 24px;
+        margin-bottom: 12px;
       }
       .detail-section-title {
         font-family: 'Playfair Display', serif;
@@ -539,8 +539,8 @@
       }
       .detail-actions {
         display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 8px;
+        margin-bottom: 10px;
       }
 
       /* Photo gallery */
@@ -1162,8 +1162,20 @@
 
         dbRef.on('value', (snap) => {
           document.getElementById('person-list-loading').style.display = 'none';
-          allPeople = snap.val() || {};
-          renderPersonList(allPeople);
+          const raw = snap.val() || {};
+
+          // Sort each person's photos so PDFs come last
+          Object.values(raw).forEach((p) => {
+            if (p.photos && Array.isArray(p.photos) && p.photos.length > 1) {
+              p.photos.sort((a, b) => {
+                const aPdf = a.toLowerCase().includes('.pdf') ? 1 : 0;
+                const bPdf = b.toLowerCase().includes('.pdf') ? 1 : 0;
+                return aPdf - bPdf;
+              });
+            }
+          });
+
+          allPeople = raw;
           if (selectedPersonId && allPeople[selectedPersonId]) {
             renderPersonView(selectedPersonId);
           } else {
@@ -1251,7 +1263,22 @@
       function lifespan(p) {
         if (!p.dob && !p.dod) return '';
         const b = p.dob ? p.dob : '?';
-        const d = p.dod ? p.dod : p.dob ? 'Present' : '?';
+        let d;
+        if (p.dod) {
+          d = p.dod;
+        } else if (p.dob) {
+          // Extract a year from the dob string — handles "15 March 1945", "1945", "Abt 1880", etc.
+          const yearMatch = p.dob.match(/\b(\d{4})\b/);
+          if (yearMatch) {
+            const birthYear = parseInt(yearMatch[1], 10);
+            const age = new Date().getFullYear() - birthYear;
+            d = age < 100 ? 'Present' : 'Unknown';
+          } else {
+            d = 'Unknown';
+          }
+        } else {
+          d = '?';
+        }
         return `${b} — ${d}`;
       }
       function initials(p) {
@@ -1393,9 +1420,16 @@ ${
     : ''
 }
             <div class="detail-section">
-          <div class="detail-section-title">Photos</div>
-          ${photoHtml}
-        </div>
+  <div class="detail-section-title" style="display:flex;align-items:center;gap:10px;">
+    Photos
+    ${
+      photos.length === 0
+        ? `<span class="text-muted" style="font-size:0.85rem;font-style:italic;text-transform:none;letter-spacing:0;font-weight:400;">No photos added.</span>`
+        : ''
+    }
+  </div>
+  ${photos.length > 0 ? photoHtml : ''}
+</div>
         <div class="detail-section">
           <div class="detail-section-title">Relationships</div>
           ${renderRelationshipSummary(id, p)}
@@ -1713,7 +1747,10 @@ ${
         parents.forEach((pid) => {
           grandparents.push(...findRelatives(pid, 'childOf'));
         });
-
+        const greatGrandparents = [];
+        grandparents.forEach((gid) => {
+          greatGrandparents.push(...findRelatives(gid, 'childOf'));
+        });
         const spouses = findSpouses(rootId);
         const children = findChildren(rootId);
         const grandchildren = [];
@@ -1734,6 +1771,14 @@ ${
     <div class="tree-container">
       <div class="tree-view-grid">`;
 
+        // Great-Grandparents
+        if (greatGrandparents.length > 0) {
+          html += `<div><div class="tree-gen-label">Great-Grandparents</div><div class="tree-generation">`;
+          [...new Set(greatGrandparents)].forEach((ggid) => {
+            html += treeCard(ggid, '');
+          });
+          html += `</div></div>`;
+        }
         // Grandparents
         if (grandparents.length > 0) {
           html += `<div><div class="tree-gen-label">Grandparents</div><div class="tree-generation">`;
@@ -2052,6 +2097,10 @@ ${
       }
 
       function removePhoto(i, mode) {
+        const confirmed = confirm(
+          'Remove this photo? This cannot be undone once you save.'
+        );
+        if (!confirmed) return;
         pendingPhotos.splice(i, 1);
         rerenderPhotoPreviews(mode);
       }
