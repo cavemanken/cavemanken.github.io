@@ -893,15 +893,36 @@
           padding: 16px;
         }
       }
+      .modal {
+        position: relative;
+      }
     </style>
   </head>
   <body>
-    <!-- AUTH SCREEN -->
-    <div id="auth-screen">
-      <div class="auth-card">
-        <div class="ornament">❧</div>
-        <h2>Our Family Heritage</h2>
-        <p>Genealogy Archive</p>
+    <!-- AUTH MODAL -->
+    <div
+      class="modal-overlay"
+      id="auth-screen"
+      style="display: none"
+      onclick="closeAuthModal(event)"
+    >
+      <div class="modal" style="max-width: 380px">
+        <div style="text-align: center; margin-bottom: 20px">
+          <div class="ornament">❧</div>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem">
+            Family Heritage
+          </h3>
+          <p
+            style="
+              color: var(--muted);
+              font-style: italic;
+              font-size: 0.95rem;
+              margin-top: 4px;
+            "
+          >
+            Sign in to make changes
+          </p>
+        </div>
         <div style="display: flex; flex-direction: column; gap: 14px">
           <div class="form-group">
             <label>Email</label>
@@ -909,24 +930,44 @@
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="auth-password" placeholder="••••••••" />
+            <input
+              type="password"
+              id="auth-password"
+              placeholder="••••••••"
+              onkeydown="if(event.key==='Enter') signIn()"
+            />
           </div>
           <div style="display: flex; gap: 10px">
             <button class="btn btn-primary" style="flex: 1" onclick="signIn()">
               Sign In
             </button>
-            <!-- <button class="btn btn-ghost" style="flex: 1" onclick="signUp()">
+            <button class="btn btn-ghost" style="flex: 1" onclick="signUp()">
               Create Account
-            </button> -->
+            </button>
           </div>
           <div
             id="auth-error"
             style="color: var(--red); font-size: 0.9rem; display: none"
           ></div>
         </div>
+        <button
+          onclick="closeAuthModal()"
+          style="
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--muted);
+            line-height: 1;
+          "
+        >
+          ✕
+        </button>
       </div>
     </div>
-
     <!-- MAIN APP -->
     <div id="app">
       <header>
@@ -1084,7 +1125,7 @@
         currentUser = user;
 
         // Always show the app — Firebase rules handle read/write permissions
-        document.getElementById('auth-screen').style.display = 'none';
+        // document.getElementById('auth-screen').style.display = 'flex';
         document.getElementById('app').style.display = 'block';
 
         if (user) {
@@ -1099,7 +1140,6 @@
         if (!dbRef) {
           dbRef = db.ref('genealogy/people');
           loadPeople();
-          renderAddForm();
         }
       });
 
@@ -1132,6 +1172,7 @@
         const pass = document.getElementById('auth-password').value;
         auth
           .signInWithEmailAndPassword(email, pass)
+          .then(() => closeAuthModal())
           .catch((e) => showAuthError(e.message));
       }
       function signUp() {
@@ -1139,6 +1180,7 @@
         const pass = document.getElementById('auth-password').value;
         auth
           .createUserWithEmailAndPassword(email, pass)
+          .then(() => closeAuthModal())
           .catch((e) => showAuthError(e.message));
       }
       function signOut() {
@@ -1298,6 +1340,15 @@
       // TABS
       // ─────────────────────────────────────────────
       function showTab(tab) {
+        // Re-render the add form fresh each time so the person dropdown is populated
+        if (tab === 'add') {
+          editingId = null;
+          pendingPhotos = [];
+          removedPhotos = [];
+          formRels['add'] = [];
+          renderAddForm();
+        }
+
         ['view', 'add', 'edit'].forEach((t) => {
           document.getElementById(`panel-${t}`).style.display =
             t === tab ? 'block' : 'none';
@@ -1309,7 +1360,6 @@
         if (editTab)
           editTab.style.display = tab === 'edit' ? 'inline-block' : 'none';
       }
-
       // ─────────────────────────────────────────────
       // WELCOME
       // ─────────────────────────────────────────────
@@ -2163,7 +2213,6 @@ ${
               selectedPersonId = ref.key;
               treeHistory.push(ref.key);
               treeHistoryIndex = treeHistory.length - 1;
-              renderAddForm();
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
@@ -2303,6 +2352,13 @@ ${
           .replace(/\n/g, '<br>');
       }
 
+      function closeAuthModal(e) {
+        if (!e || e.target.id === 'auth-screen') {
+          document.getElementById('auth-screen').style.display = 'none';
+          document.getElementById('auth-error').style.display = 'none';
+          document.getElementById('auth-error').textContent = '';
+        }
+      }
       // Initial render
       window.addEventListener('load', () => {
         renderWelcome();
