@@ -1099,7 +1099,6 @@
         if (!dbRef) {
           dbRef = db.ref('genealogy/people');
           loadPeople();
-          renderAddForm();
         }
       });
 
@@ -1298,6 +1297,15 @@
       // TABS
       // ─────────────────────────────────────────────
       function showTab(tab) {
+        // Re-render the add form fresh each time so the person dropdown is populated
+        if (tab === 'add') {
+          editingId = null;
+          pendingPhotos = [];
+          removedPhotos = [];
+          formRels['add'] = [];
+          renderAddForm();
+        }
+
         ['view', 'add', 'edit'].forEach((t) => {
           document.getElementById(`panel-${t}`).style.display =
             t === tab ? 'block' : 'none';
@@ -1309,7 +1317,6 @@
         if (editTab)
           editTab.style.display = tab === 'edit' ? 'inline-block' : 'none';
       }
-
       // ─────────────────────────────────────────────
       // WELCOME
       // ─────────────────────────────────────────────
@@ -2163,7 +2170,6 @@ ${
               selectedPersonId = ref.key;
               treeHistory.push(ref.key);
               treeHistoryIndex = treeHistory.length - 1;
-              renderAddForm();
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
