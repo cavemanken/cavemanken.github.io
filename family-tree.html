@@ -896,6 +896,12 @@
       .modal {
         position: relative;
       }
+      #add-rel-dropdown li.rel-active,
+      #edit-rel-dropdown li.rel-active {
+        background: var(--parchment-dark);
+        outline: 2px solid var(--sepia);
+        outline-offset: -2px;
+      }
     </style>
   </head>
   <body>
@@ -2041,26 +2047,47 @@ ${
           <label>Relationships</label>
           <div class="rel-section">
             <h4>Link to Family Members</h4>
-            <div class="rel-row">
-              <select id="${mode}-rel-type">
-                <option value="childOf">Child of (Parent →)</option>
-                <option value="spouseOf">Spouse of</option>
-              </select>
-              <select id="${mode}-rel-person">
-                <option value="">— Select person —</option>
-                ${Object.entries(allPeople)
-                  .filter(([pid]) => pid !== editingId)
-                  .sort(([, a], [, b]) =>
-                    fullName(a).localeCompare(fullName(b))
-                  )
-                  .map(
-                    ([pid, pp]) =>
-                      `<option value="${pid}">${fullName(pp)}</option>`
-                  )
-                  .join('')}
-              </select>
-              <button class="btn btn-ghost btn-sm" onclick="addRelTag('${mode}')">Add</button>
-            </div>
+<div class="rel-row" style="flex-wrap:wrap;gap:8px;">
+  <select id="${mode}-rel-type" style="flex:0 0 auto;min-width:160px;">
+    <option value="childOf">Child of (Parent →)</option>
+    <option value="spouseOf">Spouse of</option>
+  </select>
+  <div style="flex:1;min-width:180px;position:relative;">
+    <input
+      type="text"
+      id="${mode}-rel-search"
+      placeholder="Type a name to search…"
+      autocomplete="off"
+      oninput="filterRelPeople('${mode}')"
+      onfocus="showRelDropdown('${mode}')"
+onkeydown="relSearchKeydown(event,'${mode}')"
+      style="width:100%;padding-right:28px;"
+    />
+    <span id="${mode}-rel-clear" onclick="clearRelSearch('${mode}')"
+      style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+             cursor:pointer;color:var(--muted);display:none;font-size:1rem;line-height:1;">✕</span>
+    <ul id="${mode}-rel-dropdown" style="
+      display:none;
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      background:var(--card-bg);
+      border:1px solid var(--card-border);
+      border-top:none;
+      border-radius:0 0 6px 6px;
+      max-height:200px;
+      overflow-y:auto;
+      z-index:200;
+      list-style:none;
+      margin:0;
+      padding:0;
+      box-shadow:0 4px 12px var(--shadow);
+    "></ul>
+  </div>
+  <input type="hidden" id="${mode}-rel-person" value="" />
+  <button class="btn btn-ghost btn-sm" style="flex:0 0 auto;" onclick="addRelTag('${mode}')">Add</button>
+</div>
             <div id="${mode}-rel-tags">${renderRelTags(rels, mode)}</div>
           </div>
         </div>
@@ -2359,6 +2386,130 @@ ${
           document.getElementById('auth-error').textContent = '';
         }
       }
+      function filterRelPeople(mode) {
+        const q = document
+          .getElementById(`${mode}-rel-search`)
+          .value.toLowerCase();
+        const clearEl = document.getElementById(`${mode}-rel-clear`);
+        clearEl.style.display = q ? 'block' : 'none';
+
+        // Reset hidden value when user types
+        document.getElementById(`${mode}-rel-person`).value = '';
+
+        const results = Object.entries(allPeople)
+          .filter(([pid]) => pid !== editingId)
+          .filter(([, p]) => fullName(p).toLowerCase().includes(q))
+          .sort(([, a], [, b]) => fullName(a).localeCompare(fullName(b)))
+          .slice(0, 50); // cap at 50 results
+
+        renderRelDropdown(mode, results);
+        showRelDropdown(mode);
+      }
+
+      function renderRelDropdown(mode, results) {
+        const ul = document.getElementById(`${mode}-rel-dropdown`);
+        if (results.length === 0) {
+          ul.innerHTML = `<li style="padding:10px 12px;color:var(--muted);font-style:italic;font-size:0.9rem;">No matches found</li>`;
+        } else {
+          ul.innerHTML = results
+            .map(([pid, p]) => {
+              const dates = lifespan(p);
+              return `<li
+        onclick="selectRelPerson('${mode}','${pid}','${esc(fullName(p))}')"
+        style="
+          padding:8px 12px;
+          cursor:pointer;
+          display:flex;
+          flex-direction:column;
+          border-bottom:1px solid var(--parchment-dark);
+          transition:background 0.12s;
+        "
+        onmouseover="this.style.background='var(--parchment-dark)'"
+        onmouseout="this.style.background=''">
+        <span style="font-weight:500;font-size:0.95rem;">${fullName(p)}</span>
+        ${
+          dates
+            ? `<span style="font-size:0.78rem;color:var(--muted);font-style:italic;">${dates}</span>`
+            : ''
+        }
+      </li>`;
+            })
+            .join('');
+        }
+      }
+
+      function showRelDropdown(mode) {
+        const search = document.getElementById(`${mode}-rel-search`);
+        const ul = document.getElementById(`${mode}-rel-dropdown`);
+
+        // Populate with all people on first focus if empty
+        if (!search.value && ul.innerHTML === '') {
+          const all = Object.entries(allPeople)
+            .filter(([pid]) => pid !== editingId)
+            .sort(([, a], [, b]) => fullName(a).localeCompare(fullName(b)))
+            .slice(0, 50);
+          renderRelDropdown(mode, all);
+        }
+        ul.style.display = 'block';
+      }
+
+      function selectRelPerson(mode, pid, name) {
+        document.getElementById(`${mode}-rel-person`).value = pid;
+        document.getElementById(`${mode}-rel-search`).value = name;
+        document.getElementById(`${mode}-rel-clear`).style.display = 'block';
+        document.getElementById(`${mode}-rel-dropdown`).style.display = 'none';
+      }
+
+      function clearRelSearch(mode) {
+        document.getElementById(`${mode}-rel-search`).value = '';
+        document.getElementById(`${mode}-rel-person`).value = '';
+        document.getElementById(`${mode}-rel-clear`).style.display = 'none';
+        document.getElementById(`${mode}-rel-dropdown`).innerHTML = '';
+        document.getElementById(`${mode}-rel-dropdown`).style.display = 'none';
+        document.getElementById(`${mode}-rel-search`).focus();
+      }
+      function relSearchKeydown(e, mode) {
+        const ul = document.getElementById(`${mode}-rel-dropdown`);
+        const items = [...ul.querySelectorAll('li')];
+        if (!items.length) return;
+
+        const active = ul.querySelector('li.rel-active');
+        let idx = items.indexOf(active);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (active) active.classList.remove('rel-active');
+          idx = idx < items.length - 1 ? idx + 1 : 0;
+          items[idx].classList.add('rel-active');
+          items[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (active) active.classList.remove('rel-active');
+          idx = idx > 0 ? idx - 1 : items.length - 1;
+          items[idx].classList.add('rel-active');
+          items[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (active) {
+            active.click();
+          } else if (items.length === 1) {
+            // Auto-select if only one result
+            items[0].click();
+          }
+        } else if (e.key === 'Escape') {
+          ul.style.display = 'none';
+        }
+      }
+      document.addEventListener('click', (e) => {
+        ['add', 'edit'].forEach((mode) => {
+          const search = document.getElementById(`${mode}-rel-search`);
+          const dropdown = document.getElementById(`${mode}-rel-dropdown`);
+          if (!search || !dropdown) return;
+          if (!search.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+          }
+        });
+      });
       // Initial render
       window.addEventListener('load', () => {
         renderWelcome();
