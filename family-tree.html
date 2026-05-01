@@ -980,6 +980,14 @@
         <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
           ⬇ Export GEDCOM
         </button>
+        <button
+          class="btn btn-secondary btn-sm"
+          id="changelog-btn"
+          onclick="showChangelog()"
+          style="display: none"
+        >
+          📋 Log
+        </button>
         <h1><span>Our</span> Family <span>Heritage</span></h1>
         <div class="header-right">
           <span class="auth-info" id="auth-user-display"></span>
@@ -1150,6 +1158,11 @@
       });
 
       function setGuestMode(isGuest) {
+        // show log button only to signed-in users since it can contain sensitive info
+        const changelogBtn = document.getElementById('changelog-btn');
+        if (changelogBtn)
+          changelogBtn.style.display = isGuest ? 'none' : 'inline-block';
+
         // Sidebar "Add New Person" button
         const addBtn = document.querySelector('.sidebar .btn-primary');
         if (addBtn) addBtn.style.display = isGuest ? 'none' : 'block';
@@ -2132,7 +2145,7 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           formRels[mode],
           mode
         );
-        document.getElementById(`${mode}-rel-person`).value = ''; // reset to "— Select person —"
+        clearRelSearch(mode);
       }
 
       function removeRelTag(i, mode) {
@@ -2204,10 +2217,15 @@ onkeydown="relSearchKeydown(event,'${mode}')"
 
         // Warn if they selected a relationship but didn't click Add
         const relPersonEl = document.getElementById(`${mode}-rel-person`);
+        const relSearchEl = document.getElementById(`${mode}-rel-search`);
         const relTypeEl = document.getElementById(`${mode}-rel-type`);
-        if (relPersonEl && relPersonEl.value) {
-          const selectedName =
-            relPersonEl.options[relPersonEl.selectedIndex]?.text || 'someone';
+
+        // Warn if they typed/selected someone in the search box but didn't click Add
+        const hasSelection = relPersonEl && relPersonEl.value;
+        const hasSearchText = relSearchEl && relSearchEl.value.trim();
+
+        if (hasSelection || hasSearchText) {
+          const selectedName = relSearchEl?.value.trim() || 'someone';
           const relLabel =
             relTypeEl?.value === 'childOf' ? 'child of' : 'spouse of';
           const confirmed = confirm(
@@ -2240,16 +2258,59 @@ onkeydown="relSearchKeydown(event,'${mode}')"
               selectedPersonId = ref.key;
               treeHistory.push(ref.key);
               treeHistoryIndex = treeHistory.length - 1;
+              writeChangelog('ADD', ref.key, { name: fullName(person) });
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
         } else {
+          // Diff the old and new values before saving
+          const oldPerson = allPeople[editingId] || {};
+          const changedFields = {};
+          [
+            'firstName',
+            'middleName',
+            'lastName',
+            'dob',
+            'dod',
+            'bornLocation',
+            'notes',
+          ].forEach((field) => {
+            const oldVal = oldPerson[field] || '';
+            const newVal = person[field] || '';
+            if (oldVal !== newVal) {
+              changedFields[field] = { from: oldVal, to: newVal };
+            }
+          });
+          // Check relationship changes
+          const oldRels = JSON.stringify(
+            (oldPerson.relationships || [])
+              .map((r) => `${r.type}:${r.targetId}`)
+              .sort()
+          );
+          const newRels = JSON.stringify(
+            (person.relationships || [])
+              .map((r) => `${r.type}:${r.targetId}`)
+              .sort()
+          );
+          if (oldRels !== newRels) {
+            changedFields['relationships'] = {
+              from: oldPerson.relationships || [],
+              to: person.relationships || [],
+            };
+          }
+
           dbRef
             .child(editingId)
             .update(person)
             .then(() => {
               toast('Record updated.');
               selectedPersonId = editingId;
+              writeChangelog('EDIT', editingId, {
+                name: fullName(person),
+                changes: Object.keys(changedFields).length
+                  ? changedFields
+                  : { note: 'No field-level changes detected' },
+              });
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
@@ -2336,17 +2397,93 @@ onkeydown="relSearchKeydown(event,'${mode}')"
       }
 
       function deletePerson(id) {
+        const p = allPeople[id];
+        const name = p ? fullName(p) : id;
         dbRef
           .child(id)
           .remove()
           .then(() => {
             toast('Record deleted.');
+            writeChangelog('DELETE', id, { name });
             selectedPersonId = null;
             closeModal();
             renderWelcome();
             showTab('view');
           })
           .catch((e) => toast('Error: ' + e.message));
+      }
+
+      function showChangelog() {
+        if (!currentUser) {
+          toast('Sign in to view the changelog.');
+          return;
+        }
+
+        db.ref('genealogy/changelog')
+          .orderByChild('timestamp')
+          .limitToLast(100)
+          .once('value', (snap) => {
+            const entries = [];
+            snap.forEach((child) => {
+              entries.push(child.val());
+            });
+            entries.reverse(); // newest first
+
+            const rows = entries
+              .map((e) => {
+                const d = new Date(e.timestamp);
+                const date = d.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+                const time = d.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+                const badge =
+                  {
+                    ADD: `<span style="background:#1a3a2a;color:#4caf84;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">ADD</span>`,
+                    EDIT: `<span style="background:#2a2a0a;color:#c9a84c;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">EDIT</span>`,
+                    DELETE: `<span style="background:#3a0a0a;color:#f44336;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">DELETE</span>`,
+                  }[e.action] || e.action;
+
+                return `<tr style="border-bottom:1px solid var(--card-border);">
+          <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
+          <td style="padding:8px 10px;">${badge}</td>
+          <td style="padding:8px 10px;font-weight:500;">${
+            e.personName || '—'
+          }</td>
+          <td style="padding:8px 10px;font-size:0.8rem;color:var(--muted);">${
+            e.email || e.uid
+          }</td>
+        </tr>`;
+              })
+              .join('');
+
+            document.getElementById('modal-body').innerHTML = `
+        <h3 style="margin-bottom:16px;">📋 Change Log</h3>
+        <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+          <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
+                <th style="padding:6px 10px;text-align:left;">When</th>
+                <th style="padding:6px 10px;text-align:left;">Action</th>
+                <th style="padding:6px 10px;text-align:left;">Person</th>
+                <th style="padding:6px 10px;text-align:left;">By</th>
+              </tr>
+            </thead>
+            <tbody>${
+              rows ||
+              '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No changes recorded yet.</td></tr>'
+            }</tbody>
+          </table>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+        </div>`;
+            document.getElementById('modal').style.display = 'flex';
+          });
       }
 
       // ─────────────────────────────────────────────
@@ -2499,6 +2636,19 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         } else if (e.key === 'Escape') {
           ul.style.display = 'none';
         }
+      }
+      function writeChangelog(action, personId, details) {
+        if (!currentUser) return;
+        const ref = db.ref('genealogy/changelog').push();
+        ref.set({
+          action, // 'ADD' | 'EDIT' | 'DELETE'
+          personId,
+          personName: details.name || '',
+          uid: currentUser.uid,
+          email: currentUser.email,
+          timestamp: Date.now(),
+          changes: details.changes || null, // for edits: what fields changed
+        });
       }
       document.addEventListener('click', (e) => {
         ['add', 'edit'].forEach((mode) => {
