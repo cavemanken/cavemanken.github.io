@@ -977,6 +977,9 @@
     <!-- MAIN APP -->
     <div id="app">
       <header>
+        <button class="btn btn-secondary btn-sm" onclick="showHints()">
+          💡 Hints
+        </button>
         <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
           ⬇ Export GEDCOM
         </button>
@@ -1138,43 +1141,40 @@
       auth.onAuthStateChanged((user) => {
         currentUser = user;
 
-        // Always show the app — Firebase rules handle read/write permissions
-        // document.getElementById('auth-screen').style.display = 'flex';
-        document.getElementById('app').style.display = 'block';
-
         if (user) {
+          document.getElementById('app').style.display = 'block';
+          document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('auth-user-display').textContent = user.email;
           setGuestMode(false);
-        } else {
-          document.getElementById('auth-user-display').textContent = '';
-          setGuestMode(true);
-        }
 
-        // Only initialize the db listener once
-        if (!dbRef) {
-          dbRef = db.ref('genealogy/people');
-          loadPeople();
+          // Only initialize the db listener once
+          if (!dbRef) {
+            dbRef = db.ref('genealogy/people');
+            loadPeople();
+          }
+        } else {
+          // Not signed in — hide app and show login modal
+          document.getElementById('app').style.display = 'none';
+          document.getElementById('auth-screen').style.display = 'flex';
+          document.getElementById('auth-user-display').textContent = '';
         }
       });
 
       function setGuestMode(isGuest) {
-        // show log button only to signed-in users since it can contain sensitive info
+        // All viewers are now authenticated, so isGuest will always be false
+        // Keeping this in case you want to add role-based access later
+
         const changelogBtn = document.getElementById('changelog-btn');
         if (changelogBtn)
           changelogBtn.style.display = isGuest ? 'none' : 'inline-block';
 
-        // Sidebar "Add New Person" button
         const addBtn = document.querySelector('.sidebar .btn-primary');
         if (addBtn) addBtn.style.display = isGuest ? 'none' : 'block';
 
-        // Add Person tab in main panel
         const tabAdd = document.getElementById('tab-add');
         if (tabAdd) tabAdd.style.display = isGuest ? 'none' : 'inline-block';
 
-        // Sign in / sign out buttons in header
-        document.getElementById('guest-signin-btn').style.display = isGuest
-          ? 'inline-block'
-          : 'none';
+        document.getElementById('guest-signin-btn').style.display = 'none'; // always hidden now
         document.getElementById('auth-signout-btn').style.display = isGuest
           ? 'none'
           : 'inline-block';
@@ -1182,7 +1182,6 @@
           ? 'none'
           : 'inline';
 
-        // If guest somehow lands on add/edit tab, bounce them back to view
         if (isGuest) showTab('view');
       }
 
@@ -1203,8 +1202,13 @@
           .catch((e) => showAuthError(e.message));
       }
       function signOut() {
-        auth.signOut();
-        setGuestMode(true);
+        auth.signOut().then(() => {
+          document.getElementById('app').style.display = 'none';
+          document.getElementById('auth-screen').style.display = 'flex';
+          allPeople = {};
+          selectedPersonId = null;
+          dbRef = null; // reset so listener re-initializes on next login
+        });
       }
       function showAuthError(msg) {
         const el = document.getElementById('auth-error');
@@ -2157,22 +2161,95 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         );
       }
 
+      // Original simple photo upload handler (no resizing)
+      // function handlePhotoUpload(input, mode) {
+      //   const files = Array.from(input.files);
+      //   files.forEach((file) => {
+      //     if (file.size > 2 * 1024 * 1024) {
+      //       toast('Photo too large (max 2MB)');
+      //       return;
+      //     }
+      //     const reader = new FileReader();
+      //     reader.onload = (e) => {
+      //       pendingPhotos.push(e.target.result);
+      //       rerenderPhotoPreviews(mode);
+      //     };
+      //     reader.readAsDataURL(file);
+      //   });
+      // }
+
+      // New photo upload handler with resizing for large images
       function handlePhotoUpload(input, mode) {
         const files = Array.from(input.files);
+        const TARGET_BYTES = 500 * 1024; // 500KB
+
         files.forEach((file) => {
-          if (file.size > 2 * 1024 * 1024) {
-            toast('Photo too large (max 2MB)');
+          if (!file.type.startsWith('image/')) {
+            toast(
+              'Only image files can be resized. Use the PDF option for documents.'
+            );
             return;
           }
+
           const reader = new FileReader();
           reader.onload = (e) => {
-            pendingPhotos.push(e.target.result);
-            rerenderPhotoPreviews(mode);
+            const img = new Image();
+            img.onload = () => {
+              // If already under 500KB, use as-is
+              if (file.size <= TARGET_BYTES) {
+                pendingPhotos.push(e.target.result);
+                rerenderPhotoPreviews(mode);
+                return;
+              }
+
+              // Binary search for the right quality level
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+
+              // First scale down dimensions if image is very large (over 2000px wide)
+              const MAX_DIM = 2000;
+              if (width > MAX_DIM || height > MAX_DIM) {
+                const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Try quality levels from 0.9 down until we're under 500KB
+              let quality = 0.9;
+              let dataUrl = canvas.toDataURL('image/jpeg', quality);
+              let iterations = 0;
+
+              while (
+                dataUrl.length * 0.75 > TARGET_BYTES &&
+                quality > 0.1 &&
+                iterations < 10
+              ) {
+                quality -= 0.1;
+                dataUrl = canvas.toDataURL('image/jpeg', quality);
+                iterations++;
+              }
+
+              const finalKB = Math.round((dataUrl.length * 0.75) / 1024);
+              const origKB = Math.round(file.size / 1024);
+
+              if (origKB > 500) {
+                toast(`Photo resized from ${origKB}KB to ~${finalKB}KB.`);
+              }
+
+              pendingPhotos.push(dataUrl);
+              rerenderPhotoPreviews(mode);
+            };
+            img.src = e.target.result;
           };
           reader.readAsDataURL(file);
         });
       }
-
       function rerenderPhotoPreviews(mode) {
         const container = document.getElementById(`${mode}-photo-previews`);
         if (!container) return;
@@ -2650,6 +2727,91 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           timestamp: Date.now(),
           changes: details.changes || null, // for edits: what fields changed
         });
+      }
+      function showHints() {
+        document.getElementById('modal-body').innerHTML = `
+    <h3 style="margin-bottom:20px;">💡 Tips & Best Practices</h3>
+    <div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);">
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Adding People
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Always enter the <b>first name</b> — it's the only required field.</li>
+          <li>Use the <b>middle name field</b> for middle names only, not titles or nicknames. Put those in Notes.</li>
+          <li>For <b>married women</b>, enter their birth surname as the last name.</li>
+          <li>Enter <b>dates</b> in any natural format: <i>15 March 1945</i>, <i>March 1945</i>, <i>Abt 1880</i>, <i>Bef 1900</i>, or <i>15/03/1945</i> — the app will convert common formats automatically.</li>
+          <li>If you only know the year, just enter the year: <i>1880</i>.</li>
+          <li>Use prefixes like <b>Abt</b> (about), <b>Bef</b> (before), or <b>Aft</b> (after) for uncertain dates.</li>
+          <li>Leave <b>Date of Death</b> blank for living people.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Relationships
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Use <b>Child of</b> to link a person to their parents — add one relationship for each parent.</li>
+          <li>Use <b>Spouse of</b> to link married couples. You only need to add it from one side — the app finds it both ways.</li>
+          <li>After searching for a person in the relationship box, make sure to <b>click Add</b> before saving — just selecting from the list is not enough.</li>
+          <li>The family tree view works best when <b>both parents</b> are entered and linked to each other as spouses.</li>
+          <li>You can add <b>multiple parents</b> if the biological and adoptive parents are both known — just add two Child of relationships.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Photos
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Keep photos <b>under 500KB</b> each for best performance. Large images slow down the app for everyone.</li>
+          <li>Supported image formats: <b>JPG, PNG, WEBP</b>.</li>
+          <li>You can also attach <b>PDF documents</b> — these appear as document tiles and open in a new tab.</li>
+          <li>The <b>first image</b> in the list is used as the person's profile photo in the tree and sidebar. Make sure it's a portrait if possible.</li>
+          <li>PDFs are automatically sorted to the <b>end of the photo list</b> so images always appear first.</li>
+          <li>To resize photos before uploading, try <a href="https://squoosh.app" target="_blank" style="color:var(--accent);">squoosh.app</a> — it's free and works in your browser.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Notes
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Notes are a great place for <b>census records, obituaries, stories, and sources</b>.</li>
+          <li>Notes are hidden by default — click <b>Show Notes</b> on a person's record to expand them.</li>
+          <li>There's no length limit, so feel free to paste in full transcriptions of records.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:4px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Exporting
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Use <b>Export GEDCOM</b> in the header to download your tree in the standard genealogy format, compatible with Ancestry, FamilySearch, Gramps, and most other programs.</li>
+          <li>GEDCOM export includes names, dates, places, notes, and photo links.</li>
+          <li>The <b>Change Log</b> (visible to signed-in users) records every add, edit, and delete with the date and who made the change.</li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>`;
+        document.getElementById('modal').style.display = 'flex';
       }
       document.addEventListener('click', (e) => {
         ['add', 'edit'].forEach((mode) => {
