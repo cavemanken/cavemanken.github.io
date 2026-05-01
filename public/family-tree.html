@@ -2145,7 +2145,7 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           formRels[mode],
           mode
         );
-        document.getElementById(`${mode}-rel-person`).value = ''; // reset to "— Select person —"
+        clearRelSearch(mode);
       }
 
       function removeRelTag(i, mode) {
@@ -2217,10 +2217,15 @@ onkeydown="relSearchKeydown(event,'${mode}')"
 
         // Warn if they selected a relationship but didn't click Add
         const relPersonEl = document.getElementById(`${mode}-rel-person`);
+        const relSearchEl = document.getElementById(`${mode}-rel-search`);
         const relTypeEl = document.getElementById(`${mode}-rel-type`);
-        if (relPersonEl && relPersonEl.value) {
-          const selectedName =
-            relPersonEl.options[relPersonEl.selectedIndex]?.text || 'someone';
+
+        // Warn if they typed/selected someone in the search box but didn't click Add
+        const hasSelection = relPersonEl && relPersonEl.value;
+        const hasSearchText = relSearchEl && relSearchEl.value.trim();
+
+        if (hasSelection || hasSearchText) {
+          const selectedName = relSearchEl?.value.trim() || 'someone';
           const relLabel =
             relTypeEl?.value === 'childOf' ? 'child of' : 'spouse of';
           const confirmed = confirm(
