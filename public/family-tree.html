@@ -1237,6 +1237,7 @@
           });
 
           allPeople = raw;
+          renderPersonList(allPeople); // ← always refresh the sidebar
           if (selectedPersonId && allPeople[selectedPersonId]) {
             renderPersonView(selectedPersonId);
           } else {
@@ -2663,7 +2664,6 @@ onkeydown="relSearchKeydown(event,'${mode}')"
       // Initial render
       window.addEventListener('load', () => {
         renderWelcome();
-        renderAddForm();
       });
     </script>
   </body>
