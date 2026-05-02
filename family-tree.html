@@ -902,6 +902,25 @@
         outline: 2px solid var(--sepia);
         outline-offset: -2px;
       }
+      #ancestor-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: var(--card-border) var(--parchment-dark);
+      }
+      #ancestor-scroll::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+      #ancestor-scroll::-webkit-scrollbar-track {
+        background: var(--parchment-dark);
+        border-radius: 4px;
+      }
+      #ancestor-scroll::-webkit-scrollbar-thumb {
+        background: var(--sepia-light);
+        border-radius: 4px;
+      }
+      #ancestor-scroll::-webkit-scrollbar-thumb:hover {
+        background: var(--sepia);
+      }
     </style>
   </head>
   <body>
@@ -977,6 +996,9 @@
     <!-- MAIN APP -->
     <div id="app">
       <header>
+        <button class="btn btn-secondary btn-sm" onclick="showHints()">
+          💡 Hints
+        </button>
         <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
           ⬇ Export GEDCOM
         </button>
@@ -1138,43 +1160,40 @@
       auth.onAuthStateChanged((user) => {
         currentUser = user;
 
-        // Always show the app — Firebase rules handle read/write permissions
-        // document.getElementById('auth-screen').style.display = 'flex';
-        document.getElementById('app').style.display = 'block';
-
         if (user) {
+          document.getElementById('app').style.display = 'block';
+          document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('auth-user-display').textContent = user.email;
           setGuestMode(false);
-        } else {
-          document.getElementById('auth-user-display').textContent = '';
-          setGuestMode(true);
-        }
 
-        // Only initialize the db listener once
-        if (!dbRef) {
-          dbRef = db.ref('genealogy/people');
-          loadPeople();
+          // Only initialize the db listener once
+          if (!dbRef) {
+            dbRef = db.ref('genealogy/people');
+            loadPeople();
+          }
+        } else {
+          // Not signed in — hide app and show login modal
+          document.getElementById('app').style.display = 'none';
+          document.getElementById('auth-screen').style.display = 'flex';
+          document.getElementById('auth-user-display').textContent = '';
         }
       });
 
       function setGuestMode(isGuest) {
-        // show log button only to signed-in users since it can contain sensitive info
+        // All viewers are now authenticated, so isGuest will always be false
+        // Keeping this in case you want to add role-based access later
+
         const changelogBtn = document.getElementById('changelog-btn');
         if (changelogBtn)
           changelogBtn.style.display = isGuest ? 'none' : 'inline-block';
 
-        // Sidebar "Add New Person" button
         const addBtn = document.querySelector('.sidebar .btn-primary');
         if (addBtn) addBtn.style.display = isGuest ? 'none' : 'block';
 
-        // Add Person tab in main panel
         const tabAdd = document.getElementById('tab-add');
         if (tabAdd) tabAdd.style.display = isGuest ? 'none' : 'inline-block';
 
-        // Sign in / sign out buttons in header
-        document.getElementById('guest-signin-btn').style.display = isGuest
-          ? 'inline-block'
-          : 'none';
+        document.getElementById('guest-signin-btn').style.display = 'none'; // always hidden now
         document.getElementById('auth-signout-btn').style.display = isGuest
           ? 'none'
           : 'inline-block';
@@ -1182,7 +1201,6 @@
           ? 'none'
           : 'inline';
 
-        // If guest somehow lands on add/edit tab, bounce them back to view
         if (isGuest) showTab('view');
       }
 
@@ -1203,8 +1221,13 @@
           .catch((e) => showAuthError(e.message));
       }
       function signOut() {
-        auth.signOut();
-        setGuestMode(true);
+        auth.signOut().then(() => {
+          document.getElementById('app').style.display = 'none';
+          document.getElementById('auth-screen').style.display = 'flex';
+          allPeople = {};
+          selectedPersonId = null;
+          dbRef = null; // reset so listener re-initializes on next login
+        });
       }
       function showAuthError(msg) {
         const el = document.getElementById('auth-error');
@@ -1237,6 +1260,7 @@
           });
 
           allPeople = raw;
+          renderPersonList(allPeople); // ← always refresh the sidebar
           if (selectedPersonId && allPeople[selectedPersonId]) {
             renderPersonView(selectedPersonId);
           } else {
@@ -1836,8 +1860,8 @@ ${
       <button class="btn btn-ghost btn-sm" onclick="treeFwd()" ${
         canFwd ? '' : 'disabled'
       }>Forward ▶</button>
-    </div>
-    <div class="tree-container">
+      <button class="btn btn-ghost btn-sm" onclick="showAncestorTree('${rootId}')">🌿 Ancestor Tree</button>
+    </div>    <div class="tree-container">
       <div class="tree-view-grid">`;
 
         // Great-Grandparents
@@ -2156,22 +2180,95 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         );
       }
 
+      // Original simple photo upload handler (no resizing)
+      // function handlePhotoUpload(input, mode) {
+      //   const files = Array.from(input.files);
+      //   files.forEach((file) => {
+      //     if (file.size > 2 * 1024 * 1024) {
+      //       toast('Photo too large (max 2MB)');
+      //       return;
+      //     }
+      //     const reader = new FileReader();
+      //     reader.onload = (e) => {
+      //       pendingPhotos.push(e.target.result);
+      //       rerenderPhotoPreviews(mode);
+      //     };
+      //     reader.readAsDataURL(file);
+      //   });
+      // }
+
+      // New photo upload handler with resizing for large images
       function handlePhotoUpload(input, mode) {
         const files = Array.from(input.files);
+        const TARGET_BYTES = 500 * 1024; // 500KB
+
         files.forEach((file) => {
-          if (file.size > 2 * 1024 * 1024) {
-            toast('Photo too large (max 2MB)');
+          if (!file.type.startsWith('image/')) {
+            toast(
+              'Only image files can be resized. Use the PDF option for documents.'
+            );
             return;
           }
+
           const reader = new FileReader();
           reader.onload = (e) => {
-            pendingPhotos.push(e.target.result);
-            rerenderPhotoPreviews(mode);
+            const img = new Image();
+            img.onload = () => {
+              // If already under 500KB, use as-is
+              if (file.size <= TARGET_BYTES) {
+                pendingPhotos.push(e.target.result);
+                rerenderPhotoPreviews(mode);
+                return;
+              }
+
+              // Binary search for the right quality level
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+
+              // First scale down dimensions if image is very large (over 2000px wide)
+              const MAX_DIM = 2000;
+              if (width > MAX_DIM || height > MAX_DIM) {
+                const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Try quality levels from 0.9 down until we're under 500KB
+              let quality = 0.9;
+              let dataUrl = canvas.toDataURL('image/jpeg', quality);
+              let iterations = 0;
+
+              while (
+                dataUrl.length * 0.75 > TARGET_BYTES &&
+                quality > 0.1 &&
+                iterations < 10
+              ) {
+                quality -= 0.1;
+                dataUrl = canvas.toDataURL('image/jpeg', quality);
+                iterations++;
+              }
+
+              const finalKB = Math.round((dataUrl.length * 0.75) / 1024);
+              const origKB = Math.round(file.size / 1024);
+
+              if (origKB > 500) {
+                toast(`Photo resized from ${origKB}KB to ~${finalKB}KB.`);
+              }
+
+              pendingPhotos.push(dataUrl);
+              rerenderPhotoPreviews(mode);
+            };
+            img.src = e.target.result;
           };
           reader.readAsDataURL(file);
         });
       }
-
       function rerenderPhotoPreviews(mode) {
         const container = document.getElementById(`${mode}-photo-previews`);
         if (!container) return;
@@ -2650,6 +2747,500 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           changes: details.changes || null, // for edits: what fields changed
         });
       }
+      // ─────────────────────────────────────────────
+      // ANCESTOR TREE OLDER VERSIOn (REPLACED BY NEW BFS VERSION BELOW)
+      // ─────────────────────────────────────────────
+      //   function showAncestorTree(rootId) {
+      //     const p = allPeople[rootId];
+      //     if (!p) return;
+
+      //     // Build ancestor tree by BFS — collect all ancestors generation by generation
+      //     const generations = []; // array of arrays, index 0 = root
+      //     const visited = new Set();
+
+      //     let currentGen = [rootId];
+      //     visited.add(rootId);
+
+      //     while (currentGen.length > 0) {
+      //       generations.push(currentGen);
+      //       const nextGen = [];
+      //       currentGen.forEach((id) => {
+      //         const parents = findRelatives(id, 'childOf');
+      //         parents.forEach((pid) => {
+      //           if (!visited.has(pid) && allPeople[pid]) {
+      //             visited.add(pid);
+      //             nextGen.push(pid);
+      //           }
+      //         });
+      //       });
+      //       currentGen = nextGen;
+      //     }
+
+      //     let html = `
+      // <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      //   <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
+      //     🌿 Ancestor Tree — ${fullName(p)}
+      //   </h3>
+      //   <span style="font-size:0.85rem;color:var(--muted);font-style:italic;">
+      //     ${visited.size} ancestors found across ${
+      //       generations.length - 1
+      //     } generation${generations.length !== 2 ? 's' : ''}
+      //   </span>
+      //   <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
+      // </div>
+      // <div style="overflow-x:auto;padding-bottom:20px;">
+      //   <div style="display:grid;gap:32px;min-width:fit-content;">`;
+
+      //     generations.forEach((gen, gi) => {
+      //       const label = ancestorGenLabel(gi);
+      //       const missingParents = countMissingParents(gen, gi, generations);
+
+      //       html += `
+      //   <div>
+      //     <div style="
+      //       font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
+      //       color:var(--muted);text-align:center;margin-bottom:10px;font-weight:500;
+      //       display:flex;align-items:center;justify-content:center;gap:10px;
+      //     ">
+      //       ${label}
+      //       <span style="font-size:0.7rem;color:var(--card-border);">(${
+      //         gen.length
+      //       } known${
+      //         missingParents > 0 ? `, ${missingParents} missing` : ''
+      //       })</span>
+      //     </div>
+      //     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">`;
+
+      //       gen.forEach((id) => {
+      //         const person = allPeople[id];
+      //         if (!person) return;
+      //         const photo = (person.photos || [])[0];
+      //         const photoHtml = photo
+      //           ? photo.toLowerCase().includes('.pdf')
+      //             ? `<span style="font-size:1rem;">📄</span>`
+      //             : `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;">`
+      //           : `<span style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--muted);">${
+      //               (person.firstName || '?')[0]
+      //             }</span>`;
+
+      //         const parents = findRelatives(id, 'childOf');
+      //         const hasParents = parents.length > 0;
+      //         const isFocus = gi === 0;
+
+      //         html += `
+      //     <div onclick="selectPerson('${id}')" style="
+      //       background:var(--card-bg);
+      //       border:${
+      //         isFocus ? '2px solid var(--accent)' : '1px solid var(--card-border)'
+      //       };
+      //       border-radius:6px;
+      //       padding:10px 12px;
+      //       min-width:130px;
+      //       max-width:160px;
+      //       text-align:center;
+      //       cursor:pointer;
+      //       box-shadow:0 2px 8px var(--shadow);
+      //       transition:all 0.18s;
+      //       position:relative;
+      //       ${isFocus ? 'background:#fff8f0;' : ''}
+      //     "
+      //     onmouseover="this.style.borderColor='var(--sepia)';this.style.transform='translateY(-1px)'"
+      //     onmouseout="this.style.borderColor='${
+      //       isFocus ? 'var(--accent)' : 'var(--card-border)'
+      //     }';this.style.transform=''">
+      //       <div style="
+      //         width:44px;height:44px;border-radius:50%;
+      //         margin:0 auto 7px;
+      //         border:2px solid var(--card-border);
+      //         background:var(--parchment-dark);
+      //         overflow:hidden;
+      //         display:flex;align-items:center;justify-content:center;
+      //       ">${photoHtml}</div>
+      //       <div style="font-size:0.85rem;font-weight:600;color:var(--ink);line-height:1.2;">${fullName(
+      //         person
+      //       )}</div>
+      //       <div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:2px;">${lifespan(
+      //         person
+      //       )}</div>
+      //       ${
+      //         !hasParents && gi > 0
+      //           ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;">End of line</div>`
+      //           : ''
+      //       }
+      //       ${
+      //         isFocus
+      //           ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">★ Focus</div>`
+      //           : ''
+      //       }
+      //     </div>`;
+      //       });
+
+      //       html += `</div></div>`;
+      //     });
+
+      //     html += `</div></div>`;
+
+      //     // Inject into the view panel
+      //     document.getElementById(
+      //       'panel-view'
+      //     ).innerHTML = `<div style="max-width:100%;">${html}</div>`;
+      //   }
+
+      // ─────────────────────────────────────────────
+      // new version of showAncestorTree with SVG lines and better handling of missing ancestors
+      // (the old version is still above for reference and backup in case of bugs in the new one)
+      // This version builds the ancestor tree using BFS and keeps track of parent-child relationships to draw connecting lines in SVG.
+      // It also counts missing parents for each generation to provide more accurate info in the labels.
+      // Note: This implementation assumes a maximum of 2 parents per person for simplicity in drawing lines. It can be extended to handle more complex cases if needed.
+      // ─────────────────────────────────────────────
+      function showAncestorTree(rootId) {
+        const p = allPeople[rootId];
+        if (!p) return;
+
+        // Build generations by BFS
+        const generations = [];
+        const visited = new Set();
+        const parentMap = {}; // childId → [parentId, parentId]
+
+        let currentGen = [rootId];
+        visited.add(rootId);
+
+        while (currentGen.length > 0) {
+          generations.push(currentGen);
+          const nextGen = [];
+          currentGen.forEach((id) => {
+            const parents = findRelatives(id, 'childOf');
+            parentMap[id] = [];
+            parents.forEach((pid) => {
+              if (allPeople[pid]) {
+                parentMap[id].push(pid);
+                if (!visited.has(pid)) {
+                  visited.add(pid);
+                  nextGen.push(pid);
+                }
+              }
+            });
+          });
+          currentGen = nextGen;
+        }
+
+        // Render container
+        document.getElementById('panel-view').innerHTML = `
+    <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
+        🌿 Ancestor Tree — ${fullName(p)}
+      </h3>
+      <span style="font-size:0.85rem;color:var(--muted);font-style:italic;">
+        ${visited.size} ancestors · ${generations.length - 1} generation${
+          generations.length !== 2 ? 's' : ''
+        }
+      </span>
+      <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
+    </div>
+    <div id="ancestor-scroll" style="overflow-x:auto;overflow-y:auto;padding-bottom:20px;position:relative;">
+      <div id="ancestor-grid" style="position:relative;display:inline-block;min-width:100%;">
+        <svg id="ancestor-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
+        <div id="ancestor-gens" style="display:flex;flex-direction:column;gap:40px;padding:20px 30px;"></div>
+      </div>
+    </div>`;
+
+        const gensEl = document.getElementById('ancestor-gens');
+
+        // Render each generation row and collect card elements
+        const cardEls = {}; // id → DOM element
+
+        generations.forEach((gen, gi) => {
+          const label = ancestorGenLabel(gi);
+          const missing = countMissingParents(gen, gi, generations);
+          const genRow = document.createElement('div');
+          genRow.style.cssText =
+            'display:flex;flex-direction:column;align-items:center;';
+
+          // Label
+          const labelEl = document.createElement('div');
+          labelEl.style.cssText = `
+      font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
+      color:var(--muted);text-align:center;margin-bottom:10px;font-weight:500;
+      display:flex;align-items:center;justify-content:center;gap:10px;`;
+          labelEl.innerHTML = `${label}
+      <span style="font-size:0.7rem;color:var(--card-border);">
+        (${gen.length} known${missing > 0 ? `, ${missing} missing` : ''})
+      </span>`;
+          genRow.appendChild(labelEl);
+
+          // Cards row
+          const cardsRow = document.createElement('div');
+          cardsRow.style.cssText =
+            'display:flex;gap:16px;justify-content:center;flex-wrap:nowrap;';
+
+          gen.forEach((id) => {
+            const person = allPeople[id];
+            if (!person) return;
+
+            const photo = (person.photos || [])[0];
+            const photoHtml = photo
+              ? photo.toLowerCase().includes('.pdf')
+                ? `<span style="font-size:1rem;">📄</span>`
+                : `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;">`
+              : `<span style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--muted);">${
+                  (person.firstName || '?')[0]
+                }</span>`;
+
+            const hasParents = (parentMap[id] || []).length > 0;
+            const isFocus = gi === 0;
+
+            const card = document.createElement('div');
+            card.dataset.personId = id;
+            card.style.cssText = `
+        background:${isFocus ? '#fff8f0' : 'var(--card-bg)'};
+        border:${
+          isFocus ? '2px solid var(--accent)' : '1px solid var(--card-border)'
+        };
+        border-radius:6px;
+        padding:10px 12px;
+        min-width:130px;
+        max-width:160px;
+        text-align:center;
+        cursor:pointer;
+        box-shadow:0 2px 8px var(--shadow);
+        transition:all 0.18s;
+        flex-shrink:0;`;
+
+            card.innerHTML = `
+        <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 7px;
+          border:2px solid var(--card-border);background:var(--parchment-dark);
+          overflow:hidden;display:flex;align-items:center;justify-content:center;">
+          ${photoHtml}
+        </div>
+        <div style="font-size:0.85rem;font-weight:600;color:var(--ink);line-height:1.2;">${fullName(
+          person
+        )}</div>
+        <div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:2px;">${lifespan(
+          person
+        )}</div>
+        ${
+          !hasParents && gi > 0
+            ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;">End of line</div>`
+            : ''
+        }
+        ${
+          isFocus
+            ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">★ Focus</div>`
+            : ''
+        }`;
+
+            card.addEventListener('mouseover', () => {
+              card.style.borderColor = 'var(--sepia)';
+              card.style.transform = 'translateY(-1px)';
+            });
+            card.addEventListener('mouseout', () => {
+              card.style.borderColor = isFocus
+                ? 'var(--accent)'
+                : 'var(--card-border)';
+              card.style.transform = '';
+            });
+            card.addEventListener('click', () => selectPerson(id));
+
+            cardsRow.appendChild(card);
+            cardEls[id] = card;
+          });
+
+          genRow.appendChild(cardsRow);
+          gensEl.appendChild(genRow);
+        });
+
+        // After DOM is rendered, draw SVG lines
+        requestAnimationFrame(() =>
+          drawAncestorLines(generations, parentMap, cardEls)
+        );
+      }
+
+      function drawAncestorLines(generations, parentMap, cardEls) {
+        const svg = document.getElementById('ancestor-svg');
+        const grid = document.getElementById('ancestor-grid');
+        if (!svg || !grid) return;
+
+        const gridRect = grid.getBoundingClientRect();
+        const scrollEl = document.getElementById('ancestor-scroll');
+        const scrollTop = scrollEl ? scrollEl.scrollTop : 0;
+        const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
+
+        // Set SVG size to match grid
+        svg.setAttribute('width', grid.scrollWidth);
+        svg.setAttribute('height', grid.scrollHeight);
+        svg.innerHTML = '';
+
+        const getCardCenter = (el) => {
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return {
+            x: r.left - gridRect.left + scrollLeft + r.width / 2,
+            y: r.top - gridRect.top + scrollTop + r.height / 2,
+            top: r.top - gridRect.top + scrollTop,
+            bottom: r.top - gridRect.top + scrollTop + r.height,
+            left: r.left - gridRect.left + scrollLeft,
+            right: r.left - gridRect.left + scrollLeft + r.width,
+          };
+        };
+
+        // Draw a line from child card top to parent card bottom
+        // using a smooth cubic bezier curve
+        generations.forEach((gen, gi) => {
+          if (gi === 0) return; // focus has no child to connect to
+          gen.forEach((parentId) => {
+            // Find who this person is a parent of
+            Object.entries(parentMap).forEach(([childId, parents]) => {
+              if (!parents.includes(parentId)) return;
+
+              const childEl = cardEls[childId];
+              const parentEl = cardEls[parentId];
+              if (!childEl || !parentEl) return;
+
+              const child = getCardCenter(childEl);
+              const parent = getCardCenter(parentEl);
+              if (!child || !parent) return;
+
+              // Line goes from top-center of parent card to bottom-center of child card
+              const x1 = parent.x;
+              const y1 = parent.top;
+              const x2 = child.x;
+              const y2 = child.bottom;
+
+              // Midpoint for bezier control points
+              const midY = (y1 + y2) / 2;
+
+              const path = document.createElementNS(
+                'http://www.w3.org/2000/svg',
+                'path'
+              );
+              path.setAttribute(
+                'd',
+                `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`
+              );
+              path.setAttribute('stroke', 'var(--card-border)');
+              path.setAttribute('stroke-width', '1.5');
+              path.setAttribute('fill', 'none');
+              path.setAttribute('stroke-opacity', '0.7');
+              svg.appendChild(path);
+            });
+          });
+        });
+        // Center the view on the focus person (first card in generation 0)
+        const focusCard = Object.values(cardEls)[0];
+        if (focusCard && scrollEl) {
+          const focusRect = focusCard.getBoundingClientRect();
+          const gridLeft = gridRect.left;
+          const focusMidX =
+            focusRect.left - gridLeft + scrollLeft + focusRect.width / 2;
+          const containerW = scrollEl.clientWidth;
+
+          // Scroll so focus card is horizontally centered, and start at the top
+          scrollEl.scrollLeft = focusMidX - containerW / 2;
+          scrollEl.scrollTop = 0;
+        }
+      }
+
+      function countMissingParents(gen, genIndex, generations) {
+        // At any generation past the first, each person should have 2 parents in the next gen up
+        // Count how many slots are unfilled
+        if (genIndex === 0) return 0;
+        const prevGen = generations[genIndex - 1] || [];
+        const expected = prevGen.length * 2;
+        const actual = gen.length;
+        return Math.max(0, expected - actual);
+      }
+
+      function ancestorGenLabel(gi) {
+        if (gi === 0) return 'Focus';
+        if (gi === 1) return 'Parents';
+        if (gi === 2) return 'Grandparents';
+        if (gi === 3) return 'Great-Grandparents';
+
+        const n = gi - 2; // 2nd, 3rd, 4th...
+        const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
+        return `${n}${suffix} Great-Grandparents`;
+      }
+
+      function showHints() {
+        document.getElementById(
+          'modal-body'
+        ).innerHTML = `<h3 style="margin-bottom:20px;">💡 Tips & Best Practices</h3><div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);"><div style="margin-bottom:20px;"><div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">
+          Adding People
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Always enter the <b>first name</b> — it's the only required field.</li>
+          <li>Use the <b>middle name field</b> for middle names only, not titles or nicknames. Put those in Notes.</li>
+          <li>For <b>married women</b>, enter their birth surname as the last name.</li>
+          <li>Enter <b>dates</b> in any natural format: <i>15 March 1945</i>, <i>March 1945</i>, <i>Abt 1880</i>, <i>Bef 1900</i>, or <i>15/03/1945</i> — the app will convert common formats automatically.</li>
+          <li>If you only know the year, just enter the year: <i>1880</i>.</li>
+          <li>Use prefixes like <b>Abt</b> (about), <b>Bef</b> (before), or <b>Aft</b> (after) for uncertain dates.</li>
+          <li>Leave <b>Date of Death</b> blank for living people.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Relationships
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Use <b>Child of</b> to link a person to their parents — add one relationship for each parent.</li>
+          <li>Use <b>Spouse of</b> to link married couples. You only need to add it from one side — the app finds it both ways.</li>
+          <li>After searching for a person in the relationship box, make sure to <b>click Add</b> before saving — just selecting from the list is not enough.</li>
+          <li>The family tree view works best when <b>both parents</b> are entered and linked to each other as spouses.</li>
+          <li>You can add <b>multiple parents</b> if the biological and adoptive parents are both known — just add two Child of relationships.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Photos
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Keep photos <b>under 500KB</b> each for best performance. Large images slow down the app for everyone.</li>
+          <li>Supported image formats: <b>JPG, PNG, WEBP</b>.</li>
+          <li>You can also attach <b>PDF documents</b> — these appear as document tiles and open in a new tab.</li>
+          <li>The <b>first image</b> in the list is used as the person's profile photo in the tree and sidebar. Make sure it's a portrait if possible.</li>
+          <li>PDFs are automatically sorted to the <b>end of the photo list</b> so images always appear first.</li>
+          <li>To resize photos before uploading, try <a href="https://squoosh.app" target="_blank" style="color:var(--accent);">squoosh.app</a> — it's free and works in your browser.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Notes
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Notes are a great place for <b>census records, obituaries, stories, and sources</b>.</li>
+          <li>Notes are hidden by default — click <b>Show Notes</b> on a person's record to expand them.</li>
+          <li>There's no length limit, so feel free to paste in full transcriptions of records.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:4px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                    padding-bottom:6px;margin-bottom:10px;">
+          Exporting
+        </div>
+        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <li>Use <b>Export GEDCOM</b> in the header to download your tree in the standard genealogy format, compatible with Ancestry, FamilySearch, Gramps, and most other programs.</li>
+          <li>GEDCOM export includes names, dates, places, notes, and photo links.</li>
+          <li>The <b>Change Log</b> (visible to signed-in users) records every add, edit, and delete with the date and who made the change.</li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>`;
+        document.getElementById('modal').style.display = 'flex';
+      }
       document.addEventListener('click', (e) => {
         ['add', 'edit'].forEach((mode) => {
           const search = document.getElementById(`${mode}-rel-search`);
@@ -2663,7 +3254,22 @@ onkeydown="relSearchKeydown(event,'${mode}')"
       // Initial render
       window.addEventListener('load', () => {
         renderWelcome();
-        renderAddForm();
+      });
+
+      window.addEventListener('resize', () => {
+        const svg = document.getElementById('ancestor-svg');
+        if (svg) {
+          // Re-run if ancestor tree is visible
+          const rootId =
+            document.querySelector('[data-person-id]')?.dataset.personId;
+          if (rootId && allPeople[rootId]) {
+            // just redraw lines, don't rebuild the whole tree
+            const cardEls = {};
+            document.querySelectorAll('[data-person-id]').forEach((el) => {
+              cardEls[el.dataset.personId] = el;
+            });
+          }
+        }
       });
     </script>
   </body>
