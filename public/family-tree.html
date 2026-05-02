@@ -1841,8 +1841,8 @@ ${
       <button class="btn btn-ghost btn-sm" onclick="treeFwd()" ${
         canFwd ? '' : 'disabled'
       }>Forward ▶</button>
-    </div>
-    <div class="tree-container">
+      <button class="btn btn-ghost btn-sm" onclick="showAncestorTree('${rootId}')">🌿 Ancestor Tree</button>
+    </div>    <div class="tree-container">
       <div class="tree-view-grid">`;
 
         // Great-Grandparents
@@ -2728,15 +2728,170 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           changes: details.changes || null, // for edits: what fields changed
         });
       }
-      function showHints() {
-        document.getElementById('modal-body').innerHTML = `
-    <h3 style="margin-bottom:20px;">💡 Tips & Best Practices</h3>
-    <div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);">
+      // ─────────────────────────────────────────────
+      // ANCESTOR TREE
+      // ─────────────────────────────────────────────
+      function showAncestorTree(rootId) {
+        const p = allPeople[rootId];
+        if (!p) return;
 
-      <div style="margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                    padding-bottom:6px;margin-bottom:10px;">
+        // Build ancestor tree by BFS — collect all ancestors generation by generation
+        const generations = []; // array of arrays, index 0 = root
+        const visited = new Set();
+
+        let currentGen = [rootId];
+        visited.add(rootId);
+
+        while (currentGen.length > 0) {
+          generations.push(currentGen);
+          const nextGen = [];
+          currentGen.forEach((id) => {
+            const parents = findRelatives(id, 'childOf');
+            parents.forEach((pid) => {
+              if (!visited.has(pid) && allPeople[pid]) {
+                visited.add(pid);
+                nextGen.push(pid);
+              }
+            });
+          });
+          currentGen = nextGen;
+        }
+
+        let html = `
+    <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
+        🌿 Ancestor Tree — ${fullName(p)}
+      </h3>
+      <span style="font-size:0.85rem;color:var(--muted);font-style:italic;">
+        ${visited.size} ancestors found across ${
+          generations.length - 1
+        } generation${generations.length !== 2 ? 's' : ''}
+      </span>
+      <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
+    </div>
+    <div style="overflow-x:auto;padding-bottom:20px;">
+      <div style="display:grid;gap:32px;min-width:fit-content;">`;
+
+        generations.forEach((gen, gi) => {
+          const label = ancestorGenLabel(gi);
+          const missingParents = countMissingParents(gen, gi, generations);
+
+          html += `
+      <div>
+        <div style="
+          font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
+          color:var(--muted);text-align:center;margin-bottom:10px;font-weight:500;
+          display:flex;align-items:center;justify-content:center;gap:10px;
+        ">
+          ${label}
+          <span style="font-size:0.7rem;color:var(--card-border);">(${
+            gen.length
+          } known${
+            missingParents > 0 ? `, ${missingParents} missing` : ''
+          })</span>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">`;
+
+          gen.forEach((id) => {
+            const person = allPeople[id];
+            if (!person) return;
+            const photo = (person.photos || [])[0];
+            const photoHtml = photo
+              ? photo.toLowerCase().includes('.pdf')
+                ? `<span style="font-size:1rem;">📄</span>`
+                : `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;">`
+              : `<span style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--muted);">${
+                  (person.firstName || '?')[0]
+                }</span>`;
+
+            const parents = findRelatives(id, 'childOf');
+            const hasParents = parents.length > 0;
+            const isFocus = gi === 0;
+
+            html += `
+        <div onclick="selectPerson('${id}')" style="
+          background:var(--card-bg);
+          border:${
+            isFocus ? '2px solid var(--accent)' : '1px solid var(--card-border)'
+          };
+          border-radius:6px;
+          padding:10px 12px;
+          min-width:130px;
+          max-width:160px;
+          text-align:center;
+          cursor:pointer;
+          box-shadow:0 2px 8px var(--shadow);
+          transition:all 0.18s;
+          position:relative;
+          ${isFocus ? 'background:#fff8f0;' : ''}
+        "
+        onmouseover="this.style.borderColor='var(--sepia)';this.style.transform='translateY(-1px)'"
+        onmouseout="this.style.borderColor='${
+          isFocus ? 'var(--accent)' : 'var(--card-border)'
+        }';this.style.transform=''">
+          <div style="
+            width:44px;height:44px;border-radius:50%;
+            margin:0 auto 7px;
+            border:2px solid var(--card-border);
+            background:var(--parchment-dark);
+            overflow:hidden;
+            display:flex;align-items:center;justify-content:center;
+          ">${photoHtml}</div>
+          <div style="font-size:0.85rem;font-weight:600;color:var(--ink);line-height:1.2;">${fullName(
+            person
+          )}</div>
+          <div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:2px;">${lifespan(
+            person
+          )}</div>
+          ${
+            !hasParents && gi > 0
+              ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;">End of line</div>`
+              : ''
+          }
+          ${
+            isFocus
+              ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">★ Focus</div>`
+              : ''
+          }
+        </div>`;
+          });
+
+          html += `</div></div>`;
+        });
+
+        html += `</div></div>`;
+
+        // Inject into the view panel
+        document.getElementById(
+          'panel-view'
+        ).innerHTML = `<div style="max-width:100%;">${html}</div>`;
+      }
+
+      function countMissingParents(gen, genIndex, generations) {
+        // At any generation past the first, each person should have 2 parents in the next gen up
+        // Count how many slots are unfilled
+        if (genIndex === 0) return 0;
+        const prevGen = generations[genIndex - 1] || [];
+        const expected = prevGen.length * 2;
+        const actual = gen.length;
+        return Math.max(0, expected - actual);
+      }
+
+      function ancestorGenLabel(gi) {
+        if (gi === 0) return 'Focus';
+        if (gi === 1) return 'Parents';
+        if (gi === 2) return 'Grandparents';
+        if (gi === 3) return 'Great-Grandparents';
+
+        const n = gi - 2; // 2nd, 3rd, 4th...
+        const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
+        return `${n}${suffix} Great-Grandparents`;
+      }
+
+      function showHints() {
+        document.getElementById(
+          'modal-body'
+        ).innerHTML = `<h3 style="margin-bottom:20px;">💡 Tips & Best Practices</h3><div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);"><div style="margin-bottom:20px;"><div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">
           Adding People
         </div>
         <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
