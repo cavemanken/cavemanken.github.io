@@ -997,10 +997,10 @@
     <div id="app">
       <header>
         <div style="display: flex; gap: 8px; align-items: center">
-          <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
+          <!-- <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
             ⬇ Export GEDCOM
-          </button>
-          <button
+          </button> -->
+          <!-- <button
             class="btn btn-secondary btn-sm"
             onclick="document.getElementById('gedcom-input').click()"
           >
@@ -1012,7 +1012,7 @@
               style="display: none"
               onchange="importGEDCOM(this)"
             />
-          </button>
+          </button> -->
           <button
             class="btn btn-secondary btn-sm"
             id="changelog-btn"
@@ -1319,11 +1319,11 @@
               : initials(p);
 
           li.innerHTML = `
-      <div class="person-avatar">${photo}</div>
-      <div>
-        <div class="person-info-name">${fullName(p)}</div>
-        <div class="person-info-dates">${lifespan(p)}</div>
-      </div>`;
+            <div class="person-avatar">${photo}</div>
+            <div>
+              <div class="person-info-name">${fullName(p)}</div>
+              <div class="person-info-dates">${lifespan(p)}</div>
+            </div>`;
           list.appendChild(li);
         });
       }
@@ -1433,16 +1433,16 @@
       function renderWelcome() {
         const count = Object.keys(allPeople).length;
         document.getElementById('panel-view').innerHTML = `
-    <div class="empty-state">
-      <div style="font-size:3rem;margin-bottom:16px;">🌳</div>
-      <p>${
-        // count === 0
-        //   ? 'Your family tree is empty. Add your first family member to begin.'
-        //   :
-        'Select a family member from the left to view their record and family tree.'
-      }</p>
-      
-    </div>`;
+          <div class="empty-state">
+            <div style="font-size:3rem;margin-bottom:16px;">🌳</div>
+            <p>${
+              // count === 0
+              //   ? 'Your family tree is empty. Add your first family member to begin.'
+              //   :
+              'Select a family member from the left to view their record and family tree.'
+            }</p>
+
+          </div>`;
       }
 
       // ─────────────────────────────────────────────
@@ -1467,92 +1467,92 @@
                       url.split('/').pop().split('?')[0]
                     );
                     return `
-              <a href="${url}" target="_blank" title="Open PDF" style="
-                display:flex; flex-direction:column; align-items:center; justify-content:center;
-                gap:6px; width:110px; height:110px; border-radius:4px;
-                border:2px solid var(--card-border); background:var(--parchment-dark);
-                cursor:pointer; text-decoration:none; color:var(--ink-light);
-                transition: border-color 0.15s, transform 0.15s;
-                font-size:0.72rem; text-align:center; padding:8px;
-              "
-              onmouseover="this.style.borderColor='var(--sepia)';this.style.transform='scale(1.04)'"
-              onmouseout="this.style.borderColor='var(--card-border)';this.style.transform='scale(1)'">
-                <span style="font-size:2rem;">📄</span>
-                <span style="word-break:break-word; line-height:1.2;">${filename}</span>
-              </a>`;
+                    <a href="${url}" target="_blank" title="Open PDF" style="
+                      display:flex; flex-direction:column; align-items:center; justify-content:center;
+                      gap:6px; width:110px; height:110px; border-radius:4px;
+                      border:2px solid var(--card-border); background:var(--parchment-dark);
+                      cursor:pointer; text-decoration:none; color:var(--ink-light);
+                      transition: border-color 0.15s, transform 0.15s;
+                      font-size:0.72rem; text-align:center; padding:8px;
+                    "
+                    onmouseover="this.style.borderColor='var(--sepia)';this.style.transform='scale(1.04)'"
+                    onmouseout="this.style.borderColor='var(--card-border)';this.style.transform='scale(1)'">
+                      <span style="font-size:2rem;">📄</span>
+                      <span style="word-break:break-word; line-height:1.2;">${filename}</span>
+                    </a>`;
                   }
                   return `<img class="gallery-thumb" src="${url}" alt="Photo" onclick="openLightbox('${url}')">`;
                 })
                 .join('')}</div>`
             : `<p class="text-muted">No photos added.</p>`;
         const detailCard = `
-    <div class="person-detail">
-      <div class="person-detail-header">
-        <div class="person-detail-photo">
-          ${
-            photos[0]
-              ? photos[0].toLowerCase().includes('.pdf')
-                ? `<span style="font-size:2.5rem;">📄</span>`
-                : `<img src="${photos[0]}" alt="">`
-              : initials(p)
-          }
+          <div class="person-detail">
+            <div class="person-detail-header">
+              <div class="person-detail-photo">
+                ${
+                  photos[0]
+                    ? photos[0].toLowerCase().includes('.pdf')
+                      ? `<span style="font-size:2.5rem;">📄</span>`
+                      : `<img src="${photos[0]}" alt="">`
+                    : initials(p)
+                }
+              </div>
+              <div>
+                <div class="person-detail-name">${fullName(p)}</div>
+                <div class="person-detail-dates">${
+                  lifespan(p) || 'Dates unknown'
+                }</div>
+                ${
+                  p.bornLocation
+                    ? `<div class="person-detail-loc">📍 ${p.bornLocation}</div>`
+                    : ''
+                }
+              </div>
+            </div>
+            <div class="person-detail-body">
+      <div class="detail-actions">
+        ${
+          currentUser
+            ? `
+          <button class="btn btn-ghost btn-sm" onclick="startEdit('${id}')">✎ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${id}')">🗑 Delete</button>
+        `
+            : ''
+        }
+      </div>
+      ${
+        p.notes
+          ? `
+      <div class="detail-section">
+        <div class="detail-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+          Notes
+          <button class="btn btn-ghost btn-sm" onclick="toggleNotes(this)" style="font-size:0.8rem;padding:3px 10px;">
+            Show Notes
+          </button>
         </div>
-        <div>
-          <div class="person-detail-name">${fullName(p)}</div>
-          <div class="person-detail-dates">${
-            lifespan(p) || 'Dates unknown'
-          }</div>
+        <div class="detail-notes" id="person-notes" style="display:none;">${escHtml(
+          p.notes
+        )}</div>
+      </div>`
+          : ''
+      }
+                  <div class="detail-section">
+        <div class="detail-section-title" style="display:flex;align-items:center;gap:10px;">
+          Photos
           ${
-            p.bornLocation
-              ? `<div class="person-detail-loc">📍 ${p.bornLocation}</div>`
+            photos.length === 0
+              ? `<span class="text-muted" style="font-size:0.85rem;font-style:italic;text-transform:none;letter-spacing:0;font-weight:400;">No photos added.</span>`
               : ''
           }
         </div>
+        ${photos.length > 0 ? photoHtml : ''}
       </div>
-      <div class="person-detail-body">
-<div class="detail-actions">
-  ${
-    currentUser
-      ? `
-    <button class="btn btn-ghost btn-sm" onclick="startEdit('${id}')">✎ Edit</button>
-    <button class="btn btn-danger btn-sm" onclick="confirmDelete('${id}')">🗑 Delete</button>
-  `
-      : ''
-  }
-</div>
-${
-  p.notes
-    ? `
-<div class="detail-section">
-  <div class="detail-section-title" style="display:flex;align-items:center;justify-content:space-between;">
-    Notes
-    <button class="btn btn-ghost btn-sm" onclick="toggleNotes(this)" style="font-size:0.8rem;padding:3px 10px;">
-      Show Notes
-    </button>
-  </div>
-  <div class="detail-notes" id="person-notes" style="display:none;">${escHtml(
-    p.notes
-  )}</div>
-</div>`
-    : ''
-}
-            <div class="detail-section">
-  <div class="detail-section-title" style="display:flex;align-items:center;gap:10px;">
-    Photos
-    ${
-      photos.length === 0
-        ? `<span class="text-muted" style="font-size:0.85rem;font-style:italic;text-transform:none;letter-spacing:0;font-weight:400;">No photos added.</span>`
-        : ''
-    }
-  </div>
-  ${photos.length > 0 ? photoHtml : ''}
-</div>
-        <div class="detail-section">
-          <div class="detail-section-title">Relationships</div>
-          ${renderRelationshipSummary(id, p)}
-        </div>
-      </div>
-    </div>`;
+              <div class="detail-section">
+                <div class="detail-section-title">Relationships</div>
+                ${renderRelationshipSummary(id, p)}
+              </div>
+            </div>
+          </div>`;
 
         const treeHtml = renderTree(id);
 
@@ -1876,17 +1876,17 @@ ${
         });
 
         let html = `
-    <div class="tree-nav">
-      <h3>🌳 Family Tree — ${fullName(p)}</h3>
-      <button class="btn btn-ghost btn-sm" onclick="treeBack()" ${
-        canBack ? '' : 'disabled'
-      }>◀ Back</button>
-      <button class="btn btn-ghost btn-sm" onclick="treeFwd()" ${
-        canFwd ? '' : 'disabled'
-      }>Forward ▶</button>
-      <button class="btn btn-ghost btn-sm" onclick="showAncestorTree('${rootId}')">🌿 Ancestor Tree</button>
-    </div>    <div class="tree-container">
-      <div class="tree-view-grid">`;
+          <div class="tree-nav">
+            <h3>🌳 Family Tree — ${fullName(p)}</h3>
+            <button class="btn btn-ghost btn-sm" onclick="treeBack()" ${
+              canBack ? '' : 'disabled'
+            }>◀ Back</button>
+            <button class="btn btn-ghost btn-sm" onclick="treeFwd()" ${
+              canFwd ? '' : 'disabled'
+            }>Forward ▶</button>
+            <button class="btn btn-ghost btn-sm" onclick="showAncestorTree('${rootId}')">🌿 Ancestor Tree</button>
+          </div>    <div class="tree-container">
+            <div class="tree-view-grid">`;
 
         // Great-Grandparents
         if (greatGrandparents.length > 0) {
@@ -2001,12 +2001,12 @@ ${
             ? '<div class="tree-card-label">Spouse</div>'
             : '';
         return `
-    <div class="tree-card${cls}" onclick="selectPerson('${id}')">
-      <div class="tree-card-photo">${photoHtml}</div>
-      <div class="tree-card-name">${fullName(p)}</div>
-      <div class="tree-card-dates">${lifespan(p)}</div>
-      ${label}
-    </div>`;
+          <div class="tree-card${cls}" onclick="selectPerson('${id}')">
+            <div class="tree-card-photo">${photoHtml}</div>
+            <div class="tree-card-name">${fullName(p)}</div>
+            <div class="tree-card-dates">${lifespan(p)}</div>
+            ${label}
+          </div>`;
       }
 
       function treeBack() {
@@ -2060,116 +2060,116 @@ ${
       function buildFormHtml(p, mode) {
         const rels = p.relationships || [];
         return `
-    <div class="form-card">
-      <h2>${mode === 'edit' ? '✎ Edit Person' : '+ Add New Person'}</h2>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>First Name *</label>
-          <input type="text" id="${mode}-firstName" value="${esc(
+          <div class="form-card">
+            <h2>${mode === 'edit' ? '✎ Edit Person' : '+ Add New Person'}</h2>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" id="${mode}-firstName" value="${esc(
           p.firstName
         )}" placeholder="First name">
-        </div>
-        <div class="form-group">
-          <label>Middle Name</label>
-          <input type="text" id="${mode}-middleName" value="${esc(
+              </div>
+              <div class="form-group">
+                <label>Middle Name</label>
+                <input type="text" id="${mode}-middleName" value="${esc(
           p.middleName
         )}" placeholder="Middle name">
-        </div>
-        <div class="form-group">
-          <label>Last Name</label>
-          <input type="text" id="${mode}-lastName" value="${esc(
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" id="${mode}-lastName" value="${esc(
           p.lastName
         )}" placeholder="Last name">
-        </div>
-        <div class="form-group">
-          <label>Date of Birth</label>
-          <input type="text" id="${mode}-dob" value="${esc(
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="text" id="${mode}-dob" value="${esc(
           p.dob
         )}" placeholder="e.g. March 15, 1945">
-        </div>
-        <div class="form-group">
-          <label>Date of Death</label>
-          <input type="text" id="${mode}-dod" value="${esc(
+              </div>
+              <div class="form-group">
+                <label>Date of Death</label>
+                <input type="text" id="${mode}-dod" value="${esc(
           p.dod
         )}" placeholder="Leave blank if living">
-        </div>
-        <div class="form-group">
-          <label>Born Location</label>
-          <input type="text" id="${mode}-bornLocation" value="${esc(
+              </div>
+              <div class="form-group">
+                <label>Born Location</label>
+                <input type="text" id="${mode}-bornLocation" value="${esc(
           p.bornLocation
         )}" placeholder="City, State or Country">
-        </div>
-        <div class="form-group full">
-          <label>Notes / Biography</label>
-          <textarea id="${mode}-notes" placeholder="Life story, occupation, memories…">${esc(
+              </div>
+              <div class="form-group full">
+                <label>Notes / Biography</label>
+                <textarea id="${mode}-notes" placeholder="Life story, occupation, memories…">${esc(
           p.notes
         )}</textarea>
+              </div>
+              <div class="form-group full">
+                <label>Photos</label>
+                <div class="photo-upload-area" onclick="document.getElementById('${mode}-photo-input').click()">
+                  <input type="file" id="${mode}-photo-input" accept="image/*" multiple onchange="handlePhotoUpload(this,'${mode}')">
+                  <p>📷 Click to upload photos (JPG, PNG, WEBP)</p>
+                </div>
+                <div class="photo-previews" id="${mode}-photo-previews"></div>
+                <p style="font-size:0.8rem;color:var(--muted);margin-top:6px;">Photos are stored as base64 in your database. For best performance, use photos under 500KB each.</p>
+              </div>
+              <div class="form-group full">
+                <label>Relationships</label>
+                <div class="rel-section">
+                  <h4>Link to Family Members</h4>
+      <div class="rel-row" style="flex-wrap:wrap;gap:8px;">
+        <select id="${mode}-rel-type" style="flex:0 0 auto;min-width:160px;">
+          <option value="childOf">Child of (Parent →)</option>
+          <option value="spouseOf">Spouse of</option>
+        </select>
+        <div style="flex:1;min-width:180px;position:relative;">
+          <input
+            type="text"
+            id="${mode}-rel-search"
+            placeholder="Type a name to search…"
+            autocomplete="off"
+            oninput="filterRelPeople('${mode}')"
+            onfocus="showRelDropdown('${mode}')"
+      onkeydown="relSearchKeydown(event,'${mode}')"
+            style="width:100%;padding-right:28px;"
+          />
+          <span id="${mode}-rel-clear" onclick="clearRelSearch('${mode}')"
+            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+                   cursor:pointer;color:var(--muted);display:none;font-size:1rem;line-height:1;">✕</span>
+          <ul id="${mode}-rel-dropdown" style="
+            display:none;
+            position:absolute;
+            top:100%;
+            left:0;
+            right:0;
+            background:var(--card-bg);
+            border:1px solid var(--card-border);
+            border-top:none;
+            border-radius:0 0 6px 6px;
+            max-height:200px;
+            overflow-y:auto;
+            z-index:200;
+            list-style:none;
+            margin:0;
+            padding:0;
+            box-shadow:0 4px 12px var(--shadow);
+          "></ul>
         </div>
-        <div class="form-group full">
-          <label>Photos</label>
-          <div class="photo-upload-area" onclick="document.getElementById('${mode}-photo-input').click()">
-            <input type="file" id="${mode}-photo-input" accept="image/*" multiple onchange="handlePhotoUpload(this,'${mode}')">
-            <p>📷 Click to upload photos (JPG, PNG, WEBP)</p>
-          </div>
-          <div class="photo-previews" id="${mode}-photo-previews"></div>
-          <p style="font-size:0.8rem;color:var(--muted);margin-top:6px;">Photos are stored as base64 in your database. For best performance, use photos under 500KB each.</p>
-        </div>
-        <div class="form-group full">
-          <label>Relationships</label>
-          <div class="rel-section">
-            <h4>Link to Family Members</h4>
-<div class="rel-row" style="flex-wrap:wrap;gap:8px;">
-  <select id="${mode}-rel-type" style="flex:0 0 auto;min-width:160px;">
-    <option value="childOf">Child of (Parent →)</option>
-    <option value="spouseOf">Spouse of</option>
-  </select>
-  <div style="flex:1;min-width:180px;position:relative;">
-    <input
-      type="text"
-      id="${mode}-rel-search"
-      placeholder="Type a name to search…"
-      autocomplete="off"
-      oninput="filterRelPeople('${mode}')"
-      onfocus="showRelDropdown('${mode}')"
-onkeydown="relSearchKeydown(event,'${mode}')"
-      style="width:100%;padding-right:28px;"
-    />
-    <span id="${mode}-rel-clear" onclick="clearRelSearch('${mode}')"
-      style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
-             cursor:pointer;color:var(--muted);display:none;font-size:1rem;line-height:1;">✕</span>
-    <ul id="${mode}-rel-dropdown" style="
-      display:none;
-      position:absolute;
-      top:100%;
-      left:0;
-      right:0;
-      background:var(--card-bg);
-      border:1px solid var(--card-border);
-      border-top:none;
-      border-radius:0 0 6px 6px;
-      max-height:200px;
-      overflow-y:auto;
-      z-index:200;
-      list-style:none;
-      margin:0;
-      padding:0;
-      box-shadow:0 4px 12px var(--shadow);
-    "></ul>
-  </div>
-  <input type="hidden" id="${mode}-rel-person" value="" />
-  <button class="btn btn-ghost btn-sm" style="flex:0 0 auto;" onclick="addRelTag('${mode}')">Add</button>
-</div>
-            <div id="${mode}-rel-tags">${renderRelTags(rels, mode)}</div>
-          </div>
-        </div>
+        <input type="hidden" id="${mode}-rel-person" value="" />
+        <button class="btn btn-ghost btn-sm" style="flex:0 0 auto;" onclick="addRelTag('${mode}')">Add</button>
       </div>
-      <div class="form-actions">
-        <button class="btn btn-primary" onclick="savePerson('${mode}')">
-          ${mode === 'edit' ? 'Save Changes' : 'Add to Family Tree'}
-        </button>
-        <button class="btn btn-ghost" onclick="cancelForm('${mode}')">Cancel</button>
-      </div>
-    </div>`;
+                  <div id="${mode}-rel-tags">${renderRelTags(rels, mode)}</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="savePerson('${mode}')">
+                ${mode === 'edit' ? 'Save Changes' : 'Add to Family Tree'}
+              </button>
+              <button class="btn btn-ghost" onclick="cancelForm('${mode}')">Cancel</button>
+            </div>
+          </div>`;
       }
 
       // Track relationships in the form
@@ -2182,9 +2182,9 @@ onkeydown="relSearchKeydown(event,'${mode}')"
             const target = allPeople[r.targetId];
             const label = r.type === 'childOf' ? 'Child of' : 'Spouse of';
             return `<span class="rel-tag">
-      ${label}: ${target ? fullName(target) : r.targetId}
-      <button onclick="removeRelTag(${i},'${mode}')">✕</button>
-    </span>`;
+            ${label}: ${target ? fullName(target) : r.targetId}
+            <button onclick="removeRelTag(${i},'${mode}')">✕</button>
+          </span>`;
           })
           .join('');
       }
@@ -2309,10 +2309,10 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         container.innerHTML = pendingPhotos
           .map(
             (url, i) => `
-    <div class="photo-thumb">
-      <img src="${url}" alt="">
-      <button class="remove-photo" onclick="removePhoto(${i},'${mode}')">✕</button>
-    </div>`
+          <div class="photo-thumb">
+            <img src="${url}" alt="">
+            <button class="remove-photo" onclick="removePhoto(${i},'${mode}')">✕</button>
+          </div>`
           )
           .join('');
       }
@@ -2512,14 +2512,14 @@ onkeydown="relSearchKeydown(event,'${mode}')"
       function confirmDelete(id) {
         const p = allPeople[id];
         document.getElementById('modal-body').innerHTML = `
-    <h3>Delete Record</h3>
-    <p>Are you sure you want to permanently delete <strong>${fullName(
-      p
-    )}</strong>? This cannot be undone.</p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" onclick="deletePerson('${id}')">Delete</button>
-    </div>`;
+          <h3>Delete Record</h3>
+          <p>Are you sure you want to permanently delete <strong>${fullName(
+            p
+          )}</strong>? This cannot be undone.</p>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="deletePerson('${id}')">Delete</button>
+          </div>`;
         document.getElementById('modal').style.display = 'flex';
       }
 
@@ -2576,39 +2576,39 @@ onkeydown="relSearchKeydown(event,'${mode}')"
                   }[e.action] || e.action;
 
                 return `<tr style="border-bottom:1px solid var(--card-border);">
-          <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
-          <td style="padding:8px 10px;">${badge}</td>
-          <td style="padding:8px 10px;font-weight:500;">${
-            e.personName || '—'
-          }</td>
-          <td style="padding:8px 10px;font-size:0.8rem;color:var(--muted);">${
-            e.email || e.uid
-          }</td>
-        </tr>`;
+                <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
+                <td style="padding:8px 10px;">${badge}</td>
+                <td style="padding:8px 10px;font-weight:500;">${
+                  e.personName || '—'
+                }</td>
+                <td style="padding:8px 10px;font-size:0.8rem;color:var(--muted);">${
+                  e.email || e.uid
+                }</td>
+              </tr>`;
               })
               .join('');
 
             document.getElementById('modal-body').innerHTML = `
-        <h3 style="margin-bottom:16px;">📋 Change Log</h3>
-        <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
-          <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
-            <thead>
-              <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
-                <th style="padding:6px 10px;text-align:left;">When</th>
-                <th style="padding:6px 10px;text-align:left;">Action</th>
-                <th style="padding:6px 10px;text-align:left;">Person</th>
-                <th style="padding:6px 10px;text-align:left;">By</th>
-              </tr>
-            </thead>
-            <tbody>${
-              rows ||
-              '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No changes recorded yet.</td></tr>'
-            }</tbody>
-          </table>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="closeModal()">Close</button>
-        </div>`;
+              <h3 style="margin-bottom:16px;">📋 Change Log</h3>
+              <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+                <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
+                  <thead>
+                    <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
+                      <th style="padding:6px 10px;text-align:left;">When</th>
+                      <th style="padding:6px 10px;text-align:left;">Action</th>
+                      <th style="padding:6px 10px;text-align:left;">Person</th>
+                      <th style="padding:6px 10px;text-align:left;">By</th>
+                    </tr>
+                  </thead>
+                  <tbody>${
+                    rows ||
+                    '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No changes recorded yet.</td></tr>'
+                  }</tbody>
+                </table>
+              </div>
+              <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+              </div>`;
             document.getElementById('modal').style.display = 'flex';
           });
       }
@@ -2680,24 +2680,28 @@ onkeydown="relSearchKeydown(event,'${mode}')"
             .map(([pid, p]) => {
               const dates = lifespan(p);
               return `<li
-        onclick="selectRelPerson('${mode}','${pid}','${esc(fullName(p))}')"
-        style="
-          padding:8px 12px;
-          cursor:pointer;
-          display:flex;
-          flex-direction:column;
-          border-bottom:1px solid var(--parchment-dark);
-          transition:background 0.12s;
-        "
-        onmouseover="this.style.background='var(--parchment-dark)'"
-        onmouseout="this.style.background=''">
-        <span style="font-weight:500;font-size:0.95rem;">${fullName(p)}</span>
-        ${
-          dates
-            ? `<span style="font-size:0.78rem;color:var(--muted);font-style:italic;">${dates}</span>`
-            : ''
-        }
-      </li>`;
+              onclick="selectRelPerson('${mode}','${pid}','${esc(
+                fullName(p)
+              )}')"
+              style="
+                padding:8px 12px;
+                cursor:pointer;
+                display:flex;
+                flex-direction:column;
+                border-bottom:1px solid var(--parchment-dark);
+                transition:background 0.12s;
+              "
+              onmouseover="this.style.background='var(--parchment-dark)'"
+              onmouseout="this.style.background=''">
+              <span style="font-weight:500;font-size:0.95rem;">${fullName(
+                p
+              )}</span>
+              ${
+                dates
+                  ? `<span style="font-size:0.78rem;color:var(--muted);font-style:italic;">${dates}</span>`
+                  : ''
+              }
+            </li>`;
             })
             .join('');
         }
@@ -2957,23 +2961,23 @@ onkeydown="relSearchKeydown(event,'${mode}')"
 
         // Render container
         document.getElementById('panel-view').innerHTML = `
-    <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
-        🌿 Ancestor Tree — ${fullName(p)}
-      </h3>
-      <span style="font-size:0.85rem;color:var(--muted);font-style:italic;">
-        ${visited.size} ancestors · ${generations.length - 1} generation${
+          <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
+              🌿 Ancestor Tree — ${fullName(p)}
+            </h3>
+            <span style="font-size:0.85rem;color:var(--muted);font-style:italic;">
+              ${visited.size} ancestors · ${generations.length - 1} generation${
           generations.length !== 2 ? 's' : ''
         }
-      </span>
-      <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
-    </div>
-    <div id="ancestor-scroll" style="overflow-x:auto;overflow-y:auto;padding-bottom:20px;position:relative;">
-      <div id="ancestor-grid" style="position:relative;display:inline-block;min-width:100%;">
-        <svg id="ancestor-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
-        <div id="ancestor-gens" style="display:flex;flex-direction:column;gap:40px;padding:20px 30px;"></div>
-      </div>
-    </div>`;
+            </span>
+            <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
+          </div>
+          <div id="ancestor-scroll" style="overflow-x:auto;overflow-y:auto;padding-bottom:20px;position:relative;">
+            <div id="ancestor-grid" style="position:relative;display:inline-block;min-width:100%;">
+              <svg id="ancestor-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
+              <div id="ancestor-gens" style="display:flex;flex-direction:column;gap:40px;padding:20px 30px;"></div>
+            </div>
+          </div>`;
 
         const gensEl = document.getElementById('ancestor-gens');
 
@@ -2990,13 +2994,13 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           // Label
           const labelEl = document.createElement('div');
           labelEl.style.cssText = `
-      font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
-      color:var(--muted);text-align:center;margin-bottom:10px;font-weight:500;
-      display:flex;align-items:center;justify-content:center;gap:10px;`;
+            font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
+            color:var(--muted);text-align:center;margin-bottom:10px;font-weight:500;
+            display:flex;align-items:center;justify-content:center;gap:10px;`;
           labelEl.innerHTML = `${label}
-      <span style="font-size:0.7rem;color:var(--card-border);">
-        (${gen.length} known${missing > 0 ? `, ${missing} missing` : ''})
-      </span>`;
+            <span style="font-size:0.7rem;color:var(--card-border);">
+              (${gen.length} known${missing > 0 ? `, ${missing} missing` : ''})
+            </span>`;
           genRow.appendChild(labelEl);
 
           // Cards row
@@ -3023,42 +3027,44 @@ onkeydown="relSearchKeydown(event,'${mode}')"
             const card = document.createElement('div');
             card.dataset.personId = id;
             card.style.cssText = `
-        background:${isFocus ? '#fff8f0' : 'var(--card-bg)'};
-        border:${
-          isFocus ? '2px solid var(--accent)' : '1px solid var(--card-border)'
-        };
-        border-radius:6px;
-        padding:10px 12px;
-        min-width:130px;
-        max-width:160px;
-        text-align:center;
-        cursor:pointer;
-        box-shadow:0 2px 8px var(--shadow);
-        transition:all 0.18s;
-        flex-shrink:0;`;
+              background:${isFocus ? '#fff8f0' : 'var(--card-bg)'};
+              border:${
+                isFocus
+                  ? '2px solid var(--accent)'
+                  : '1px solid var(--card-border)'
+              };
+              border-radius:6px;
+              padding:10px 12px;
+              min-width:130px;
+              max-width:160px;
+              text-align:center;
+              cursor:pointer;
+              box-shadow:0 2px 8px var(--shadow);
+              transition:all 0.18s;
+              flex-shrink:0;`;
 
             card.innerHTML = `
-        <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 7px;
-          border:2px solid var(--card-border);background:var(--parchment-dark);
-          overflow:hidden;display:flex;align-items:center;justify-content:center;">
-          ${photoHtml}
-        </div>
-        <div style="font-size:0.85rem;font-weight:600;color:var(--ink);line-height:1.2;">${fullName(
-          person
-        )}</div>
-        <div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:2px;">${lifespan(
-          person
-        )}</div>
-        ${
-          !hasParents && gi > 0
-            ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;">End of line</div>`
-            : ''
-        }
-        ${
-          isFocus
-            ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">★ Focus</div>`
-            : ''
-        }`;
+              <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 7px;
+                border:2px solid var(--card-border);background:var(--parchment-dark);
+                overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                ${photoHtml}
+              </div>
+              <div style="font-size:0.85rem;font-weight:600;color:var(--ink);line-height:1.2;">${fullName(
+                person
+              )}</div>
+              <div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:2px;">${lifespan(
+                person
+              )}</div>
+              ${
+                !hasParents && gi > 0
+                  ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;">End of line</div>`
+                  : ''
+              }
+              ${
+                isFocus
+                  ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">★ Focus</div>`
+                  : ''
+              }`;
 
             card.addEventListener('mouseover', () => {
               card.style.borderColor = 'var(--sepia)';
@@ -3362,38 +3368,38 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         });
 
         document.getElementById('modal-body').innerHTML = `
-    <h3 style="margin-bottom:16px;">⬆ Import GEDCOM</h3>
-    <p style="margin-bottom:16px;line-height:1.6;">Ready to import:</p>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
-      <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
-        <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${indiCount}</div>
-        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">People</div>
-      </div>
-      <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
-        <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${famCount}</div>
-        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Families</div>
-      </div>
-      <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
-        <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${relCount}</div>
-        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Relationships</div>
-      </div>
-    </div>
-    <p style="color:var(--muted);font-style:italic;font-size:0.9rem;margin-bottom:20px;line-height:1.6;">
-      ⚠ This will ADD to your existing data — it will not overwrite or delete anyone already in the tree.
-      If you import the same file twice, you may get duplicate records.
-    </p>
-    <div id="gedcom-progress" style="display:none;margin-bottom:12px;">
-      <div style="background:var(--parchment-dark);border-radius:4px;height:8px;overflow:hidden;">
-        <div id="gedcom-progress-bar" style="background:var(--sepia-light);height:100%;width:0%;transition:width 0.2s;"></div>
-      </div>
-      <div id="gedcom-progress-label" style="font-size:0.8rem;color:var(--muted);margin-top:6px;text-align:center;"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" id="gedcom-confirm-btn" onclick="executeGEDCOMImport(pendingGEDCOMData)">
-        Import ${indiCount} People
-      </button>
-    </div>`;
+          <h3 style="margin-bottom:16px;">⬆ Import GEDCOM</h3>
+          <p style="margin-bottom:16px;line-height:1.6;">Ready to import:</p>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
+            <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
+              <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${indiCount}</div>
+              <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">People</div>
+            </div>
+            <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
+              <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${famCount}</div>
+              <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Families</div>
+            </div>
+            <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
+              <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${relCount}</div>
+              <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Relationships</div>
+            </div>
+          </div>
+          <p style="color:var(--muted);font-style:italic;font-size:0.9rem;margin-bottom:20px;line-height:1.6;">
+            ⚠ This will ADD to your existing data — it will not overwrite or delete anyone already in the tree.
+            If you import the same file twice, you may get duplicate records.
+          </p>
+          <div id="gedcom-progress" style="display:none;margin-bottom:12px;">
+            <div style="background:var(--parchment-dark);border-radius:4px;height:8px;overflow:hidden;">
+              <div id="gedcom-progress-bar" style="background:var(--sepia-light);height:100%;width:0%;transition:width 0.2s;"></div>
+            </div>
+            <div id="gedcom-progress-label" style="font-size:0.8rem;color:var(--muted);margin-top:6px;text-align:center;"></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="gedcom-confirm-btn" onclick="executeGEDCOMImport(pendingGEDCOMData)">
+              Import ${indiCount} People
+            </button>
+          </div>`;
         document.getElementById('modal').style.display = 'flex';
       }
 
@@ -3522,81 +3528,99 @@ onkeydown="relSearchKeydown(event,'${mode}')"
       function showHints() {
         document.getElementById(
           'modal-body'
-        ).innerHTML = `<h3 style="margin-bottom:20px;">💡 Tips & Best Practices</h3><div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);"><div style="margin-bottom:20px;"><div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">
-          Adding People
-        </div>
-        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-          <li>Always enter the <b>first name</b> — it's the only required field.</li>
-          <li>Use the <b>middle name field</b> for middle names only, not titles or nicknames. Put those in Notes.</li>
-          <li>For <b>married women</b>, enter their birth surname as the last name.</li>
-          <li>Enter <b>dates</b> in any natural format: <i>15 March 1945</i>, <i>March 1945</i>, <i>Abt 1880</i>, <i>Bef 1900</i>, or <i>15/03/1945</i> — the app will convert common formats automatically.</li>
-          <li>If you only know the year, just enter the year: <i>1880</i>.</li>
-          <li>Use prefixes like <b>Abt</b> (about), <b>Bef</b> (before), or <b>Aft</b> (after) for uncertain dates.</li>
-          <li>Leave <b>Date of Death</b> blank for living people.</li>
-        </ul>
-      </div>
+        ).innerHTML = `<h3 style="margin-bottom:20px;">💡 Tips & Best Practices</h3>
+              
+<div style="
+        background: #2a1a0a;
+        border: 1px solid var(--sepia);
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      ">
+        <span style="font-size:1.4rem;">🖥️</span>
+        <span style="color:var(--sepia-light);font-size:0.95rem;line-height:1.5;">
+          <b style="font-family:'Playfair Display',serif;">Best viewed on a desktop or laptop.</b><br>
+          This app works on mobile but is designed for larger screens — entering and editing records,
+          viewing the family tree, and exploring ancestors is much easier with a full-size display.
+        </span>
+      </div>              <div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);"><div style="margin-bottom:20px;"><div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">
+                Adding People
+              </div>
+              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+                <li>Always enter the <b>first name</b> — it's the only required field.</li>
+                <li>Use the <b>middle name field</b> for middle names only, not titles or nicknames. Put those in Notes.</li>
+                <li>For <b>married women</b>, enter their birth surname as the last name.</li>
+                <li>Enter <b>dates</b> in any natural format: <i>15 March 1945</i>, <i>March 1945</i>, <i>Abt 1880</i>, <i>Bef 1900</i>, or <i>15/03/1945</i> — the app will convert common formats automatically.</li>
+                <li>If you only know the year, just enter the year: <i>1880</i>.</li>
+                <li>Use prefixes like <b>Abt</b> (about), <b>Bef</b> (before), or <b>Aft</b> (after) for uncertain dates.</li>
+                <li>Leave <b>Date of Death</b> blank for living people.</li>
+              </ul>
+            </div>
 
-      <div style="margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                    padding-bottom:6px;margin-bottom:10px;">
-          Relationships
-        </div>
-        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-          <li>Use <b>Child of</b> to link a person to their parents — add one relationship for each parent.</li>
-          <li>Use <b>Spouse of</b> to link married couples. You only need to add it from one side — the app finds it both ways.</li>
-          <li>After searching for a person in the relationship box, make sure to <b>click Add</b> before saving — just selecting from the list is not enough.</li>
-          <li>The family tree view works best when <b>both parents</b> are entered and linked to each other as spouses.</li>
-          <li>You can add <b>multiple parents</b> if the biological and adoptive parents are both known — just add two Child of relationships.</li>
-        </ul>
-      </div>
+            <div style="margin-bottom:20px;">
+              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                          padding-bottom:6px;margin-bottom:10px;">
+                Relationships
+              </div>
+              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+                <li>Use <b>Child of</b> to link a person to their parents — add one relationship for each parent.</li>
+                <li>Use <b>Spouse of</b> to link married couples. You only need to add it from one side — the app finds it both ways.</li>
+                <li>After searching for a person in the relationship box, make sure to <b>click Add</b> before saving — just selecting from the list is not enough.</li>
+                <li>The family tree view works best when <b>both parents</b> are entered and linked to each other as spouses.</li>
+                <li>You can add <b>multiple parents</b> if the biological and adoptive parents are both known — just add two Child of relationships.</li>
+              </ul>
+            </div>
 
-      <div style="margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                    padding-bottom:6px;margin-bottom:10px;">
-          Photos
-        </div>
-        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-          <li>Keep photos <b>under 500KB</b> each for best performance. Large images slow down the app for everyone.</li>
-          <li>Supported image formats: <b>JPG, PNG, WEBP</b>.</li>
-          <li>You can also attach <b>PDF documents</b> — these appear as document tiles and open in a new tab.</li>
-          <li>The <b>first image</b> in the list is used as the person's profile photo in the tree and sidebar. Make sure it's a portrait if possible.</li>
-          <li>PDFs are automatically sorted to the <b>end of the photo list</b> so images always appear first.</li>
-          <li>To resize photos before uploading, try <a href="https://squoosh.app" target="_blank" style="color:var(--accent);">squoosh.app</a> — it's free and works in your browser.</li>
-        </ul>
-      </div>
+            <div style="margin-bottom:20px;">
+              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                          padding-bottom:6px;margin-bottom:10px;">
+                Photos
+              </div>
+              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+                <li>Keep photos <b>under 500KB</b> each for best performance. Large images slow down the app for everyone.</li>
+                <li>Supported image formats: <b>JPG, PNG, WEBP</b>.</li>
+                <li>You can also attach <b>PDF documents</b> — these appear as document tiles and open in a new tab.</li>
+                <li>The <b>first image</b> in the list is used as the person's profile photo in the tree and sidebar. Make sure it's a portrait if possible.</li>
+                <li>PDFs are automatically sorted to the <b>end of the photo list</b> so images always appear first.</li>
+                <li>To resize photos before uploading, try <a href="https://squoosh.app" target="_blank" style="color:var(--accent);">squoosh.app</a> — it's free and works in your browser.</li>
+              </ul>
+            </div>
 
-      <div style="margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                    padding-bottom:6px;margin-bottom:10px;">
-          Notes
-        </div>
-        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-          <li>Notes are a great place for <b>census records, obituaries, stories, and sources</b>.</li>
-          <li>Notes are hidden by default — click <b>Show Notes</b> on a person's record to expand them.</li>
-          <li>There's no length limit, so feel free to paste in full transcriptions of records.</li>
-        </ul>
-      </div>
+            <div style="margin-bottom:20px;">
+              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                          padding-bottom:6px;margin-bottom:10px;">
+                Notes
+              </div>
+              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+                <li>Notes are a great place for <b>census records, obituaries, stories, and sources</b>.</li>
+                <li>Notes are hidden by default — click <b>Show Notes</b> on a person's record to expand them.</li>
+                <li>There's no length limit, so feel free to paste in full transcriptions of records.</li>
+              </ul>
+            </div>
 
-      <div style="margin-bottom:4px;">
-        <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                    letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                    padding-bottom:6px;margin-bottom:10px;">
-          Exporting
-        </div>
-        <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-          <li>Use <b>Export GEDCOM</b> in the header to download your tree in the standard genealogy format, compatible with Ancestry, FamilySearch, Gramps, and most other programs.</li>
-          <li>GEDCOM export includes names, dates, places, notes, and photo links.</li>
-          <li>The <b>Change Log</b> (visible to signed-in users) records every add, edit, and delete with the date and who made the change.</li>
-        </ul>
-      </div>
+            <div style="margin-bottom:4px;">
+              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
+                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
+                          padding-bottom:6px;margin-bottom:10px;">
+                Exporting
+              </div>
+              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+                <li>Use <b>Export GEDCOM</b> in the header to download your tree in the standard genealogy format, compatible with Ancestry, FamilySearch, Gramps, and most other programs.</li>
+                <li>GEDCOM export includes names, dates, places, notes, and photo links.</li>
+                <li>The <b>Change Log</b> (visible to signed-in users) records every add, edit, and delete with the date and who made the change.</li>
+              </ul>
+            </div>
 
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
-    </div>`;
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+          </div>`;
         document.getElementById('modal').style.display = 'flex';
       }
       document.addEventListener('click', (e) => {
