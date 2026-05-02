@@ -996,20 +996,36 @@
     <!-- MAIN APP -->
     <div id="app">
       <header>
-        <button class="btn btn-secondary btn-sm" onclick="showHints()">
-          💡 Hints
-        </button>
-        <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
-          ⬇ Export GEDCOM
-        </button>
-        <button
-          class="btn btn-secondary btn-sm"
-          id="changelog-btn"
-          onclick="showChangelog()"
-          style="display: none"
-        >
-          📋 Log
-        </button>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
+            ⬇ Export GEDCOM
+          </button>
+          <button
+            class="btn btn-secondary btn-sm"
+            onclick="document.getElementById('gedcom-input').click()"
+          >
+            ⬆ Import GEDCOM
+            <input
+              type="file"
+              id="gedcom-input"
+              accept=".ged,.gedcom"
+              style="display: none"
+              onchange="importGEDCOM(this)"
+            />
+          </button>
+          <button
+            class="btn btn-secondary btn-sm"
+            id="changelog-btn"
+            onclick="showChangelog()"
+            style="display: none"
+          >
+            📋 Log
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="showHints()">
+            💡 Hints
+          </button>
+        </div>
+
         <h1><span>Our</span> Family <span>Heritage</span></h1>
         <div class="header-right">
           <span class="auth-info" id="auth-user-display"></span>
@@ -1160,29 +1176,25 @@
       auth.onAuthStateChanged((user) => {
         currentUser = user;
 
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('auth-screen').style.display = 'none';
+
         if (user) {
-          document.getElementById('app').style.display = 'block';
-          document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('auth-user-display').textContent = user.email;
           setGuestMode(false);
-
-          // Only initialize the db listener once
-          if (!dbRef) {
-            dbRef = db.ref('genealogy/people');
-            loadPeople();
-          }
         } else {
-          // Not signed in — hide app and show login modal
-          document.getElementById('app').style.display = 'none';
-          document.getElementById('auth-screen').style.display = 'flex';
           document.getElementById('auth-user-display').textContent = '';
+          setGuestMode(true);
+        }
+
+        // Only initialize the db listener once
+        if (!dbRef) {
+          dbRef = db.ref('genealogy/people');
+          loadPeople();
         }
       });
 
       function setGuestMode(isGuest) {
-        // All viewers are now authenticated, so isGuest will always be false
-        // Keeping this in case you want to add role-based access later
-
         const changelogBtn = document.getElementById('changelog-btn');
         if (changelogBtn)
           changelogBtn.style.display = isGuest ? 'none' : 'inline-block';
@@ -1193,13 +1205,16 @@
         const tabAdd = document.getElementById('tab-add');
         if (tabAdd) tabAdd.style.display = isGuest ? 'none' : 'inline-block';
 
-        document.getElementById('guest-signin-btn').style.display = 'none'; // always hidden now
-        document.getElementById('auth-signout-btn').style.display = isGuest
-          ? 'none'
-          : 'inline-block';
-        document.getElementById('auth-user-display').style.display = isGuest
-          ? 'none'
-          : 'inline';
+        const guestBtn = document.getElementById('guest-signin-btn');
+        const signoutBtn = document.getElementById('auth-signout-btn');
+        const userDisplay = document.getElementById('auth-user-display');
+
+        if (guestBtn)
+          guestBtn.style.display = isGuest ? 'inline-block' : 'none';
+        if (signoutBtn)
+          signoutBtn.style.display = isGuest ? 'none' : 'inline-block';
+        if (userDisplay)
+          userDisplay.style.display = isGuest ? 'none' : 'inline';
 
         if (isGuest) showTab('view');
       }
@@ -1222,11 +1237,9 @@
       }
       function signOut() {
         auth.signOut().then(() => {
-          document.getElementById('app').style.display = 'none';
-          document.getElementById('auth-screen').style.display = 'flex';
           allPeople = {};
           selectedPersonId = null;
-          dbRef = null; // reset so listener re-initializes on next login
+          dbRef = null;
         });
       }
       function showAuthError(msg) {
@@ -1260,7 +1273,12 @@
           });
 
           allPeople = raw;
-          renderPersonList(allPeople); // ← always refresh the sidebar
+          const q = document.getElementById('search-input')?.value || '';
+          if (q.trim()) {
+            filterPeople(q);
+          } else {
+            renderPersonList(allPeople);
+          }
           if (selectedPersonId && allPeople[selectedPersonId]) {
             renderPersonView(selectedPersonId);
           } else {
@@ -1325,7 +1343,13 @@
 
       function selectPerson(id) {
         selectedPersonId = id;
-        renderPersonList(allPeople);
+        // Re-render the list with whatever is currently in the search box
+        const q = document.getElementById('search-input').value;
+        if (q.trim()) {
+          filterPeople(q);
+        } else {
+          renderPersonList(allPeople);
+        }
         showTab('view');
         // push to tree history
         if (treeHistory[treeHistoryIndex] !== id) {
@@ -1881,15 +1905,25 @@ ${
           html += `</div></div>`;
         }
 
-        // Parents
+        // Parents — group spouses together and don't render a parent twice
         if (parents.length > 0) {
           html += `<div><div class="tree-gen-label">Parents</div><div class="tree-generation">`;
+          const renderedParents = new Set();
           parents.forEach((pid) => {
+            if (renderedParents.has(pid)) return; // already rendered as a spouse
+            renderedParents.add(pid);
             html += `<div class="tree-gen-group">`;
             html += treeCard(pid, '');
             findSpouses(pid).forEach((sid) => {
-              html += `<span class="spouse-connector">⚭</span>`;
-              html += treeCard(sid, 'spouse');
+              if (parents.includes(sid)) {
+                // This spouse is also a parent — render them here and skip later
+                renderedParents.add(sid);
+                html += `<span class="spouse-connector">⚭</span>`;
+                html += treeCard(sid, ''); // not 'spouse' variant since they are a real parent
+              } else {
+                html += `<span class="spouse-connector">⚭</span>`;
+                html += treeCard(sid, 'spouse');
+              }
             });
             html += `</div>`;
           });
@@ -2421,7 +2455,6 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         // Match mm/dd/yyyy or m/d/yyyy
         const slashMatch = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (slashMatch) {
-          console.log('here1');
           const [, month, day, year] = slashMatch;
           const months = [
             'January',
@@ -2439,10 +2472,7 @@ onkeydown="relSearchKeydown(event,'${mode}')"
           ];
           const monthName = months[parseInt(month, 10) - 1];
           if (!monthName) {
-            console.log(month, 'here2');
             return val; // invalid month, leave as-is
-          } else {
-            console.log(`${parseInt(day, 10)} ${monthName} ${year}`);
           }
           return `${parseInt(day, 10)} ${monthName} ${year}`;
         }
@@ -2589,6 +2619,7 @@ onkeydown="relSearchKeydown(event,'${mode}')"
       function closeModal(e) {
         if (!e || e.target.id === 'modal') {
           document.getElementById('modal').style.display = 'none';
+          pendingGEDCOMData = null;
         }
       }
       function openLightbox(url) {
@@ -3159,6 +3190,333 @@ onkeydown="relSearchKeydown(event,'${mode}')"
         const n = gi - 2; // 2nd, 3rd, 4th...
         const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
         return `${n}${suffix} Great-Grandparents`;
+      }
+
+      // ─────────────────────────────────────────────
+      // GEDCOM IMPORT
+      // ─────────────────────────────────────────────
+      function importGEDCOM(input) {
+        if (!currentUser) {
+          toast('You must be signed in to import data.');
+          return;
+        }
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const text = e.target.result;
+            const result = parseGEDCOM(text);
+            previewGEDCOMImport(result);
+          } catch (err) {
+            toast('Error parsing GEDCOM: ' + err.message);
+            console.error(err);
+          }
+        };
+        reader.readAsText(file, 'UTF-8');
+        // Reset so same file can be re-imported if needed
+        input.value = '';
+      }
+
+      function parseGEDCOM(text) {
+        // Normalize line endings
+        const lines = text
+          .replace(/\r\n/g, '\n')
+          .replace(/\r/g, '\n')
+          .split('\n');
+
+        const individuals = {};
+        const families = {};
+
+        let currentId = null;
+        let currentType = null;
+        let currentTag = null;
+
+        lines.forEach((rawLine) => {
+          const line = rawLine.trim();
+          if (!line) return;
+
+          // Split into at most 3 parts: level, tag/id, value
+          const parts = line.split(/\s+/);
+          if (parts.length < 2) return;
+
+          const level = parseInt(parts[0]);
+          if (isNaN(level)) return;
+
+          const tagOrId = parts[1];
+          // Value is everything after the level and tag, preserving internal spaces
+          const value = parts.slice(2).join(' ');
+
+          if (level === 0) {
+            currentId = null;
+            currentType = null;
+            currentTag = null;
+
+            // "0 @I1@ INDI" — tagOrId is the xref, value is the record type
+            if (tagOrId.startsWith('@') && value === 'INDI') {
+              currentId = tagOrId;
+              currentType = 'INDI';
+              individuals[currentId] = {
+                id: currentId,
+                firstName: '',
+                middleName: '',
+                lastName: '',
+                dob: '',
+                dod: '',
+                bornLocation: '',
+                notes: '',
+                photos: [],
+                sex: '',
+              };
+            } else if (tagOrId.startsWith('@') && value === 'FAM') {
+              currentId = tagOrId;
+              currentType = 'FAM';
+              families[currentId] = { husb: null, wife: null, children: [] };
+            }
+            return;
+          }
+
+          if (!currentId) return;
+
+          const tag = tagOrId; // at level 1+, tagOrId is always the tag
+
+          if (currentType === 'INDI') {
+            const p = individuals[currentId];
+
+            if (level === 1) {
+              currentTag = tag;
+
+              if (tag === 'NAME') {
+                // Value is like "John /Bogus/" or "John William /Bogus/"
+                const lastMatch = value.match(/\/([^/]*)\//);
+                p.lastName = lastMatch ? lastMatch[1].trim() : '';
+                const given = value.replace(/\/[^/]*\//, '').trim();
+                const givenParts = given.split(/\s+/).filter(Boolean);
+                p.firstName = givenParts[0] || '';
+                p.middleName = givenParts.slice(1).join(' ');
+              }
+
+              if (tag === 'SEX') p.sex = value;
+              if (tag === 'NOTE') p.notes = value;
+            }
+
+            if (level === 2) {
+              if (currentTag === 'BIRT') {
+                if (tag === 'DATE') p.dob = value;
+                if (tag === 'PLAC') p.bornLocation = value;
+              }
+              if (currentTag === 'DEAT') {
+                if (tag === 'DATE') p.dod = value;
+                if (tag === 'PLAC') {
+                  // Append death place to notes if we have it
+                  if (value)
+                    p.notes += (p.notes ? '\n' : '') + 'Death place: ' + value;
+                }
+              }
+              if (tag === 'CONT' || tag === 'CONC') {
+                if (currentTag === 'NOTE') {
+                  p.notes += (tag === 'CONT' ? '\n' : '') + value;
+                }
+              }
+              if (currentTag === 'OBJE' && tag === 'FILE') {
+                p.photos.push(value);
+              }
+            }
+
+            if (level === 3) {
+              if (tag === 'CONT' || tag === 'CONC') {
+                if (currentTag === 'NOTE') {
+                  individuals[currentId].notes +=
+                    (tag === 'CONT' ? '\n' : '') + value;
+                }
+              }
+            }
+          }
+
+          if (currentType === 'FAM') {
+            const f = families[currentId];
+            if (level === 1) {
+              currentTag = tag;
+              if (tag === 'HUSB') f.husb = value.trim();
+              if (tag === 'WIFE') f.wife = value.trim();
+              if (tag === 'CHIL') f.children.push(value.trim());
+            }
+          }
+        });
+        return { individuals, families };
+      }
+
+      let pendingGEDCOMData = null;
+
+      function previewGEDCOMImport({ individuals, families }) {
+        pendingGEDCOMData = { individuals, families }; // store for later, don't embed in HTML
+
+        const indiCount = Object.keys(individuals).length;
+        const famCount = Object.keys(families).length;
+
+        let relCount = 0;
+        Object.values(families).forEach((f) => {
+          if (f.husb && f.wife) relCount++;
+          relCount += f.children.length * 2;
+        });
+
+        document.getElementById('modal-body').innerHTML = `
+    <h3 style="margin-bottom:16px;">⬆ Import GEDCOM</h3>
+    <p style="margin-bottom:16px;line-height:1.6;">Ready to import:</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
+      <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
+        <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${indiCount}</div>
+        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">People</div>
+      </div>
+      <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
+        <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${famCount}</div>
+        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Families</div>
+      </div>
+      <div style="background:var(--parchment-dark);border-radius:6px;padding:12px 20px;text-align:center;flex:1;">
+        <div style="font-size:1.8rem;font-weight:700;color:var(--accent);">${relCount}</div>
+        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Relationships</div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-style:italic;font-size:0.9rem;margin-bottom:20px;line-height:1.6;">
+      ⚠ This will ADD to your existing data — it will not overwrite or delete anyone already in the tree.
+      If you import the same file twice, you may get duplicate records.
+    </p>
+    <div id="gedcom-progress" style="display:none;margin-bottom:12px;">
+      <div style="background:var(--parchment-dark);border-radius:4px;height:8px;overflow:hidden;">
+        <div id="gedcom-progress-bar" style="background:var(--sepia-light);height:100%;width:0%;transition:width 0.2s;"></div>
+      </div>
+      <div id="gedcom-progress-label" style="font-size:0.8rem;color:var(--muted);margin-top:6px;text-align:center;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="gedcom-confirm-btn" onclick="executeGEDCOMImport(pendingGEDCOMData)">
+        Import ${indiCount} People
+      </button>
+    </div>`;
+        document.getElementById('modal').style.display = 'flex';
+      }
+
+      async function executeGEDCOMImport({ individuals, families }) {
+        const confirmBtn = document.getElementById('gedcom-confirm-btn');
+        if (confirmBtn) confirmBtn.disabled = true;
+
+        const progressWrap = document.getElementById('gedcom-progress');
+        const progressBar = document.getElementById('gedcom-progress-bar');
+        const progressLabel = document.getElementById('gedcom-progress-label');
+        if (progressWrap) progressWrap.style.display = 'block';
+
+        const gedcomIdToKey = {}; // "@I123@" → new Firebase key
+        const relUpdates = {}; // newKey → [relationships]
+
+        // Step 1 — write all individuals
+        const indiEntries = Object.values(individuals);
+        const total = indiEntries.length;
+        let done = 0;
+
+        for (const p of indiEntries) {
+          const ref = dbRef.push();
+          gedcomIdToKey[p.id] = ref.key;
+
+          await ref.set({
+            firstName: p.firstName || '',
+            middleName: p.middleName || '',
+            lastName: p.lastName || '',
+            dob: p.dob || '',
+            dod: p.dod || '',
+            bornLocation: p.bornLocation || '',
+            notes: (p.notes || '').trim(),
+            photos: p.photos || [],
+            relationships: [],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+
+          done++;
+          if (progressBar)
+            progressBar.style.width = `${Math.round((done / total) * 50)}%`;
+          if (progressLabel)
+            progressLabel.textContent = `Writing people… ${done}/${total}`;
+        }
+
+        // Step 2 — build relationships from FAM records and update each person
+        Object.values(families).forEach((f) => {
+          const husbKey = f.husb ? gedcomIdToKey[f.husb] : null;
+          const wifeKey = f.wife ? gedcomIdToKey[f.wife] : null;
+
+          // Spouse relationship — only add from one side since findSpouses is bidirectional
+          if (husbKey && wifeKey) {
+            if (!relUpdates[husbKey]) relUpdates[husbKey] = [];
+            // Only add if not already present
+            if (
+              !relUpdates[husbKey].find(
+                (r) => r.type === 'spouseOf' && r.targetId === wifeKey
+              )
+            ) {
+              relUpdates[husbKey].push({ type: 'spouseOf', targetId: wifeKey });
+            }
+            // Don't add from wife side — findSpouses() already checks both directions
+          }
+
+          // Child relationships
+          f.children.forEach((childGedcomId) => {
+            const childKey = gedcomIdToKey[childGedcomId];
+            if (!childKey) return;
+            if (!relUpdates[childKey]) relUpdates[childKey] = [];
+            if (
+              husbKey &&
+              !relUpdates[childKey].find(
+                (r) => r.type === 'childOf' && r.targetId === husbKey
+              )
+            ) {
+              relUpdates[childKey].push({ type: 'childOf', targetId: husbKey });
+            }
+            if (
+              wifeKey &&
+              !relUpdates[childKey].find(
+                (r) => r.type === 'childOf' && r.targetId === wifeKey
+              )
+            ) {
+              relUpdates[childKey].push({ type: 'childOf', targetId: wifeKey });
+            }
+          });
+        });
+        // Step 2 — write relationships
+        const relEntries = Object.entries(relUpdates);
+        const relTotal = relEntries.length;
+        let relDone = 0;
+
+        for (const [key, rels] of relEntries) {
+          await dbRef.child(key).update({
+            relationships: rels,
+            updatedAt: Date.now(),
+          });
+          relDone++;
+          if (progressBar)
+            progressBar.style.width = `${
+              50 + Math.round((relDone / relTotal) * 50)
+            }%`;
+          if (progressLabel)
+            progressLabel.textContent = `Writing relationships… ${relDone}/${relTotal}`;
+        }
+        // Log it
+        writeChangelog('ADD', 'GEDCOM_IMPORT', {
+          name: `GEDCOM import — ${total} people, ${
+            Object.keys(families).length
+          } families`,
+        });
+
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressLabel) progressLabel.textContent = 'Import complete!';
+
+        setTimeout(() => {
+          closeModal();
+          toast(
+            `✓ Imported ${total} people and ${
+              Object.keys(families).length
+            } families.`
+          );
+        }, 800);
       }
 
       function showHints() {
