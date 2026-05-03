@@ -1286,7 +1286,10 @@
           .limitToLast(50)
           .once('value', (snap) => {
             const entries = [];
-            snap.forEach((child) => entries.unshift(child.val()));
+            snap.forEach((child) => {
+              entries.push(child.val());
+            });
+            entries.reverse(); // newest first
 
             if (entries.length === 0) {
               list.innerHTML =
