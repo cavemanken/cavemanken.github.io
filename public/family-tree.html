@@ -2232,35 +2232,62 @@
       // }
 
       // New photo upload handler with resizing for large images
-      function handlePhotoUpload(input, mode) {
-        const files = Array.from(input.files);
-        const TARGET_BYTES = 500 * 1024; // 500KB
+      async function handlePhotoUpload(input, mode) {
+        if (!currentUser) {
+          toast('You must be signed in to upload photos.');
+          return;
+        }
 
-        files.forEach((file) => {
-          if (!file.type.startsWith('image/')) {
-            toast(
-              'Only image files can be resized. Use the PDF option for documents.'
-            );
-            return;
+        const files = Array.from(input.files);
+        const TARGET_BYTES = 500 * 1024;
+
+        for (const file of files) {
+          if (!file.type.startsWith('image/') && !file.type.includes('pdf')) {
+            toast(`Skipping ${file.name} — unsupported file type.`);
+            continue;
           }
 
+          toast(`Uploading ${file.name}…`);
+
+          try {
+            let uploadBlob = file;
+
+            // Resize images over 500KB
+            if (file.type.startsWith('image/') && file.size > TARGET_BYTES) {
+              uploadBlob = await resizeImage(file, TARGET_BYTES);
+              const origKB = Math.round(file.size / 1024);
+              const finalKB = Math.round(uploadBlob.size / 1024);
+              toast(`Resized from ${origKB}KB to ~${finalKB}KB`);
+            }
+
+            // Upload to Firebase Storage
+            const ext = file.name.split('.').pop();
+            const filename = `genealogy-photos/${Date.now()}_${Math.random()
+              .toString(36)
+              .slice(2, 7)}.${ext}`;
+            const storageRef = firebase.storage().ref(filename);
+            const snap = await storageRef.put(uploadBlob);
+            const url = await snap.ref.getDownloadURL();
+
+            pendingPhotos.push(url);
+            rerenderPhotoPreviews(mode);
+            toast(`${file.name} uploaded ✓`);
+          } catch (e) {
+            toast(`Upload failed: ${e.message}`);
+            console.error(e);
+          }
+        }
+      }
+
+      function resizeImage(file, targetBytes) {
+        return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-              // If already under 500KB, use as-is
-              if (file.size <= TARGET_BYTES) {
-                pendingPhotos.push(e.target.result);
-                rerenderPhotoPreviews(mode);
-                return;
-              }
-
-              // Binary search for the right quality level
-              const canvas = document.createElement('canvas');
               let width = img.width;
               let height = img.height;
 
-              // First scale down dimensions if image is very large (over 2000px wide)
               const MAX_DIM = 2000;
               if (width > MAX_DIM || height > MAX_DIM) {
                 const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
@@ -2268,18 +2295,17 @@
                 height = Math.round(height * ratio);
               }
 
+              const canvas = document.createElement('canvas');
               canvas.width = width;
               canvas.height = height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, width, height);
+              canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-              // Try quality levels from 0.9 down until we're under 500KB
               let quality = 0.9;
               let dataUrl = canvas.toDataURL('image/jpeg', quality);
               let iterations = 0;
 
               while (
-                dataUrl.length * 0.75 > TARGET_BYTES &&
+                dataUrl.length * 0.75 > targetBytes &&
                 quality > 0.1 &&
                 iterations < 10
               ) {
@@ -2288,18 +2314,13 @@
                 iterations++;
               }
 
-              const finalKB = Math.round((dataUrl.length * 0.75) / 1024);
-              const origKB = Math.round(file.size / 1024);
-
-              if (origKB > 500) {
-                toast(`Photo resized from ${origKB}KB to ~${finalKB}KB.`);
-              }
-
-              pendingPhotos.push(dataUrl);
-              rerenderPhotoPreviews(mode);
+              // Convert dataUrl back to blob
+              canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
             };
+            img.onerror = reject;
             img.src = e.target.result;
           };
+          reader.onerror = reject;
           reader.readAsDataURL(file);
         });
       }
