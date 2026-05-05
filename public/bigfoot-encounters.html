@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sasquatch Sightings — Report an Encounter</title>
+    <title>Bigfoot Encounters — Report an Encounter</title>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -195,7 +195,7 @@
       input[type='text'],
       input[type='email'],
       input[type='password'],
-      input[type='datetime-local'],
+      input[type='datetime'],
       select,
       textarea {
         font-family: 'Cabin', sans-serif;
@@ -631,7 +631,7 @@
       <div class="site-header">
         <div class="eyebrow">Field Research Archive</div>
         <span class="bigfoot-icon">🦶</span>
-        <h1 class="site-title">Sasquatch Sightings</h1>
+        <h1 class="site-title">Bigfoot Encounters</h1>
         <p class="site-subtitle">Report your encounter with the unknown</p>
       </div>
 
@@ -748,7 +748,7 @@
               <!-- Date & Time -->
               <div class="form-group">
                 <label>Date & Time of Encounter *</label>
-                <input type="datetime-local" id="enc-datetime" />
+                <input type="date" id="enc-date" />
               </div>
 
               <!-- Country -->
@@ -1155,15 +1155,16 @@
           return;
         }
 
-        const datetime = document.getElementById('enc-datetime').value;
+        const datetime = document.getElementById('enc-date').value;
         const country = document.getElementById('enc-country').value;
         const province = document.getElementById('enc-province').value;
         const county = document.getElementById('enc-county').value.trim();
 
         if (!datetime) {
-          toast('Please enter the date and time of your encounter.');
+          toast('Please enter the date of your encounter.');
           return;
         }
+
         if (!country) {
           toast('Please select a country.');
           return;
@@ -1299,16 +1300,20 @@
 
             list.innerHTML = entries
               .map((e) => {
-                const d = new Date(e.datetime);
-                const dateStr = d.toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                });
-                const timeStr = d.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
+                const parts = (e.datetime || '').split('-');
+                const dateStr =
+                  parts.length === 3
+                    ? new Date(
+                        parseInt(parts[0]),
+                        parseInt(parts[1]) - 1,
+                        parseInt(parts[2])
+                      ).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    : e.datetime || '—';
+                const timeStr = null;
 
                 const audioSection = e.audioUrl
                   ? `
@@ -1331,7 +1336,7 @@
               }">
                 ${e.type === 'audio' ? '🎙 Audio' : '✍ Written'}
               </span>
-              <span class="encounter-date">📅 ${dateStr} at ${timeStr}</span>
+              <span class="encounter-date">📅 ${dateStr}</span>
             </div>
             <div class="encounter-location">
               📍 <span>${e.county}</span>, <span>${e.province}</span>, <span>${
@@ -1340,7 +1345,14 @@
             </div>
             ${textSection}
             ${audioSection}
-            <div class="encounter-submitter">Submitted by ${e.email}</div>
+            <div class="encounter-submitter">
+              Submitted by ${e.email} &nbsp;on&nbsp;
+              ${new Date(e.submittedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </div>
           </div>`;
               })
               .join('');
