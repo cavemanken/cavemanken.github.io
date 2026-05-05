@@ -303,8 +303,6 @@
       }
 
       /* ── TABLE ── */
-      .expenses-section {
-      }
       .expenses-header {
         display: flex;
         justify-content: space-between;
@@ -614,6 +612,7 @@
               id="inp-desc"
               placeholder="Where was it?"
               maxlength="80"
+              oninput="autoCategory(this.value)"
             />
           </div>
           <div class="form-group">
@@ -1177,6 +1176,18 @@
         t.className = 'toast' + (amber ? ' amber' : '');
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 2800);
+      };
+
+      // default the category based on description keywords (very basic)
+      window.autoCategory = function (val) {
+        const groceryStores = ['walmart', 'kroger', 'costco', 'publix'];
+        const lower = val.toLowerCase().trim();
+        const cat = document.getElementById('inp-cat');
+        if (groceryStores.some((store) => lower.includes(store))) {
+          cat.value = 'Groceries';
+        } else if (lower.length > 0) {
+          cat.value = 'Eat Out';
+        }
       };
 
       // Default date to today
