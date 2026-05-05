@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Migration Tool</title>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 32px;
+    }
+    h1 { color: #c9a84c; font-size: 1.5rem; margin-bottom: 6px; }
+    .subtitle { color: #888; font-size: 0.88rem; margin-bottom: 28px; }
+    .card {
+      background: #16213e;
+      border: 1px solid #2a3a5e;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+      max-width: 860px;
+    }
+    h2 { color: #9ab4d8; font-size: 1rem; margin-bottom: 14px; }
+    label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+    input {
+      width: 100%;
+      background: #0f1b2d;
+      border: 1px solid #2a3a5e;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 0.88rem;
+      padding: 9px 12px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    input:focus { border-color: #c9a84c; }
+    .btn {
+      font-size: 0.92rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 10px 22px;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: #c9a84c; color: #1a1a2e; }
+    .btn-primary:hover { background: #e8c060; }
+    .btn-primary:disabled { background: #5a4a22; color: #888; cursor: not-allowed; }
+    .btn-secondary { background: #2a3a5e; color: #9ab4d8; margin-left: 10px; }
+    .btn-secondary:hover { background: #3a4a6e; }
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .log {
+      background: #0f1b2d;
+      border: 1px solid #2a3a5e;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      min-height: 200px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .ok   { color: #4caf84; }
+    .warn { color: #c9a84c; }
+    .err  { color: #f44336; }
+    .info { color: #9ab4d8; }
+    .progress-wrap {
+      background: #0f1b2d;
+      border-radius: 4px;
+      height: 10px;
+      margin-top: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar {
+      background: linear-gradient(to right, #2a3a5e, #c9a84c);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .stat {
+      background: #0f1b2d;
+      border: 1px solid #2a3a5e;
+      border-radius: 6px;
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 90px;
+    }
+    .stat-num   { color: #c9a84c; font-size: 1.5rem; font-weight: 700; }
+    .stat-label { color: #666; font-size: 0.72rem; margin-top: 2px; }
+    .warning-box {
+      background: #3a1a0a;
+      border: 1px solid #c9a84c;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: #c9a84c;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📸 Photo Migration Tool</h1>
+<p class="subtitle">Migrates photos from old Firebase Storage URLs into cmk63project Storage, then updates the database URLs.</p>
+
+<!-- Step 1: Auth -->
+<div class="card">
+  <h2>Step 1 — Sign In to cmk63project</h2>
+  <label>Email</label>
+  <input type="email" id="auth-email" placeholder="your@email.com" />
+  <label>Password</label>
+  <input type="password" id="auth-password" placeholder="••••••••" />
+  <button class="btn btn-primary" onclick="signIn()">Sign In</button>
+  <span id="auth-status" style="margin-left:14px;font-size:0.85rem;color:#888;"></span>
+</div>
+
+<!-- Step 2: Scan -->
+<div class="card">
+  <h2>Step 2 — Scan Database for Photos</h2>
+  <div class="warning-box">
+    ⚠ This tool will:<br>
+    1. Scan every person in your genealogy database for photo URLs<br>
+    2. Download each photo from the old Firebase Storage URL<br>
+    3. Re-upload it to cmk63project Firebase Storage<br>
+    4. Update the person's record in the database with the new URL<br><br>
+    Base64 photos already in the database will be uploaded to Storage and replaced with URLs too.<br><br>
+    <strong>Run a dry run first to see what will be migrated before making any changes.</strong>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="scanDatabase()">Scan Database</button>
+  </div>
+  <div class="stats" id="scan-stats" style="display:none;">
+    <div class="stat"><div class="stat-num" id="stat-people">0</div><div class="stat-label">People</div></div>
+    <div class="stat"><div class="stat-num" id="stat-photos">0</div><div class="stat-label">Total Photos</div></div>
+    <div class="stat"><div class="stat-num" id="stat-old-urls">0</div><div class="stat-label">Old URLs</div></div>
+    <div class="stat"><div class="stat-num" id="stat-base64">0</div><div class="stat-label">Base64</div></div>
+    <div class="stat"><div class="stat-num" id="stat-new-urls">0</div><div class="stat-label">Already Migrated</div></div>
+  </div>
+</div>
+
+<!-- Step 3: Migrate -->
+<div class="card">
+  <h2>Step 3 — Migrate</h2>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="migrate-btn" onclick="migrate(false)" disabled>Migrate Photos</button>
+    <button class="btn btn-secondary" id="dryrun-btn" onclick="migrate(true)" disabled>Dry Run</button>
+  </div>
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+</div>
+
+<!-- Log -->
+<div class="card">
+  <h2>Log</h2>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:            'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
+  authDomain:        'cmk63project.firebaseapp.com',
+  databaseURL:       'https://cmk63project-default-rtdb.firebaseio.com',
+  projectId:         'cmk63project',
+  storageBucket:     'cmk63project.firebasestorage.app',
+  messagingSenderId: '520150418866',
+  appId:             '1:520150418866:web:5bd7d2aa561b987b1b90ab',
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth    = firebase.auth();
+const db      = firebase.database();
+const storage = firebase.storage();
+
+let currentUser = null;
+let allPeople   = null;  // raw snapshot
+
+// ── AUTH ──────────────────────────────────────────────────────────
+auth.onAuthStateChanged(u => {
+  currentUser = u;
+  const el = document.getElementById('auth-status');
+  if (u) {
+    el.textContent  = `✓ Signed in as ${u.email}`;
+    el.style.color  = '#4caf84';
+  } else {
+    el.textContent  = 'Not signed in';
+    el.style.color  = '#888';
+  }
+});
+
+function signIn() {
+  const email = document.getElementById('auth-email').value;
+  const pass  = document.getElementById('auth-password').value;
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(() => log('Signed in.', 'ok'))
+    .catch(e  => log('Sign-in error: ' + e.message, 'err'));
+}
+
+// ── LOGGING ───────────────────────────────────────────────────────
+function log(msg, type = 'info') {
+  const el   = document.getElementById('log');
+  const line = document.createElement('div');
+  line.className   = type;
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function updateProgress(done, total) {
+  document.getElementById('progress-bar').style.width =
+    Math.round(done / total * 100) + '%';
+}
+
+// ── SCAN ──────────────────────────────────────────────────────────
+async function scanDatabase() {
+  if (!currentUser) { alert('Please sign in first.'); return; }
+
+  log('Scanning database…', 'info');
+  const snap = await db.ref('genealogy/people').once('value');
+  allPeople  = snap.val() || {};
+
+  let totalPhotos = 0, oldUrls = 0, base64Count = 0, newUrls = 0;
+  const peopleCount = Object.keys(allPeople).length;
+
+  Object.entries(allPeople).forEach(([id, p]) => {
+    const photos = p.photos || [];
+    photos.forEach(url => {
+      totalPhotos++;
+      if (!url) return;
+      if (url.startsWith('data:')) {
+        base64Count++;
+      } else if (url.includes('cavemanken-tree')) {
+        oldUrls++;
+      } else if (url.includes('cmk63project')) {
+        newUrls++;
+      } else {
+        oldUrls++; // any other external URL treat as needing migration
+      }
+    });
+  });
+
+  document.getElementById('scan-stats').style.display  = 'flex';
+  document.getElementById('stat-people').textContent   = peopleCount;
+  document.getElementById('stat-photos').textContent   = totalPhotos;
+  document.getElementById('stat-old-urls').textContent = oldUrls;
+  document.getElementById('stat-base64').textContent   = base64Count;
+  document.getElementById('stat-new-urls').textContent = newUrls;
+
+  log(`Scan complete: ${peopleCount} people, ${totalPhotos} photos total.`, 'ok');
+  log(`  Old storage URLs: ${oldUrls}`, oldUrls > 0 ? 'warn' : 'ok');
+  log(`  Base64 images:    ${base64Count}`, base64Count > 0 ? 'warn' : 'ok');
+  log(`  Already migrated: ${newUrls}`, 'ok');
+  log(`\nReady. Click "Dry Run" to preview or "Migrate Photos" to proceed.`, 'info');
+
+  document.getElementById('migrate-btn').disabled = false;
+  document.getElementById('dryrun-btn').disabled  = false;
+}
+
+// ── MIGRATE ───────────────────────────────────────────────────────
+async function migrate(dryRun) {
+  if (!currentUser) { alert('Please sign in first.'); return; }
+  if (!allPeople)   { alert('Please scan the database first.'); return; }
+
+  document.getElementById('migrate-btn').disabled = true;
+  document.getElementById('dryrun-btn').disabled  = true;
+  document.getElementById('progress-wrap').style.display = 'block';
+
+  log(`\n── ${dryRun ? 'DRY RUN' : 'MIGRATION'} START ──`, 'info');
+
+  const entries   = Object.entries(allPeople);
+  const total     = entries.length;
+  let   processed = 0;
+  let   migrated  = 0;
+  let   skipped   = 0;
+  let   errors    = 0;
+
+  for (const [personId, person] of entries) {
+    const photos = person.photos || [];
+    if (!photos.length) { processed++; updateProgress(processed, total); continue; }
+
+    let changed    = false;
+    const newPhotos = [];
+
+    for (const url of photos) {
+      if (!url) { newPhotos.push(url); continue; }
+
+      // Already on cmk63project — skip
+      if (url.includes('cmk63project')) {
+        newPhotos.push(url);
+        skipped++;
+        continue;
+      }
+
+      // Base64 — upload to Storage
+      if (url.startsWith('data:')) {
+        const ext      = url.split(';')[0].split('/')[1] || 'jpg';
+        const filename = `genealogy-photos/${personId}/${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+        log(`  [base64→Storage] ${fullName(person)} — ${filename}`, 'info');
+
+        if (!dryRun) {
+          try {
+            const newUrl = await uploadBase64(url, filename);
+            newPhotos.push(newUrl);
+            changed = true;
+            migrated++;
+            log(`    ✓ Uploaded`, 'ok');
+          } catch(e) {
+            log(`    ✗ Error: ${e.message}`, 'err');
+            newPhotos.push(url); // keep original on error
+            errors++;
+          }
+        } else {
+          newPhotos.push(url);
+          migrated++;
+        }
+        continue;
+      }
+
+      // Old Firebase Storage URL — download and re-upload
+      const filename = extractFilename(url, personId);
+      log(`  [url→Storage] ${fullName(person)} — ${filename}`, 'info');
+
+      if (!dryRun) {
+        try {
+          const newUrl = await downloadAndReupload(url, filename);
+          newPhotos.push(newUrl);
+          changed = true;
+          migrated++;
+          log(`    ✓ Migrated`, 'ok');
+        } catch(e) {
+          log(`    ✗ Error: ${e.message}`, 'err');
+          newPhotos.push(url); // keep original on error
+          errors++;
+        }
+      } else {
+        newPhotos.push(url);
+        migrated++;
+      }
+    }
+
+    // Update database record if anything changed
+    if (changed && !dryRun) {
+      try {
+        await db.ref(`genealogy/people/${personId}`).update({
+          photos:    newPhotos,
+          updatedAt: Date.now(),
+        });
+      } catch(e) {
+        log(`  ✗ DB update failed for ${fullName(person)}: ${e.message}`, 'err');
+        errors++;
+      }
+    }
+
+    processed++;
+    updateProgress(processed, total);
+  }
+
+  log(`\n── ${dryRun ? 'DRY RUN' : 'MIGRATION'} COMPLETE ──`, 'ok');
+  log(`  Migrated: ${migrated}`, migrated > 0 ? 'ok' : 'info');
+  log(`  Skipped (already migrated): ${skipped}`, 'info');
+  log(`  Errors: ${errors}`, errors > 0 ? 'err' : 'ok');
+
+  document.getElementById('migrate-btn').disabled = false;
+  document.getElementById('dryrun-btn').disabled  = false;
+}
+
+// ── UPLOAD HELPERS ────────────────────────────────────────────────
+async function uploadBase64(dataUrl, filename) {
+  const storageRef = storage.ref(filename);
+  await storageRef.putString(dataUrl, 'data_url');
+  return await storageRef.getDownloadURL();
+}
+
+async function downloadAndReupload(oldUrl, filename) {
+  // Fetch via a CORS proxy since old bucket may block direct fetch
+  // Try direct first, fall back to proxy
+  let blob;
+  try {
+    const resp = await fetch(oldUrl);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    blob = await resp.blob();
+  } catch(e) {
+    throw new Error(`Could not fetch photo: ${e.message}. You may need to set CORS on the old bucket.`);
+  }
+
+  const storageRef = storage.ref(filename);
+  await storageRef.put(blob);
+  return await storageRef.getDownloadURL();
+}
+
+function extractFilename(url, personId) {
+  try {
+    // Firebase Storage URLs look like: .../o/path%2Fto%2Ffile.jpg?alt=media&...
+    const match = url.match(/\/o\/([^?]+)/);
+    if (match) {
+      const decoded = decodeURIComponent(match[1]);
+      const name    = decoded.split('/').pop();
+      return `genealogy-photos/${personId}/${name}`;
+    }
+  } catch(e) {}
+  return `genealogy-photos/${personId}/${Date.now()}.jpg`;
+}
+
+function fullName(p) {
+  return [p.firstName, p.middleName, p.lastName].filter(Boolean).join(' ') || 'Unknown';
+}
+</script>
+</body>
+</html>
