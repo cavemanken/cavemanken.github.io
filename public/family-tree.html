@@ -2239,7 +2239,7 @@
         }
 
         const files = Array.from(input.files);
-        const TARGET_BYTES = 500 * 1024;
+        const TARGET_BYTES = 1000 * 1024; // 1MB target after resizing/compression
 
         for (const file of files) {
           if (!file.type.startsWith('image/') && !file.type.includes('pdf')) {
@@ -2252,7 +2252,7 @@
           try {
             let uploadBlob = file;
 
-            // Resize images over 500KB
+            // Resize images over 1MB
             if (file.type.startsWith('image/') && file.size > TARGET_BYTES) {
               uploadBlob = await resizeImage(file, TARGET_BYTES);
               const origKB = Math.round(file.size / 1024);
