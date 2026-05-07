@@ -297,6 +297,59 @@
         color: var(--parchment-dark);
       }
 
+      /* ── NOTABLE STYLES ── */
+      .tree-card.notable {
+        box-shadow: 0 0 0 2px var(--sepia-light), 0 2px 8px var(--shadow);
+      }
+      .notable-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        background: linear-gradient(135deg, #c9a84c, #8b6914);
+        color: #fff8e8;
+        border-radius: 10px;
+        padding: 1px 7px 1px 5px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        vertical-align: middle;
+        margin-left: 4px;
+        white-space: nowrap;
+      }
+      .notable-star {
+        position: absolute;
+        top: 4px;
+        right: 6px;
+        font-size: 0.8rem;
+        line-height: 1;
+        color: var(--sepia-light);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      }
+      .person-item.notable-person .person-info-name::after {
+        content: ' ⭐';
+        font-size: 0.75em;
+      }
+      .sidebar-filter-row {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+        margin-bottom: 4px;
+      }
+      .filter-pill {
+        font-family: 'Crimson Pro', serif;
+        font-size: 0.85rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        background: transparent;
+        cursor: pointer;
+        color: var(--muted);
+        transition: all 0.15s;
+      }
+      .filter-pill.active {
+        background: var(--ink);
+        color: var(--parchment);
+        border-color: var(--ink);
+      }
+
       /* ── MAIN PANEL ── */
       .main-panel {
         padding: 28px 32px;
@@ -538,6 +591,8 @@
         display: flex;
         gap: 8px;
         margin-bottom: 10px;
+        flex-wrap: wrap;
+        align-items: center;
       }
 
       /* Photo gallery */
@@ -994,22 +1049,6 @@
     <div id="app">
       <header>
         <div style="display: flex; gap: 8px; align-items: center">
-          <!-- <button class="btn btn-secondary btn-sm" onclick="exportGEDCOM()">
-            ⬇ Export GEDCOM
-          </button> -->
-          <!-- <button
-            class="btn btn-secondary btn-sm"
-            onclick="document.getElementById('gedcom-input').click()"
-          >
-            ⬆ Import GEDCOM
-            <input
-              type="file"
-              id="gedcom-input"
-              accept=".ged,.gedcom"
-              style="display: none"
-              onchange="importGEDCOM(this)"
-            />
-          </button> -->
           <button
             class="btn btn-secondary btn-sm"
             id="changelog-btn"
@@ -1060,6 +1099,10 @@
           </div>
           <div class="sidebar-section">
             <div class="sidebar-title">All Family Members</div>
+            <div class="sidebar-filter-row">
+              <button class="filter-pill active" id="filter-all" onclick="setListFilter('all')">All</button>
+              <button class="filter-pill" id="filter-notable" onclick="setListFilter('notable')">⭐ Notable</button>
+            </div>
             <ul class="person-list" id="person-list"></ul>
             <div
               id="person-list-loading"
@@ -1274,7 +1317,7 @@
           if (q.trim()) {
             filterPeople(q);
           } else {
-            renderPersonList(allPeople);
+            filterPeople('');
           }
           if (selectedPersonId && allPeople[selectedPersonId]) {
             renderPersonView(selectedPersonId);
@@ -1315,6 +1358,7 @@
                 : `<img src="${p.photos[0]}" alt="">`
               : initials(p);
 
+          if (p.notable) li.classList.add('notable-person');
           li.innerHTML = `
             <div class="person-avatar">${photo}</div>
             <div>
@@ -1325,14 +1369,35 @@
         });
       }
 
+      // ─────────────────────────────────────────────
+      // FILTER
+      // ─────────────────────────────────────────────
+      let listFilter = 'all'; // 'all' | 'notable'
+
+      function setListFilter(f) {
+        listFilter = f;
+        document.getElementById('filter-all').classList.toggle('active', f === 'all');
+        document.getElementById('filter-notable').classList.toggle('active', f === 'notable');
+        const q = document.getElementById('search-input').value;
+        filterPeople(q);
+      }
+
       function filterPeople(q) {
+        let pool = allPeople;
+        if (listFilter === 'notable') {
+          const notableOnly = {};
+          Object.entries(allPeople).forEach(([id, p]) => {
+            if (p.notable) notableOnly[id] = p;
+          });
+          pool = notableOnly;
+        }
         if (!q.trim()) {
-          renderPersonList(allPeople);
+          renderPersonList(pool);
           return;
         }
         const lc = q.toLowerCase();
         const filtered = {};
-        Object.entries(allPeople).forEach(([id, p]) => {
+        Object.entries(pool).forEach(([id, p]) => {
           if (fullName(p).toLowerCase().includes(lc)) filtered[id] = p;
         });
         renderPersonList(filtered);
@@ -1342,11 +1407,7 @@
         selectedPersonId = id;
         // Re-render the list with whatever is currently in the search box
         const q = document.getElementById('search-input').value;
-        if (q.trim()) {
-          filterPeople(q);
-        } else {
-          renderPersonList(allPeople);
-        }
+        filterPeople(q);
         showTab('view');
         // push to tree history
         if (treeHistory[treeHistoryIndex] !== id) {
@@ -1373,7 +1434,6 @@
         if (p.dod) {
           d = p.dod;
         } else if (p.dob) {
-          // Extract a year from the dob string — handles "15 March 1945", "1945", "Abt 1880", etc.
           const yearMatch = p.dob.match(/\b(\d{4})\b/);
           if (yearMatch) {
             const birthYear = parseInt(yearMatch[1], 10);
@@ -1404,7 +1464,6 @@
       // TABS
       // ─────────────────────────────────────────────
       function showTab(tab) {
-        // Re-render the add form fresh each time so the person dropdown is populated
         if (tab === 'add') {
           editingId = null;
           pendingPhotos = [];
@@ -1419,26 +1478,19 @@
           const btn = document.getElementById(`tab-${t}`);
           if (btn) btn.classList.toggle('active', t === tab);
         });
-        // show edit tab only when editing
         const editTab = document.getElementById('tab-edit');
         if (editTab)
           editTab.style.display = tab === 'edit' ? 'inline-block' : 'none';
       }
+
       // ─────────────────────────────────────────────
       // WELCOME
       // ─────────────────────────────────────────────
       function renderWelcome() {
-        const count = Object.keys(allPeople).length;
         document.getElementById('panel-view').innerHTML = `
           <div class="empty-state">
             <div style="font-size:3rem;margin-bottom:16px;">🌳</div>
-            <p>${
-              // count === 0
-              //   ? 'Your family tree is empty. Add your first family member to begin.'
-              //   :
-              'Select a family member from the left to view their record and family tree.'
-            }</p>
-
+            <p>Select a family member from the left to view their record and family tree.</p>
           </div>`;
       }
 
@@ -1482,6 +1534,11 @@
                 })
                 .join('')}</div>`
             : `<p class="text-muted">No photos added.</p>`;
+
+        const notableBadge = p.notable
+          ? `<span class="notable-badge">⭐ Notable</span>`
+          : '';
+
         const detailCard = `
           <div class="person-detail">
             <div class="person-detail-header">
@@ -1495,7 +1552,7 @@
                 }
               </div>
               <div>
-                <div class="person-detail-name">${fullName(p)}</div>
+                <div class="person-detail-name">${fullName(p)} ${notableBadge}</div>
                 <div class="person-detail-dates">${
                   lifespan(p) || 'Dates unknown'
                 }</div>
@@ -1513,6 +1570,9 @@
             ? `
           <button class="btn btn-ghost btn-sm" onclick="startEdit('${id}')">✎ Edit</button>
           <button class="btn btn-danger btn-sm" onclick="confirmDelete('${id}')">🗑 Delete</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleNotable('${id}')" style="border-color:var(--sepia-light);color:var(--sepia);">
+            ${p.notable ? '★ Remove Notable' : '☆ Mark Notable'}
+          </button>
         `
             : ''
         }
@@ -1560,7 +1620,6 @@
       function renderRelationshipSummary(id, p) {
         const parts = [];
 
-        // Parents
         const parents = findRelatives(id, 'childOf');
         if (parents.length)
           parts.push(
@@ -1569,7 +1628,6 @@
               .join(', ')}`
           );
 
-        // Spouses
         const spouses = findRelatives(id, 'spouseOf');
         if (spouses.length)
           parts.push(
@@ -1578,7 +1636,6 @@
               .join(', ')}`
           );
 
-        // Children
         const children = findChildren(id);
         if (children.length)
           parts.push(
@@ -1587,7 +1644,6 @@
               .join(', ')}`
           );
 
-        // Siblings
         const siblings = findSiblings(id);
         if (siblings.length)
           parts.push(
@@ -1616,10 +1672,23 @@
         btn.textContent = hidden ? 'Hide Notes' : 'Show Notes';
       }
 
+      // ─────────────────────────────────────────────
+      // NOTABLE TOGGLE
+      // ─────────────────────────────────────────────
+      function toggleNotable(id) {
+        const p = allPeople[id];
+        if (!p || !currentUser) return;
+        const newVal = !p.notable;
+        dbRef.child(id).update({ notable: newVal }).then(() => {
+          toast(newVal
+            ? `${fullName(p)} marked as notable.`
+            : `Notable mark removed from ${fullName(p)}.`
+          );
+        }).catch(e => toast('Error: ' + e.message));
+      }
+
       function exportGEDCOM() {
         const lines = [];
-
-        // Header
         lines.push('0 HEAD');
         lines.push('1 SOUR FamilyHeritage');
         lines.push('2 NAME Family Heritage Genealogy App');
@@ -1639,35 +1708,25 @@
               .toUpperCase()
         );
 
-        // --- INDI records (one per person) ---
         Object.entries(allPeople).forEach(([id, p]) => {
           lines.push(`0 @I${id}@ INDI`);
-
-          // Name
           const first = [p.firstName, p.middleName].filter(Boolean).join(' ');
           const last = p.lastName || '';
           lines.push(`1 NAME ${first} /${last}/`);
           if (p.firstName) lines.push(`2 GIVN ${first}`);
           if (p.lastName) lines.push(`2 SURN ${last}`);
-
-          // Birth
           if (p.dob || p.bornLocation) {
             lines.push('1 BIRT');
             if (p.dob) lines.push(`2 DATE ${p.dob}`);
             if (p.bornLocation) lines.push(`2 PLAC ${p.bornLocation}`);
           }
-
-          // Death
           if (p.dod) {
             lines.push('1 DEAT');
             lines.push(`2 DATE ${p.dod}`);
           }
-
-          // Notes — split on newlines so no single line exceeds GEDCOM's 255-char limit
           if (p.notes) {
             const noteLines = p.notes.split('\n');
             noteLines.forEach((noteLine, i) => {
-              // Chunk any very long lines
               const chunks = chunkString(noteLine, 200);
               chunks.forEach((chunk, ci) => {
                 if (i === 0 && ci === 0) lines.push(`1 NOTE ${chunk}`);
@@ -1675,8 +1734,6 @@
               });
             });
           }
-
-          // Photos as OBJE records
           (p.photos || []).forEach((url) => {
             lines.push('1 OBJE');
             lines.push('2 FORM URL');
@@ -1684,10 +1741,7 @@
           });
         });
 
-        // --- FAM records ---
-        // Build families by grouping children under their parent pairs.
-        // A family = unique (father, mother) pair, or single parent if only one known.
-        const families = {}; // key: "fatherId|motherId" → { father, mother, children[] }
+        const families = {};
 
         Object.entries(allPeople).forEach(([childId, p]) => {
           const rels = p.relationships || [];
@@ -1695,15 +1749,10 @@
             .filter((r) => r.type === 'childOf')
             .map((r) => r.targetId);
 
-          // Find which parents are spouses of each other to group correctly
-          const spouseIds = findSpouses(parentIds[0] || '');
-
           let fatherId = null;
           let motherId = null;
 
           parentIds.forEach((pid) => {
-            // We don't store gender, so we use whichever two parents are spouses of each other
-            // Just assign first parent as "father slot" and second as "mother slot" for GEDCOM
             if (!fatherId) fatherId = pid;
             else if (!motherId && pid !== fatherId) motherId = pid;
           });
@@ -1716,7 +1765,6 @@
           families[famKey].children.push(childId);
         });
 
-        // Also create FAM records for spouse relationships that have no children
         Object.entries(allPeople).forEach(([id, p]) => {
           (p.relationships || []).forEach((r) => {
             if (r.type !== 'spouseOf') return;
@@ -1729,14 +1777,12 @@
           });
         });
 
-        // Write FAM records
         let famIndex = 1;
-        const famIds = {}; // famKey → @F1@, @F2@, etc.
+        const famIds = {};
 
         Object.entries(families).forEach(([famKey, fam]) => {
           const famTag = `F${famIndex++}`;
           famIds[famKey] = famTag;
-
           lines.push(`0 @${famTag}@ FAM`);
           if (fam.fatherId) lines.push(`1 HUSB @I${fam.fatherId}@`);
           if (fam.motherId) lines.push(`1 WIFE @I${fam.motherId}@`);
@@ -1745,11 +1791,9 @@
           });
         });
 
-        // Trailer
         lines.push('0 TRLR');
 
-        // Download
-        const content = lines.join('\r\n'); // GEDCOM spec requires CRLF
+        const content = lines.join('\r\n');
         const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1765,7 +1809,6 @@
         );
       }
 
-      // Helper: split long strings into chunks for GEDCOM line limits
       function chunkString(str, maxLen) {
         const chunks = [];
         while (str.length > maxLen) {
@@ -1776,17 +1819,13 @@
         return chunks;
       }
 
-      // Find people where person `id` appears in their relationships of a given type
       function findRelatives(id, relType) {
         const results = [];
-        // Check this person's OWN relationships of the given type
         const own = allPeople[id]?.relationships || [];
         own.forEach((r) => {
           if (r.type === relType && !results.includes(r.targetId))
             results.push(r.targetId);
         });
-        // Also check if others have listed this person as their target with the same type
-        // (bidirectional — e.g. spouseOf added from either side)
         if (relType === 'spouseOf') {
           Object.entries(allPeople).forEach(([pid, p]) => {
             if (pid === id) return;
@@ -1802,25 +1841,8 @@
         }
         return [...new Set(results)];
       }
-      // function findRelatives(id, relType) {
-      //   const results = [];
-      //   Object.entries(allPeople).forEach(([pid, p]) => {
-      //     const rels = p.relationships || [];
-      //     rels.forEach((r) => {
-      //       if (r.type === relType && r.targetId === id) results.push(pid);
-      //     });
-      //   });
-      //   // Also check own relationships
-      //   const own = allPeople[id]?.relationships || [];
-      //   own.forEach((r) => {
-      //     if (r.type === relType && !results.includes(r.targetId))
-      //       results.push(r.targetId);
-      //   });
-      //   return [...new Set(results)];
-      // }
 
       function findChildren(parentId) {
-        // children are people who have a childOf relationship pointing to parentId
         const results = [];
         Object.entries(allPeople).forEach(([pid, p]) => {
           const rels = p.relationships || [];
@@ -1833,7 +1855,6 @@
       }
 
       function findSiblings(id) {
-        // shared parents
         const myParents = findRelatives(id, 'childOf');
         if (!myParents.length) return [];
         const siblings = new Set();
@@ -1855,7 +1876,6 @@
         const canBack = treeHistoryIndex > 0;
         const canFwd = treeHistoryIndex < treeHistory.length - 1;
 
-        // Build generations
         const parents = findRelatives(rootId, 'childOf');
         const grandparents = [];
         parents.forEach((pid) => {
@@ -1882,10 +1902,10 @@
               canFwd ? '' : 'disabled'
             }>Forward ▶</button>
             <button class="btn btn-ghost btn-sm" onclick="showAncestorTree('${rootId}')">🌿 Ancestor Tree</button>
-          </div>    <div class="tree-container">
+          </div>
+          <div class="tree-container">
             <div class="tree-view-grid">`;
 
-        // Great-Grandparents
         if (greatGrandparents.length > 0) {
           html += `<div><div class="tree-gen-label">Great-Grandparents</div><div class="tree-generation">`;
           [...new Set(greatGrandparents)].forEach((ggid) => {
@@ -1893,7 +1913,6 @@
           });
           html += `</div></div>`;
         }
-        // Grandparents
         if (grandparents.length > 0) {
           html += `<div><div class="tree-gen-label">Grandparents</div><div class="tree-generation">`;
           grandparents.forEach((gid) => {
@@ -1902,21 +1921,19 @@
           html += `</div></div>`;
         }
 
-        // Parents — group spouses together and don't render a parent twice
         if (parents.length > 0) {
           html += `<div><div class="tree-gen-label">Parents</div><div class="tree-generation">`;
           const renderedParents = new Set();
           parents.forEach((pid) => {
-            if (renderedParents.has(pid)) return; // already rendered as a spouse
+            if (renderedParents.has(pid)) return;
             renderedParents.add(pid);
             html += `<div class="tree-gen-group">`;
             html += treeCard(pid, '');
             findSpouses(pid).forEach((sid) => {
               if (parents.includes(sid)) {
-                // This spouse is also a parent — render them here and skip later
                 renderedParents.add(sid);
                 html += `<span class="spouse-connector">⚭</span>`;
-                html += treeCard(sid, ''); // not 'spouse' variant since they are a real parent
+                html += treeCard(sid, '');
               } else {
                 html += `<span class="spouse-connector">⚭</span>`;
                 html += treeCard(sid, 'spouse');
@@ -1927,7 +1944,6 @@
           html += `</div></div>`;
         }
 
-        // Root person + spouses
         html += `<div><div class="tree-gen-label">Focus</div><div class="tree-generation"><div class="tree-gen-group">`;
         html += treeCard(rootId, 'root');
         spouses.forEach((sid) => {
@@ -1936,7 +1952,6 @@
         });
         html += `</div></div></div>`;
 
-        // Children
         if (children.length > 0) {
           html += `<div><div class="tree-gen-label">Children</div><div class="tree-generation">`;
           children.forEach((cid) => {
@@ -1951,7 +1966,6 @@
           html += `</div></div>`;
         }
 
-        // Grandchildren
         if (grandchildren.length > 0) {
           html += `<div><div class="tree-gen-label">Grandchildren</div><div class="tree-generation">`;
           [...new Set(grandchildren)].forEach((gid) => {
@@ -1966,11 +1980,9 @@
 
       function findSpouses(id) {
         const spouses = new Set();
-        // own relationships
         (allPeople[id]?.relationships || []).forEach((r) => {
           if (r.type === 'spouseOf') spouses.add(r.targetId);
         });
-        // others who list this person as spouse
         Object.entries(allPeople).forEach(([pid, p]) => {
           if (pid === id) return;
           (p.relationships || []).forEach((r) => {
@@ -1985,6 +1997,7 @@
         if (!p) return '';
         const cls =
           variant === 'root' ? ' root' : variant === 'spouse' ? ' spouse' : '';
+        const notableCls = p.notable ? ' notable' : '';
         const photo = (p.photos || [])[0];
         const photoHtml = photo
           ? photo.toLowerCase().includes('.pdf')
@@ -1997,8 +2010,12 @@
             : variant === 'spouse'
             ? '<div class="tree-card-label">Spouse</div>'
             : '';
+        const notableStar = p.notable
+          ? `<span class="notable-star">⭐</span>`
+          : '';
         return `
-          <div class="tree-card${cls}" onclick="selectPerson('${id}')">
+          <div class="tree-card${cls}${notableCls}" onclick="selectPerson('${id}')">
+            ${notableStar}
             <div class="tree-card-photo">${photoHtml}</div>
             <div class="tree-card-name">${fullName(p)}</div>
             <div class="tree-card-dates">${lifespan(p)}</div>
@@ -2028,9 +2045,9 @@
       // ─────────────────────────────────────────────
       // ADD / EDIT FORM
       // ─────────────────────────────────────────────
-      let formMode = 'add'; // 'add' or 'edit'
+      let formMode = 'add';
       let editingId = null;
-      let pendingPhotos = []; // base64 or URLs
+      let pendingPhotos = [];
       let removedPhotos = [];
 
       function renderAddForm(prefill) {
@@ -2050,7 +2067,6 @@
         const html = buildFormHtml(p, 'edit');
         document.getElementById('panel-edit').innerHTML = html;
         showTab('edit');
-        // re-render existing photos
         rerenderPhotoPreviews('edit');
       }
 
@@ -2128,7 +2144,7 @@
             autocomplete="off"
             oninput="filterRelPeople('${mode}')"
             onfocus="showRelDropdown('${mode}')"
-      onkeydown="relSearchKeydown(event,'${mode}')"
+            onkeydown="relSearchKeydown(event,'${mode}')"
             style="width:100%;padding-right:28px;"
           />
           <span id="${mode}-rel-clear" onclick="clearRelSearch('${mode}')"
@@ -2169,7 +2185,6 @@
           </div>`;
       }
 
-      // Track relationships in the form
       let formRels = { add: [], edit: [] };
 
       function renderRelTags(rels, mode) {
@@ -2190,7 +2205,6 @@
         const type = document.getElementById(`${mode}-rel-type`).value;
         const targetId = document.getElementById(`${mode}-rel-person`).value;
         if (!targetId) return;
-        // avoid duplicate
         if (
           formRels[mode].find((r) => r.type === type && r.targetId === targetId)
         )
@@ -2211,24 +2225,6 @@
         );
       }
 
-      // Original simple photo upload handler (no resizing)
-      // function handlePhotoUpload(input, mode) {
-      //   const files = Array.from(input.files);
-      //   files.forEach((file) => {
-      //     if (file.size > 2 * 1024 * 1024) {
-      //       toast('Photo too large (max 2MB)');
-      //       return;
-      //     }
-      //     const reader = new FileReader();
-      //     reader.onload = (e) => {
-      //       pendingPhotos.push(e.target.result);
-      //       rerenderPhotoPreviews(mode);
-      //     };
-      //     reader.readAsDataURL(file);
-      //   });
-      // }
-
-      // New photo upload handler with resizing for large images
       async function handlePhotoUpload(input, mode) {
         if (!currentUser) {
           toast('You must be signed in to upload photos.');
@@ -2236,7 +2232,7 @@
         }
 
         const files = Array.from(input.files);
-        const TARGET_BYTES = 1000 * 1024; // 1MB target after resizing/compression
+        const TARGET_BYTES = 1000 * 1024;
 
         for (const file of files) {
           if (!file.type.startsWith('image/') && !file.type.includes('pdf')) {
@@ -2249,7 +2245,6 @@
           try {
             let uploadBlob = file;
 
-            // Resize images over 1MB
             if (file.type.startsWith('image/') && file.size > TARGET_BYTES) {
               uploadBlob = await resizeImage(file, TARGET_BYTES);
               const origKB = Math.round(file.size / 1024);
@@ -2257,7 +2252,6 @@
               toast(`Resized from ${origKB}KB to ~${finalKB}KB`);
             }
 
-            // Upload to Firebase Storage
             const ext = file.name.split('.').pop();
             const filename = `genealogy-photos/${Date.now()}_${Math.random()
               .toString(36)
@@ -2311,7 +2305,6 @@
                 iterations++;
               }
 
-              // Convert dataUrl back to blob
               canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
             };
             img.onerror = reject;
@@ -2321,6 +2314,7 @@
           reader.readAsDataURL(file);
         });
       }
+
       function rerenderPhotoPreviews(mode) {
         const container = document.getElementById(`${mode}-photo-previews`);
         if (!container) return;
@@ -2364,12 +2358,10 @@
           return;
         }
 
-        // Warn if they selected a relationship but didn't click Add
         const relPersonEl = document.getElementById(`${mode}-rel-person`);
         const relSearchEl = document.getElementById(`${mode}-rel-search`);
         const relTypeEl = document.getElementById(`${mode}-rel-type`);
 
-        // Warn if they typed/selected someone in the search box but didn't click Add
         const hasSelection = relPersonEl && relPersonEl.value;
         const hasSearchText = relSearchEl && relSearchEl.value.trim();
 
@@ -2412,7 +2404,6 @@
             })
             .catch((e) => toast('Error: ' + e.message));
         } else {
-          // Diff the old and new values before saving
           const oldPerson = allPeople[editingId] || {};
           const changedFields = {};
           [
@@ -2430,7 +2421,6 @@
               changedFields[field] = { from: oldVal, to: newVal };
             }
           });
-          // Check relationship changes
           const oldRels = JSON.stringify(
             (oldPerson.relationships || [])
               .map((r) => `${r.type}:${r.targetId}`)
@@ -2447,6 +2437,9 @@
               to: person.relationships || [],
             };
           }
+
+          // Preserve the notable flag — don't wipe it on save
+          if (oldPerson.notable) person.notable = oldPerson.notable;
 
           dbRef
             .child(editingId)
@@ -2470,57 +2463,32 @@
         if (!val) return '';
         val = val.trim();
 
-        // Match mm/dd/yyyy or m/d/yyyy
         const slashMatch = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (slashMatch) {
           const [, month, day, year] = slashMatch;
           const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
+            'January','February','March','April','May','June',
+            'July','August','September','October','November','December',
           ];
           const monthName = months[parseInt(month, 10) - 1];
-          if (!monthName) {
-            return val; // invalid month, leave as-is
-          }
+          if (!monthName) return val;
           return `${parseInt(day, 10)} ${monthName} ${year}`;
         }
 
-        // Match yyyy-mm-dd (e.g. pasted from somewhere)
         const isoMatch = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if (isoMatch) {
           const [, year, month, day] = isoMatch;
           const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
+            'January','February','March','April','May','June',
+            'July','August','September','October','November','December',
           ];
           const monthName = months[parseInt(month, 10) - 1];
           const d = parseInt(day, 10);
           if (!monthName) return val;
-          if (d === 0) return `${monthName} ${year}`; // no day
+          if (d === 0) return `${monthName} ${year}`;
           return `${d} ${monthName} ${year}`;
         }
 
-        // Anything else (already "15 March 1945", "Abt 1880", etc.) — leave alone
         return val;
       }
 
@@ -2572,7 +2540,7 @@
             snap.forEach((child) => {
               entries.push(child.val());
             });
-            entries.reverse(); // newest first
+            entries.reverse();
 
             const rows = entries
               .map((e) => {
@@ -2676,14 +2644,13 @@
         const clearEl = document.getElementById(`${mode}-rel-clear`);
         clearEl.style.display = q ? 'block' : 'none';
 
-        // Reset hidden value when user types
         document.getElementById(`${mode}-rel-person`).value = '';
 
         const results = Object.entries(allPeople)
           .filter(([pid]) => pid !== editingId)
           .filter(([, p]) => fullName(p).toLowerCase().includes(q))
           .sort(([, a], [, b]) => fullName(a).localeCompare(fullName(b)))
-          .slice(0, 50); // cap at 50 results
+          .slice(0, 50);
 
         renderRelDropdown(mode, results);
         showRelDropdown(mode);
@@ -2729,7 +2696,6 @@
         const search = document.getElementById(`${mode}-rel-search`);
         const ul = document.getElementById(`${mode}-rel-dropdown`);
 
-        // Populate with all people on first focus if empty
         if (!search.value && ul.innerHTML === '') {
           const all = Object.entries(allPeople)
             .filter(([pid]) => pid !== editingId)
@@ -2780,7 +2746,6 @@
           if (active) {
             active.click();
           } else if (items.length === 1) {
-            // Auto-select if only one result
             items[0].click();
           }
         } else if (e.key === 'Escape') {
@@ -2791,169 +2756,26 @@
         if (!currentUser) return;
         const ref = db.ref('genealogy/changelog').push();
         ref.set({
-          action, // 'ADD' | 'EDIT' | 'DELETE'
+          action,
           personId,
           personName: details.name || '',
           uid: currentUser.uid,
           email: currentUser.email,
           timestamp: Date.now(),
-          changes: details.changes || null, // for edits: what fields changed
+          changes: details.changes || null,
         });
       }
-      // ─────────────────────────────────────────────
-      // ANCESTOR TREE OLDER VERSIOn (REPLACED BY NEW BFS VERSION BELOW)
-      // ─────────────────────────────────────────────
-      //   function showAncestorTree(rootId) {
-      //     const p = allPeople[rootId];
-      //     if (!p) return;
-
-      //     // Build ancestor tree by BFS — collect all ancestors generation by generation
-      //     const generations = []; // array of arrays, index 0 = root
-      //     const visited = new Set();
-
-      //     let currentGen = [rootId];
-      //     visited.add(rootId);
-
-      //     while (currentGen.length > 0) {
-      //       generations.push(currentGen);
-      //       const nextGen = [];
-      //       currentGen.forEach((id) => {
-      //         const parents = findRelatives(id, 'childOf');
-      //         parents.forEach((pid) => {
-      //           if (!visited.has(pid) && allPeople[pid]) {
-      //             visited.add(pid);
-      //             nextGen.push(pid);
-      //           }
-      //         });
-      //       });
-      //       currentGen = nextGen;
-      //     }
-
-      //     let html = `
-      // <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      //   <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
-      //     🌿 Ancestor Tree — ${fullName(p)}
-      //   </h3>
-      //   <span style="font-size:0.85rem;color:var(--muted);font-style:italic;">
-      //     ${visited.size} ancestors found across ${
-      //       generations.length - 1
-      //     } generation${generations.length !== 2 ? 's' : ''}
-      //   </span>
-      //   <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
-      // </div>
-      // <div style="overflow-x:auto;padding-bottom:20px;">
-      //   <div style="display:grid;gap:32px;min-width:fit-content;">`;
-
-      //     generations.forEach((gen, gi) => {
-      //       const label = ancestorGenLabel(gi);
-      //       const missingParents = countMissingParents(gen, gi, generations);
-
-      //       html += `
-      //   <div>
-      //     <div style="
-      //       font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
-      //       color:var(--muted);text-align:center;margin-bottom:10px;font-weight:500;
-      //       display:flex;align-items:center;justify-content:center;gap:10px;
-      //     ">
-      //       ${label}
-      //       <span style="font-size:0.7rem;color:var(--card-border);">(${
-      //         gen.length
-      //       } known${
-      //         missingParents > 0 ? `, ${missingParents} missing` : ''
-      //       })</span>
-      //     </div>
-      //     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">`;
-
-      //       gen.forEach((id) => {
-      //         const person = allPeople[id];
-      //         if (!person) return;
-      //         const photo = (person.photos || [])[0];
-      //         const photoHtml = photo
-      //           ? photo.toLowerCase().includes('.pdf')
-      //             ? `<span style="font-size:1rem;">📄</span>`
-      //             : `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;">`
-      //           : `<span style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--muted);">${
-      //               (person.firstName || '?')[0]
-      //             }</span>`;
-
-      //         const parents = findRelatives(id, 'childOf');
-      //         const hasParents = parents.length > 0;
-      //         const isFocus = gi === 0;
-
-      //         html += `
-      //     <div onclick="selectPerson('${id}')" style="
-      //       background:var(--card-bg);
-      //       border:${
-      //         isFocus ? '2px solid var(--accent)' : '1px solid var(--card-border)'
-      //       };
-      //       border-radius:6px;
-      //       padding:10px 12px;
-      //       min-width:130px;
-      //       max-width:160px;
-      //       text-align:center;
-      //       cursor:pointer;
-      //       box-shadow:0 2px 8px var(--shadow);
-      //       transition:all 0.18s;
-      //       position:relative;
-      //       ${isFocus ? 'background:#fff8f0;' : ''}
-      //     "
-      //     onmouseover="this.style.borderColor='var(--sepia)';this.style.transform='translateY(-1px)'"
-      //     onmouseout="this.style.borderColor='${
-      //       isFocus ? 'var(--accent)' : 'var(--card-border)'
-      //     }';this.style.transform=''">
-      //       <div style="
-      //         width:44px;height:44px;border-radius:50%;
-      //         margin:0 auto 7px;
-      //         border:2px solid var(--card-border);
-      //         background:var(--parchment-dark);
-      //         overflow:hidden;
-      //         display:flex;align-items:center;justify-content:center;
-      //       ">${photoHtml}</div>
-      //       <div style="font-size:0.85rem;font-weight:600;color:var(--ink);line-height:1.2;">${fullName(
-      //         person
-      //       )}</div>
-      //       <div style="font-size:0.72rem;color:var(--muted);font-style:italic;margin-top:2px;">${lifespan(
-      //         person
-      //       )}</div>
-      //       ${
-      //         !hasParents && gi > 0
-      //           ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;">End of line</div>`
-      //           : ''
-      //       }
-      //       ${
-      //         isFocus
-      //           ? `<div style="font-size:0.62rem;color:var(--accent-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">★ Focus</div>`
-      //           : ''
-      //       }
-      //     </div>`;
-      //       });
-
-      //       html += `</div></div>`;
-      //     });
-
-      //     html += `</div></div>`;
-
-      //     // Inject into the view panel
-      //     document.getElementById(
-      //       'panel-view'
-      //     ).innerHTML = `<div style="max-width:100%;">${html}</div>`;
-      //   }
 
       // ─────────────────────────────────────────────
-      // new version of showAncestorTree with SVG lines and better handling of missing ancestors
-      // (the old version is still above for reference and backup in case of bugs in the new one)
-      // This version builds the ancestor tree using BFS and keeps track of parent-child relationships to draw connecting lines in SVG.
-      // It also counts missing parents for each generation to provide more accurate info in the labels.
-      // Note: This implementation assumes a maximum of 2 parents per person for simplicity in drawing lines. It can be extended to handle more complex cases if needed.
+      // ANCESTOR TREE
       // ─────────────────────────────────────────────
       function showAncestorTree(rootId) {
         const p = allPeople[rootId];
         if (!p) return;
 
-        // Build generations by BFS
         const generations = [];
         const visited = new Set();
-        const parentMap = {}; // childId → [parentId, parentId]
+        const parentMap = {};
 
         let currentGen = [rootId];
         visited.add(rootId);
@@ -2977,7 +2799,6 @@
           currentGen = nextGen;
         }
 
-        // Render container
         document.getElementById('panel-view').innerHTML = `
           <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
             <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;flex:1;">
@@ -2998,9 +2819,7 @@
           </div>`;
 
         const gensEl = document.getElementById('ancestor-gens');
-
-        // Render each generation row and collect card elements
-        const cardEls = {}; // id → DOM element
+        const cardEls = {};
 
         generations.forEach((gen, gi) => {
           const label = ancestorGenLabel(gi);
@@ -3009,7 +2828,6 @@
           genRow.style.cssText =
             'display:flex;flex-direction:column;align-items:center;';
 
-          // Label
           const labelEl = document.createElement('div');
           labelEl.style.cssText = `
             font-size:0.72rem;text-transform:uppercase;letter-spacing:0.14em;
@@ -3021,7 +2839,6 @@
             </span>`;
           genRow.appendChild(labelEl);
 
-          // Cards row
           const cardsRow = document.createElement('div');
           cardsRow.style.cssText =
             'display:flex;gap:16px;justify-content:center;flex-wrap:nowrap;';
@@ -3057,11 +2874,13 @@
               max-width:160px;
               text-align:center;
               cursor:pointer;
-              box-shadow:0 2px 8px var(--shadow);
+              box-shadow:${person.notable ? '0 0 0 2px var(--sepia-light), 0 2px 8px var(--shadow)' : '0 2px 8px var(--shadow)'};
               transition:all 0.18s;
-              flex-shrink:0;`;
+              flex-shrink:0;
+              position:relative;`;
 
             card.innerHTML = `
+              ${person.notable ? `<span style="position:absolute;top:4px;right:6px;font-size:0.8rem;color:var(--sepia-light);">⭐</span>` : ''}
               <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 7px;
                 border:2px solid var(--card-border);background:var(--parchment-dark);
                 overflow:hidden;display:flex;align-items:center;justify-content:center;">
@@ -3104,7 +2923,6 @@
           gensEl.appendChild(genRow);
         });
 
-        // After DOM is rendered, draw SVG lines
         requestAnimationFrame(() =>
           drawAncestorLines(generations, parentMap, cardEls)
         );
@@ -3120,7 +2938,6 @@
         const scrollTop = scrollEl ? scrollEl.scrollTop : 0;
         const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
 
-        // Set SVG size to match grid
         svg.setAttribute('width', grid.scrollWidth);
         svg.setAttribute('height', grid.scrollHeight);
         svg.innerHTML = '';
@@ -3138,12 +2955,9 @@
           };
         };
 
-        // Draw a line from child card top to parent card bottom
-        // using a smooth cubic bezier curve
         generations.forEach((gen, gi) => {
-          if (gi === 0) return; // focus has no child to connect to
+          if (gi === 0) return;
           gen.forEach((parentId) => {
-            // Find who this person is a parent of
             Object.entries(parentMap).forEach(([childId, parents]) => {
               if (!parents.includes(parentId)) return;
 
@@ -3155,13 +2969,10 @@
               const parent = getCardCenter(parentEl);
               if (!child || !parent) return;
 
-              // Line goes from top-center of parent card to bottom-center of child card
               const x1 = parent.x;
               const y1 = parent.top;
               const x2 = child.x;
               const y2 = child.bottom;
-
-              // Midpoint for bezier control points
               const midY = (y1 + y2) / 2;
 
               const path = document.createElementNS(
@@ -3180,7 +2991,7 @@
             });
           });
         });
-        // Center the view on the focus person (first card in generation 0)
+
         const focusCard = Object.values(cardEls)[0];
         if (focusCard && scrollEl) {
           const focusRect = focusCard.getBoundingClientRect();
@@ -3188,16 +2999,12 @@
           const focusMidX =
             focusRect.left - gridLeft + scrollLeft + focusRect.width / 2;
           const containerW = scrollEl.clientWidth;
-
-          // Scroll so focus card is horizontally centered, and start at the top
           scrollEl.scrollLeft = focusMidX - containerW / 2;
           scrollEl.scrollTop = 0;
         }
       }
 
       function countMissingParents(gen, genIndex, generations) {
-        // At any generation past the first, each person should have 2 parents in the next gen up
-        // Count how many slots are unfilled
         if (genIndex === 0) return 0;
         const prevGen = generations[genIndex - 1] || [];
         const expected = prevGen.length * 2;
@@ -3210,8 +3017,7 @@
         if (gi === 1) return 'Parents';
         if (gi === 2) return 'Grandparents';
         if (gi === 3) return 'Great-Grandparents';
-
-        const n = gi - 2; // 2nd, 3rd, 4th...
+        const n = gi - 2;
         const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
         return `${n}${suffix} Great-Grandparents`;
       }
@@ -3239,12 +3045,10 @@
           }
         };
         reader.readAsText(file, 'UTF-8');
-        // Reset so same file can be re-imported if needed
         input.value = '';
       }
 
       function parseGEDCOM(text) {
-        // Normalize line endings
         const lines = text
           .replace(/\r\n/g, '\n')
           .replace(/\r/g, '\n')
@@ -3261,7 +3065,6 @@
           const line = rawLine.trim();
           if (!line) return;
 
-          // Split into at most 3 parts: level, tag/id, value
           const parts = line.split(/\s+/);
           if (parts.length < 2) return;
 
@@ -3269,7 +3072,6 @@
           if (isNaN(level)) return;
 
           const tagOrId = parts[1];
-          // Value is everything after the level and tag, preserving internal spaces
           const value = parts.slice(2).join(' ');
 
           if (level === 0) {
@@ -3277,7 +3079,6 @@
             currentType = null;
             currentTag = null;
 
-            // "0 @I1@ INDI" — tagOrId is the xref, value is the record type
             if (tagOrId.startsWith('@') && value === 'INDI') {
               currentId = tagOrId;
               currentType = 'INDI';
@@ -3303,7 +3104,7 @@
 
           if (!currentId) return;
 
-          const tag = tagOrId; // at level 1+, tagOrId is always the tag
+          const tag = tagOrId;
 
           if (currentType === 'INDI') {
             const p = individuals[currentId];
@@ -3312,7 +3113,6 @@
               currentTag = tag;
 
               if (tag === 'NAME') {
-                // Value is like "John /Bogus/" or "John William /Bogus/"
                 const lastMatch = value.match(/\/([^/]*)\//);
                 p.lastName = lastMatch ? lastMatch[1].trim() : '';
                 const given = value.replace(/\/[^/]*\//, '').trim();
@@ -3333,7 +3133,6 @@
               if (currentTag === 'DEAT') {
                 if (tag === 'DATE') p.dod = value;
                 if (tag === 'PLAC') {
-                  // Append death place to notes if we have it
                   if (value)
                     p.notes += (p.notes ? '\n' : '') + 'Death place: ' + value;
                 }
@@ -3374,7 +3173,7 @@
       let pendingGEDCOMData = null;
 
       function previewGEDCOMImport({ individuals, families }) {
-        pendingGEDCOMData = { individuals, families }; // store for later, don't embed in HTML
+        pendingGEDCOMData = { individuals, families };
 
         const indiCount = Object.keys(individuals).length;
         const famCount = Object.keys(families).length;
@@ -3404,7 +3203,6 @@
           </div>
           <p style="color:var(--muted);font-style:italic;font-size:0.9rem;margin-bottom:20px;line-height:1.6;">
             ⚠ This will ADD to your existing data — it will not overwrite or delete anyone already in the tree.
-            If you import the same file twice, you may get duplicate records.
           </p>
           <div id="gedcom-progress" style="display:none;margin-bottom:12px;">
             <div style="background:var(--parchment-dark);border-radius:4px;height:8px;overflow:hidden;">
@@ -3430,10 +3228,9 @@
         const progressLabel = document.getElementById('gedcom-progress-label');
         if (progressWrap) progressWrap.style.display = 'block';
 
-        const gedcomIdToKey = {}; // "@I123@" → new Firebase key
-        const relUpdates = {}; // newKey → [relationships]
+        const gedcomIdToKey = {};
+        const relUpdates = {};
 
-        // Step 1 — write all individuals
         const indiEntries = Object.values(individuals);
         const total = indiEntries.length;
         let done = 0;
@@ -3463,15 +3260,12 @@
             progressLabel.textContent = `Writing people… ${done}/${total}`;
         }
 
-        // Step 2 — build relationships from FAM records and update each person
         Object.values(families).forEach((f) => {
           const husbKey = f.husb ? gedcomIdToKey[f.husb] : null;
           const wifeKey = f.wife ? gedcomIdToKey[f.wife] : null;
 
-          // Spouse relationship — only add from one side since findSpouses is bidirectional
           if (husbKey && wifeKey) {
             if (!relUpdates[husbKey]) relUpdates[husbKey] = [];
-            // Only add if not already present
             if (
               !relUpdates[husbKey].find(
                 (r) => r.type === 'spouseOf' && r.targetId === wifeKey
@@ -3479,10 +3273,8 @@
             ) {
               relUpdates[husbKey].push({ type: 'spouseOf', targetId: wifeKey });
             }
-            // Don't add from wife side — findSpouses() already checks both directions
           }
 
-          // Child relationships
           f.children.forEach((childGedcomId) => {
             const childKey = gedcomIdToKey[childGedcomId];
             if (!childKey) return;
@@ -3505,7 +3297,7 @@
             }
           });
         });
-        // Step 2 — write relationships
+
         const relEntries = Object.entries(relUpdates);
         const relTotal = relEntries.length;
         let relDone = 0;
@@ -3523,7 +3315,7 @@
           if (progressLabel)
             progressLabel.textContent = `Writing relationships… ${relDone}/${relTotal}`;
         }
-        // Log it
+
         writeChangelog('ADD', 'GEDCOM_IMPORT', {
           name: `GEDCOM import — ${total} people, ${
             Object.keys(families).length
@@ -3561,86 +3353,50 @@
         <span style="font-size:1.4rem;">🖥️</span>
         <span style="color:var(--sepia-light);font-size:0.95rem;line-height:1.5;">
           <b style="font-family:'Playfair Display',serif;">Best viewed on a desktop or laptop.</b><br>
-          This app works on mobile but is designed for larger screens — entering and editing records,
-          viewing the family tree, and exploring ancestors is much easier with a full-size display.
+          This app works on mobile but is designed for larger screens.
         </span>
-      </div>              <div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);"><div style="margin-bottom:20px;"><div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">
-                Adding People
-              </div>
-              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-                <li>Always enter the <b>first name</b> — it's the only required field.</li>
-                <li>Use the <b>middle name field</b> for middle names only, not titles or nicknames. Put those in Notes.</li>
-                <li>For <b>married women</b>, enter their birth surname as the last name.</li>
-                <li>Enter <b>dates</b> in any natural format: <i>15 March 1945</i>, <i>March 1945</i>, <i>Abt 1880</i>, <i>Bef 1900</i>, or <i>15/03/1945</i> — the app will convert common formats automatically.</li>
-                <li>If you only know the year, just enter the year: <i>1880</i>.</li>
-                <li>Use prefixes like <b>Abt</b> (about), <b>Bef</b> (before), or <b>Aft</b> (after) for uncertain dates.</li>
-                <li>Leave <b>Date of Death</b> blank for living people.</li>
-              </ul>
-            </div>
-
-            <div style="margin-bottom:20px;">
-              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                          padding-bottom:6px;margin-bottom:10px;">
-                Relationships
-              </div>
-              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-                <li>Use <b>Child of</b> to link a person to their parents — add one relationship for each parent.</li>
-                <li>Use <b>Spouse of</b> to link married couples. You only need to add it from one side — the app finds it both ways.</li>
-                <li>After searching for a person in the relationship box, make sure to <b>click Add</b> before saving — just selecting from the list is not enough.</li>
-                <li>The family tree view works best when <b>both parents</b> are entered and linked to each other as spouses.</li>
-                <li>You can add <b>multiple parents</b> if the biological and adoptive parents are both known — just add two Child of relationships.</li>
-              </ul>
-            </div>
-
-            <div style="margin-bottom:20px;">
-              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                          padding-bottom:6px;margin-bottom:10px;">
-                Photos
-              </div>
-              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-                <li>Keep photos <b>under 500KB</b> each for best performance. Large images slow down the app for everyone.</li>
-                <li>Supported image formats: <b>JPG, PNG, WEBP</b>.</li>
-                <li>You can also attach <b>PDF documents</b> — these appear as document tiles and open in a new tab.</li>
-                <li>The <b>first image</b> in the list is used as the person's profile photo in the tree and sidebar. Make sure it's a portrait if possible.</li>
-                <li>PDFs are automatically sorted to the <b>end of the photo list</b> so images always appear first.</li>
-                <li>To resize photos before uploading, try <a href="https://squoosh.app" target="_blank" style="color:var(--accent);">squoosh.app</a> — it's free and works in your browser.</li>
-              </ul>
-            </div>
-
-            <div style="margin-bottom:20px;">
-              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                          padding-bottom:6px;margin-bottom:10px;">
-                Notes
-              </div>
-              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-                <li>Notes are a great place for <b>census records, obituaries, stories, and sources</b>.</li>
-                <li>Notes are hidden by default — click <b>Show Notes</b> on a person's record to expand them.</li>
-                <li>There's no length limit, so feel free to paste in full transcriptions of records.</li>
-              </ul>
-            </div>
-
-            <div style="margin-bottom:4px;">
-              <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;
-                          letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);
-                          padding-bottom:6px;margin-bottom:10px;">
-                Exporting
-              </div>
-              <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
-                <li>Use <b>Export GEDCOM</b> in the header to download your tree in the standard genealogy format, compatible with Ancestry, FamilySearch, Gramps, and most other programs.</li>
-                <li>GEDCOM export includes names, dates, places, notes, and photo links.</li>
-                <li>The <b>Change Log</b> (visible to signed-in users) records every add, edit, and delete with the date and who made the change.</li>
-              </ul>
-            </div>
-
-          </div>
+      </div>
+      <div style="overflow-y:auto;max-height:65vh;font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.7;color:var(--ink-light);">
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">Notable People</div>
+          <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            <li>Click <b>☆ Mark Notable</b> on any person's record to designate them as historically or personally significant.</li>
+            <li>Notable people show a <b>⭐ star</b> in the sidebar list, on tree cards, and in their name header.</li>
+            <li>Use the <b>⭐ Notable</b> filter pill in the sidebar to quickly browse only notable family members.</li>
+            <li>Clicking <b>★ Remove Notable</b> on a marked person will clear the flag.</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">Adding People</div>
+          <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            <li>Always enter the <b>first name</b> — it's the only required field.</li>
+            <li>Enter <b>dates</b> in any natural format: <i>15 March 1945</i>, <i>March 1945</i>, <i>Abt 1880</i>, or <i>15/03/1945</i>.</li>
+            <li>Leave <b>Date of Death</b> blank for living people.</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">Relationships</div>
+          <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            <li>Use <b>Child of</b> to link a person to their parents — add one relationship per parent.</li>
+            <li>Use <b>Spouse of</b> to link married couples. You only need to add it from one side.</li>
+            <li>After searching for a person in the relationship box, make sure to <b>click Add</b> before saving.</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Playfair Display',serif;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);border-bottom:1px solid var(--card-border);padding-bottom:6px;margin-bottom:10px;">Photos</div>
+          <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            <li>Supported formats: <b>JPG, PNG, WEBP</b>. Large images are auto-resized under 1MB.</li>
+            <li>You can also attach <b>PDF documents</b> — these open in a new tab.</li>
+            <li>The <b>first image</b> is used as the profile photo in the tree and sidebar.</li>
+          </ul>
+        </div>
+      </div>
           <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeModal()">Close</button>
           </div>`;
         document.getElementById('modal').style.display = 'flex';
       }
+
       document.addEventListener('click', (e) => {
         ['add', 'edit'].forEach((mode) => {
           const search = document.getElementById(`${mode}-rel-search`);
@@ -3651,7 +3407,7 @@
           }
         });
       });
-      // Initial render
+
       window.addEventListener('load', () => {
         renderWelcome();
       });
@@ -3659,11 +3415,9 @@
       window.addEventListener('resize', () => {
         const svg = document.getElementById('ancestor-svg');
         if (svg) {
-          // Re-run if ancestor tree is visible
           const rootId =
             document.querySelector('[data-person-id]')?.dataset.personId;
           if (rootId && allPeople[rootId]) {
-            // just redraw lines, don't rebuild the whole tree
             const cardEls = {};
             document.querySelectorAll('[data-person-id]').forEach((el) => {
               cardEls[el.dataset.personId] = el;
