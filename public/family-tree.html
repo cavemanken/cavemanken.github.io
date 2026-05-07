@@ -954,6 +954,11 @@
         outline: 2px solid var(--sepia);
         outline-offset: -2px;
       }
+      li.rp-active {
+        background: var(--parchment-dark) !important;
+        outline: 2px solid var(--sepia);
+        outline-offset: -2px;
+      }
       #ancestor-scroll {
         scrollbar-width: thin;
         scrollbar-color: var(--card-border) var(--parchment-dark);
@@ -1157,10 +1162,18 @@
             >
               ✎ Edit
             </button>
+            <button
+              class="tab"
+              id="tab-relate"
+              onclick="showTab('relate')"
+            >
+              🔗 How Are They Related?
+            </button>
           </div>
           <div id="panel-view"><!-- filled dynamically --></div>
           <div id="panel-add" style="display: none"><!-- add form --></div>
           <div id="panel-edit" style="display: none"><!-- edit form --></div>
+          <div id="panel-relate" style="display: none"><!-- relationship finder --></div>
         </div>
       </div>
     </div>
@@ -1471,10 +1484,13 @@
           formRels['add'] = [];
           renderAddForm();
         }
+        if (tab === 'relate') {
+          renderRelationshipFinder();
+        }
 
-        ['view', 'add', 'edit'].forEach((t) => {
-          document.getElementById(`panel-${t}`).style.display =
-            t === tab ? 'block' : 'none';
+        ['view', 'add', 'edit', 'relate'].forEach((t) => {
+          const panel = document.getElementById(`panel-${t}`);
+          if (panel) panel.style.display = t === tab ? 'block' : 'none';
           const btn = document.getElementById(`tab-${t}`);
           if (btn) btn.classList.toggle('active', t === tab);
         });
@@ -2495,6 +2511,359 @@
       // ─────────────────────────────────────────────
       // DELETE
       // ─────────────────────────────────────────────
+      // ─────────────────────────────────────────────
+      // RELATIONSHIP FINDER
+      // ─────────────────────────────────────────────
+
+      // Build a graph of all edges: for each person, list connected people + edge label
+      function buildRelGraph() {
+        const graph = {}; // id → [{id, label}]
+        const add = (a, b, label) => {
+          if (!graph[a]) graph[a] = [];
+          graph[a].push({ id: b, label });
+        };
+        Object.entries(allPeople).forEach(([id, p]) => {
+          (p.relationships || []).forEach((r) => {
+            if (!allPeople[r.targetId]) return;
+            if (r.type === 'childOf') {
+              // id is child of r.targetId
+              add(id, r.targetId, 'child→parent');
+              add(r.targetId, id, 'parent→child');
+            } else if (r.type === 'spouseOf') {
+              add(id, r.targetId, 'spouse');
+              add(r.targetId, id, 'spouse');
+            }
+          });
+        });
+        return graph;
+      }
+
+      // BFS from startId to endId, returns path array [{id, label}] or null
+      function findRelationshipPath(startId, endId) {
+        if (startId === endId) return [{ id: startId, label: null }];
+        const graph = buildRelGraph();
+        const visited = new Set([startId]);
+        // queue entries: { id, path: [{id, label}] }
+        const queue = [{ id: startId, path: [{ id: startId, label: null }] }];
+        while (queue.length) {
+          const { id, path } = queue.shift();
+          const neighbors = graph[id] || [];
+          for (const { id: nid, label } of neighbors) {
+            if (visited.has(nid)) continue;
+            visited.add(nid);
+            const newPath = [...path, { id: nid, label }];
+            if (nid === endId) return newPath;
+            queue.push({ id: nid, path: newPath });
+          }
+        }
+        return null; // not connected
+      }
+
+      // Describe edge label as a readable sentence fragment
+      // "A →[label]→ B"
+      function edgeDescription(fromId, toId, label) {
+        const a = allPeople[fromId];
+        const b = allPeople[toId];
+        if (!a || !b) return '';
+        const aName = fullName(a);
+        const bName = fullName(b);
+        if (label === 'spouse') return `${aName} is the <b>spouse</b> of ${bName}`;
+        if (label === 'child→parent') return `${aName} is a <b>child</b> of ${bName}`;
+        if (label === 'parent→child') return `${aName} is the <b>parent</b> of ${bName}`;
+        return `${aName} → ${bName}`;
+      }
+
+      // Summarise the full path as a one-line relationship description
+      function summarisePath(path) {
+        if (path.length === 1) return 'Same person.';
+        if (path.length === 2) {
+          const lbl = path[1].label;
+          const a = fullName(allPeople[path[0].id]);
+          const b = fullName(allPeople[path[1].id]);
+          if (lbl === 'spouse') return `${a} and ${b} are <b>spouses</b>.`;
+          if (lbl === 'parent→child') return `${b} is the <b>child</b> of ${a}.`;
+          if (lbl === 'child→parent') return `${b} is the <b>parent</b> of ${a}.`;
+        }
+        // Count generations: each child→parent is going up, parent→child going down
+        // and spouse steps are lateral
+        let upSteps = 0, downSteps = 0, spouseSteps = 0;
+        for (let i = 1; i < path.length; i++) {
+          const lbl = path[i].label;
+          if (lbl === 'child→parent') upSteps++;
+          else if (lbl === 'parent→child') downSteps++;
+          else if (lbl === 'spouse') spouseSteps++;
+        }
+        const a = fullName(allPeople[path[0].id]);
+        const b = fullName(allPeople[path[path.length - 1].id]);
+        // Common relationship patterns
+        if (upSteps === 1 && downSteps === 1 && spouseSteps === 0) return `${a} and ${b} are <b>siblings</b>.`;
+        if (upSteps === 0 && downSteps === 2 && spouseSteps === 0) return `${b} is the <b>grandchild</b> of ${a}.`;
+        if (upSteps === 2 && downSteps === 0 && spouseSteps === 0) return `${b} is the <b>grandparent</b> of ${a}.`;
+        if (upSteps === 1 && downSteps === 2 && spouseSteps === 0) return `${a} and ${b} are <b>uncle/aunt and niece/nephew</b>.`;
+        if (upSteps === 2 && downSteps === 1 && spouseSteps === 0) return `${a} and ${b} are <b>uncle/aunt and niece/nephew</b>.`;
+        if (upSteps === 2 && downSteps === 2 && spouseSteps === 0) return `${a} and ${b} are <b>first cousins</b>.`;
+        if (upSteps === 3 && downSteps === 3 && spouseSteps === 0) return `${a} and ${b} are <b>second cousins</b>.`;
+        if (upSteps === 0 && downSteps === 3 && spouseSteps === 0) return `${b} is the <b>great-grandchild</b> of ${a}.`;
+        if (upSteps === 3 && downSteps === 0 && spouseSteps === 0) return `${b} is the <b>great-grandparent</b> of ${a}.`;
+        if (spouseSteps > 0) {
+          const deg = upSteps + downSteps;
+          if (deg === 1) return `${a} and ${b} are connected through <b>marriage</b> and one generation.`;
+          return `${a} and ${b} are connected through <b>marriage</b> and ${deg} generation${deg !== 1 ? 's' : ''}.`;
+        }
+        const gens = Math.max(upSteps, downSteps);
+        return `${a} and ${b} are connected across <b>${path.length - 1} steps</b> (${upSteps} up, ${downSteps} down).`;
+      }
+
+      // Person picker dropdown for relationship finder
+      let relFinderA = null, relFinderB = null;
+
+      function renderRelationshipFinder() {
+        const panel = document.getElementById('panel-relate');
+        panel.innerHTML = `
+          <div class="form-card" style="max-width:680px;">
+            <h2 style="font-size:1.3rem;">🔗 How Are They Related?</h2>
+            <p style="color:var(--muted);font-style:italic;margin-bottom:24px;font-size:0.95rem;">
+              Select two family members to find out how (or if) they are related.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-bottom:20px;">
+              ${relPersonPicker('relate-a', 'Person A', relFinderA)}
+              <div style="padding-top:28px;text-align:center;font-size:1.4rem;color:var(--sepia-light);">↔</div>
+              ${relPersonPicker('relate-b', 'Person B', relFinderB)}
+            </div>
+            <button class="btn btn-primary" onclick="runRelationshipFinder()" style="min-width:180px;">Find Relationship</button>
+            <div id="relate-result" style="margin-top:24px;"></div>
+          </div>`;
+        // If a person is currently selected, pre-fill slot A
+        if (selectedPersonId && !relFinderA) {
+          relFinderA = selectedPersonId;
+          refreshRelPicker('relate-a', relFinderA);
+        }
+      }
+
+      function relPersonPicker(slot, label, preselectedId) {
+        const p = preselectedId ? allPeople[preselectedId] : null;
+        return `
+          <div>
+            <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px;">${label}</div>
+            <div style="position:relative;">
+              <input type="text" id="${slot}-search"
+                placeholder="Type a name…"
+                autocomplete="off"
+                value="${p ? esc(fullName(p)) : ''}"
+                oninput="relPickerInput('${slot}')"
+                onfocus="relPickerFocus('${slot}')"
+                onkeydown="relPickerKeydown(event,'${slot}')"
+                style="width:100%;font-family:'Crimson Pro',serif;font-size:1rem;padding:9px 28px 9px 12px;border:1px solid var(--card-border);border-radius:4px;background:var(--parchment);color:var(--ink);outline:none;"
+              />
+              <span id="${slot}-clear" onclick="relPickerClear('${slot}')"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);${p ? '' : 'display:none;'}font-size:1rem;line-height:1;">✕</span>
+              <ul id="${slot}-dropdown" style="
+                display:none;position:absolute;top:100%;left:0;right:0;
+                background:var(--card-bg);border:1px solid var(--card-border);
+                border-top:none;border-radius:0 0 6px 6px;max-height:220px;
+                overflow-y:auto;z-index:300;list-style:none;margin:0;padding:0;
+                box-shadow:0 4px 12px var(--shadow);"></ul>
+              <input type="hidden" id="${slot}-value" value="${preselectedId || ''}" />
+            </div>
+          </div>`;
+      }
+
+      function refreshRelPicker(slot, personId) {
+        const p = allPeople[personId];
+        if (!p) return;
+        const inp = document.getElementById(`${slot}-search`);
+        const hid = document.getElementById(`${slot}-value`);
+        const clr = document.getElementById(`${slot}-clear`);
+        if (inp) inp.value = fullName(p);
+        if (hid) hid.value = personId;
+        if (clr) clr.style.display = 'inline';
+      }
+
+      function relPickerInput(slot) {
+        const q = document.getElementById(`${slot}-search`).value.toLowerCase();
+        document.getElementById(`${slot}-value`).value = '';
+        const clr = document.getElementById(`${slot}-clear`);
+        clr.style.display = q ? 'inline' : 'none';
+        relPickerShowDropdown(slot, q);
+      }
+
+      function relPickerFocus(slot) {
+        const q = document.getElementById(`${slot}-search`).value.toLowerCase();
+        relPickerShowDropdown(slot, q);
+      }
+
+      function relPickerShowDropdown(slot, q) {
+        const ul = document.getElementById(`${slot}-dropdown`);
+        const results = Object.entries(allPeople)
+          .filter(([, p]) => fullName(p).toLowerCase().includes(q))
+          .sort(([, a], [, b]) => fullName(a).localeCompare(fullName(b)))
+          .slice(0, 60);
+        if (!results.length) {
+          ul.innerHTML = `<li style="padding:10px 12px;color:var(--muted);font-style:italic;font-size:0.9rem;">No matches</li>`;
+        } else {
+          ul.innerHTML = results.map(([pid, p]) => {
+            const dates = lifespan(p);
+            return `<li onclick="relPickerSelect('${slot}','${pid}','${esc(fullName(p))}')"
+              style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--parchment-dark);"
+              onmouseover="this.style.background='var(--parchment-dark)'"
+              onmouseout="this.style.background=''">
+              <span style="font-weight:500;font-size:0.95rem;">${fullName(p)}</span>
+              ${dates ? `<span style="font-size:0.78rem;color:var(--muted);font-style:italic;margin-left:6px;">${dates}</span>` : ''}
+            </li>`;
+          }).join('');
+        }
+        ul.style.display = 'block';
+      }
+
+      function relPickerSelect(slot, pid, name) {
+        document.getElementById(`${slot}-search`).value = name;
+        document.getElementById(`${slot}-value`).value = pid;
+        document.getElementById(`${slot}-clear`).style.display = 'inline';
+        document.getElementById(`${slot}-dropdown`).style.display = 'none';
+        if (slot === 'relate-a') relFinderA = pid;
+        if (slot === 'relate-b') relFinderB = pid;
+      }
+
+      function relPickerClear(slot) {
+        document.getElementById(`${slot}-search`).value = '';
+        document.getElementById(`${slot}-value`).value = '';
+        document.getElementById(`${slot}-clear`).style.display = 'none';
+        document.getElementById(`${slot}-dropdown`).style.display = 'none';
+        if (slot === 'relate-a') relFinderA = null;
+        if (slot === 'relate-b') relFinderB = null;
+        document.getElementById(`${slot}-search`).focus();
+      }
+
+      function relPickerKeydown(e, slot) {
+        const ul = document.getElementById(`${slot}-dropdown`);
+        const items = [...ul.querySelectorAll('li')];
+        if (!items.length) return;
+        const active = ul.querySelector('li.rp-active');
+        let idx = items.indexOf(active);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (active) active.classList.remove('rp-active');
+          idx = idx < items.length - 1 ? idx + 1 : 0;
+          items[idx].classList.add('rp-active');
+          items[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (active) active.classList.remove('rp-active');
+          idx = idx > 0 ? idx - 1 : items.length - 1;
+          items[idx].classList.add('rp-active');
+          items[idx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (active) active.click();
+          else if (items.length === 1) items[0].click();
+        } else if (e.key === 'Escape') {
+          ul.style.display = 'none';
+        }
+      }
+
+      function runRelationshipFinder() {
+        const aId = document.getElementById('relate-a-value')?.value;
+        const bId = document.getElementById('relate-b-value')?.value;
+        const resultEl = document.getElementById('relate-result');
+        if (!aId || !bId) {
+          resultEl.innerHTML = `<p style="color:var(--red);font-style:italic;">Please select both people.</p>`;
+          return;
+        }
+        if (aId === bId) {
+          resultEl.innerHTML = `<p style="color:var(--muted);font-style:italic;">That's the same person!</p>`;
+          return;
+        }
+        const path = findRelationshipPath(aId, bId);
+        if (!path) {
+          const a = allPeople[aId], b = allPeople[bId];
+          resultEl.innerHTML = `
+            <div style="background:var(--parchment-dark);border:1px solid var(--card-border);border-radius:8px;padding:20px 24px;">
+              <div style="font-size:1.1rem;font-weight:500;color:var(--ink);margin-bottom:8px;">No connection found</div>
+              <p style="color:var(--muted);font-style:italic;font-size:0.95rem;">
+                <b>${fullName(a)}</b> and <b>${fullName(b)}</b> do not appear to be related through
+                any recorded relationships in this tree. They may be from unconnected branches.
+              </p>
+            </div>`;
+          return;
+        }
+
+        // Summary banner
+        const summary = summarisePath(path);
+        const steps = path.length - 1;
+
+        // Build step-by-step path cards
+        const stepCards = path.map((node, i) => {
+          const p = allPeople[node.id];
+          if (!p) return '';
+          const photo = (p.photos || [])[0];
+          const photoHtml = photo && !photo.toLowerCase().includes('.pdf')
+            ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;">`
+            : `<span style="font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--muted);">${(p.firstName||'?')[0]}</span>`;
+          const isFirst = i === 0;
+          const isLast = i === path.length - 1;
+
+          const connectorLabel = i < path.length - 1 ? (() => {
+            const nextLabel = path[i + 1].label;
+            if (nextLabel === 'spouse') return 'spouse of';
+            if (nextLabel === 'child→parent') return 'child of';
+            if (nextLabel === 'parent→child') return 'parent of';
+            return '';
+          })() : null;
+
+          return `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div onclick="selectPerson('${node.id}');showTab('view');" style="
+                background:${isFirst || isLast ? 'var(--ink)' : 'var(--card-bg)'};
+                border:${isFirst || isLast ? '2px solid var(--sepia-light)' : '1px solid var(--card-border)'};
+                border-radius:8px;padding:12px 14px;width:130px;text-align:center;
+                cursor:pointer;transition:all 0.15s;box-shadow:0 2px 8px var(--shadow);
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px var(--shadow)'"
+              onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px var(--shadow)'"
+              >
+                <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 8px;
+                  border:2px solid ${isFirst || isLast ? 'var(--sepia-light)' : 'var(--card-border)'};
+                  background:${isFirst || isLast ? 'rgba(255,255,255,0.1)' : 'var(--parchment-dark)'};
+                  overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                  ${photoHtml}
+                </div>
+                <div style="font-size:0.82rem;font-weight:600;color:${isFirst || isLast ? 'var(--parchment)' : 'var(--ink)'};line-height:1.3;">${fullName(p)}</div>
+                <div style="font-size:0.7rem;color:${isFirst || isLast ? 'var(--sepia-light)' : 'var(--muted)'};font-style:italic;margin-top:2px;">${lifespan(p)}</div>
+              </div>
+              ${connectorLabel ? `
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                  <div style="width:1.5px;height:16px;background:var(--card-border);"></div>
+                  <div style="background:var(--parchment-dark);border:1px solid var(--card-border);border-radius:12px;
+                    padding:3px 10px;font-size:0.72rem;color:var(--muted);white-space:nowrap;font-style:italic;">${connectorLabel}</div>
+                  <div style="width:1.5px;height:16px;background:var(--card-border);"></div>
+                </div>` : ''}
+            </div>`;
+        }).join('');
+
+        resultEl.innerHTML = `
+          <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:20px 24px;box-shadow:0 4px 16px var(--shadow);">
+            <div style="font-size:1.05rem;color:var(--ink);margin-bottom:6px;line-height:1.6;">${summary}</div>
+            <div style="font-size:0.85rem;color:var(--muted);font-style:italic;margin-bottom:20px;">
+              Connected through ${steps} step${steps !== 1 ? 's' : ''}.
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              ${stepCards}
+            </div>
+          </div>`;
+      }
+
+      // Close rel-finder dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        ['relate-a', 'relate-b'].forEach((slot) => {
+          const search = document.getElementById(`${slot}-search`);
+          const dropdown = document.getElementById(`${slot}-dropdown`);
+          if (!search || !dropdown) return;
+          if (!search.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+          }
+        });
+      });
+
       function confirmDelete(id) {
         const p = allPeople[id];
         document.getElementById('modal-body').innerHTML = `
