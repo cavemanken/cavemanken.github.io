@@ -1252,7 +1252,7 @@
 
         // Only initialize the db listener once
         if (!dbRef) {
-          dbRef = db.ref('genealogy/people');
+          dbRef = db.ref('genealogy/mary/people');
           loadPeople();
         }
       });
@@ -2290,7 +2290,7 @@
             }
 
             const ext = file.name.split('.').pop();
-            const filename = `genealogy-photos/${Date.now()}_${Math.random()
+            const filename = `genealogy-photos/mary/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
             const storageRef = firebase.storage().ref(filename);
@@ -3011,7 +3011,7 @@
           return;
         }
 
-        db.ref('genealogy/changelog')
+        db.ref('genealogy/mary/changelog')
           .orderByChild('timestamp')
           .limitToLast(100)
           .once('value', (snap) => {
@@ -3233,7 +3233,7 @@
       }
       function writeChangelog(action, personId, details) {
         if (!currentUser) return;
-        const ref = db.ref('genealogy/changelog').push();
+        const ref = db.ref('genealogy/mary/changelog').push();
         ref.set({
           action,
           personId,
