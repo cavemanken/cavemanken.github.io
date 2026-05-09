@@ -1272,12 +1272,24 @@
         if (isGuest) showTab('view');
       }
 
+      function writeLoginLog(user, action) {
+        db.ref('genealogy/loginLog').push({
+          email: user.email,
+          uid: user.uid,
+          action, // 'login' | 'signup'
+          timestamp: Date.now(),
+        });
+      }
+
       function signIn() {
         const email = document.getElementById('auth-email').value;
         const pass = document.getElementById('auth-password').value;
         auth
           .signInWithEmailAndPassword(email, pass)
-          .then(() => closeAuthModal())
+          .then((cred) => {
+            writeLoginLog(cred.user, 'login');
+            closeAuthModal();
+          })
           .catch((e) => showAuthError(e.message));
       }
       function signUp() {
@@ -1285,7 +1297,10 @@
         const pass = document.getElementById('auth-password').value;
         auth
           .createUserWithEmailAndPassword(email, pass)
-          .then(() => closeAuthModal())
+          .then((cred) => {
+            writeLoginLog(cred.user, 'signup');
+            closeAuthModal();
+          })
           .catch((e) => showAuthError(e.message));
       }
       function signOut() {
@@ -2901,51 +2916,62 @@
           return;
         }
 
-        db.ref('genealogy/changelog')
-          .orderByChild('timestamp')
-          .limitToLast(100)
-          .once('value', (snap) => {
+        // Load both changelog and loginLog in parallel
+        Promise.all([
+          db.ref('genealogy/changelog').orderByChild('timestamp').limitToLast(100).once('value'),
+          db.ref('genealogy/loginLog').orderByChild('timestamp').limitToLast(200).once('value'),
+        ]).then(([changeSnap, loginSnap]) => {
             const entries = [];
-            snap.forEach((child) => {
-              entries.push(child.val());
-            });
+            changeSnap.forEach((child) => entries.push(child.val()));
             entries.reverse();
+
+            const logins = [];
+            loginSnap.forEach((child) => logins.push(child.val()));
+            logins.reverse();
+
+            const fmtDate = (ts) => {
+              const d = new Date(ts);
+              return {
+                date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                time: d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+              };
+            };
 
             const rows = entries
               .map((e) => {
-                const d = new Date(e.timestamp);
-                const date = d.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                });
-                const time = d.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
+                const { date, time } = fmtDate(e.timestamp);
                 const badge =
                   {
                     ADD: `<span style="background:#1a3a2a;color:#4caf84;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">ADD</span>`,
                     EDIT: `<span style="background:#2a2a0a;color:#c9a84c;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">EDIT</span>`,
                     DELETE: `<span style="background:#3a0a0a;color:#f44336;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">DELETE</span>`,
                   }[e.action] || e.action;
-
                 return `<tr style="border-bottom:1px solid var(--card-border);">
                 <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
                 <td style="padding:8px 10px;">${badge}</td>
-                <td style="padding:8px 10px;font-weight:500;">${
-                  e.personName || '—'
-                }</td>
-                <td style="padding:8px 10px;font-size:0.8rem;color:var(--muted);">${
-                  e.email || e.uid
-                }</td>
+                <td style="padding:8px 10px;font-weight:500;">${e.personName || '—'}</td>
+                <td style="padding:8px 10px;font-size:0.8rem;color:var(--muted);">${e.email || e.uid}</td>
+              </tr>`;
+              })
+              .join('');
+
+            const loginRows = logins
+              .map((e) => {
+                const { date, time } = fmtDate(e.timestamp);
+                const badge = e.action === 'signup'
+                  ? `<span style="background:#1a2a3a;color:#64b5f6;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">NEW</span>`
+                  : `<span style="background:#1a1a2a;color:#b39ddb;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">LOGIN</span>`;
+                return `<tr style="border-bottom:1px solid var(--card-border);">
+                <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
+                <td style="padding:8px 10px;">${badge}</td>
+                <td style="padding:8px 10px;font-size:0.9rem;color:var(--muted);">${e.email}</td>
               </tr>`;
               })
               .join('');
 
             document.getElementById('modal-body').innerHTML = `
               <h3 style="margin-bottom:16px;">📋 Change Log</h3>
-              <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+              <div style="overflow-x:auto;max-height:40vh;overflow-y:auto;margin-bottom:20px;">
                 <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
                   <thead>
                     <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
@@ -2955,10 +2981,20 @@
                       <th style="padding:6px 10px;text-align:left;">By</th>
                     </tr>
                   </thead>
-                  <tbody>${
-                    rows ||
-                    '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No changes recorded yet.</td></tr>'
-                  }</tbody>
+                  <tbody>${rows || '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No changes recorded yet.</td></tr>'}</tbody>
+                </table>
+              </div>
+              <h3 style="margin-bottom:12px;font-size:1.1rem;">🔑 Login Log</h3>
+              <div style="overflow-x:auto;max-height:25vh;overflow-y:auto;">
+                <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
+                  <thead>
+                    <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
+                      <th style="padding:6px 10px;text-align:left;">When</th>
+                      <th style="padding:6px 10px;text-align:left;">Type</th>
+                      <th style="padding:6px 10px;text-align:left;">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>${loginRows || '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No logins recorded yet.</td></tr>'}</tbody>
                 </table>
               </div>
               <div class="modal-actions">
