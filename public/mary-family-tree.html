@@ -1286,7 +1286,7 @@
         db.ref('genealogy/mary/loginLog').push({
           email: user.email,
           uid: user.uid,
-          action, // 'login' | 'signup'
+          action,
           timestamp: Date.now(),
         });
       }
@@ -2099,11 +2099,13 @@
       // ─────────────────────────────────────────────
       let formMode = 'add';
       let editingId = null;
+      let pendingPersonKey = null;
       let pendingPhotos = [];
       let removedPhotos = [];
 
       function renderAddForm(prefill) {
         const p = prefill || {};
+        pendingPersonKey = dbRef.push().key;
         const html = buildFormHtml(p, 'add');
         document.getElementById('panel-add').innerHTML = html;
         pendingPhotos = [];
@@ -2305,7 +2307,12 @@
             }
 
             const ext = file.name.split('.').pop();
-            const filename = `genealogy-photos/mary/${Date.now()}_${Math.random()
+            const personKey = mode === 'edit' ? editingId : pendingPersonKey;
+            console.log(personKey);
+            const folder = personKey
+              ? `genealogy-photos/mary/${personKey}`
+              : 'genealogy-photos/mary/unassigned';
+            const filename = `${folder}/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
             const storageRef = firebase.storage().ref(filename);
@@ -2381,12 +2388,24 @@
           .join('');
       }
 
+      function deleteStorageFile(url) {
+        // Convert a Firebase Storage download URL to a storage ref and delete it.
+        // Silently ignores errors (e.g. file already gone, external URLs).
+        try {
+          const ref = firebase.storage().refFromURL(url);
+          ref.delete().catch(() => {});
+        } catch (e) {
+          // refFromURL throws if the URL isn't a Firebase Storage URL — ignore
+        }
+      }
+
       function removePhoto(i, mode) {
         const confirmed = confirm(
           'Remove this photo? This cannot be undone once you save.'
         );
         if (!confirmed) return;
-        pendingPhotos.splice(i, 1);
+        const [removed] = pendingPhotos.splice(i, 1);
+        removedPhotos.push(removed); // track for deletion from Storage on save
         rerenderPhotoPreviews(mode);
       }
 
@@ -2443,15 +2462,20 @@
 
         if (mode === 'add') {
           person.createdAt = Date.now();
-          const ref = dbRef.push();
+          const ref = dbRef.child(pendingPersonKey);
           ref
             .set(person)
             .then(() => {
               toast(`${fullName(person)} added to the family tree.`);
-              selectedPersonId = ref.key;
-              treeHistory.push(ref.key);
+              selectedPersonId = pendingPersonKey;
+              treeHistory.push(pendingPersonKey);
               treeHistoryIndex = treeHistory.length - 1;
-              writeChangelog('ADD', ref.key, { name: fullName(person) });
+              writeChangelog('ADD', pendingPersonKey, {
+                name: fullName(person),
+              });
+              removedPhotos.forEach(deleteStorageFile);
+              removedPhotos = [];
+              pendingPersonKey = null;
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
@@ -2497,6 +2521,8 @@
             .child(editingId)
             .update(person)
             .then(() => {
+              removedPhotos.forEach(deleteStorageFile);
+              removedPhotos = [];
               toast('Record updated.');
               selectedPersonId = editingId;
               writeChangelog('EDIT', editingId, {
@@ -3006,6 +3032,8 @@
       function deletePerson(id) {
         const p = allPeople[id];
         const name = p ? fullName(p) : id;
+        // Delete all photos from Storage first (fire-and-forget, don't block on errors)
+        (p?.photos || []).forEach(deleteStorageFile);
         dbRef
           .child(id)
           .remove()
@@ -3026,7 +3054,6 @@
           return;
         }
 
-        // Load both changelog and loginLog in parallel
         Promise.all([
           db
             .ref('genealogy/mary/changelog')
