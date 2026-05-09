@@ -1282,12 +1282,24 @@
         if (isGuest) showTab('view');
       }
 
+      function writeLoginLog(user, action) {
+        db.ref('genealogy/mary/loginLog').push({
+          email: user.email,
+          uid: user.uid,
+          action,
+          timestamp: Date.now(),
+        });
+      }
+
       function signIn() {
         const email = document.getElementById('auth-email').value;
         const pass = document.getElementById('auth-password').value;
         auth
           .signInWithEmailAndPassword(email, pass)
-          .then(() => closeAuthModal())
+          .then((cred) => {
+            writeLoginLog(cred.user, 'login');
+            closeAuthModal();
+          })
           .catch((e) => showAuthError(e.message));
       }
       function signUp() {
@@ -1295,7 +1307,10 @@
         const pass = document.getElementById('auth-password').value;
         auth
           .createUserWithEmailAndPassword(email, pass)
-          .then(() => closeAuthModal())
+          .then((cred) => {
+            writeLoginLog(cred.user, 'signup');
+            closeAuthModal();
+          })
           .catch((e) => showAuthError(e.message));
       }
       function signOut() {
@@ -2084,11 +2099,13 @@
       // ─────────────────────────────────────────────
       let formMode = 'add';
       let editingId = null;
+      let pendingPersonKey = null;
       let pendingPhotos = [];
       let removedPhotos = [];
 
       function renderAddForm(prefill) {
         const p = prefill || {};
+        pendingPersonKey = dbRef.push().key;
         const html = buildFormHtml(p, 'add');
         document.getElementById('panel-add').innerHTML = html;
         pendingPhotos = [];
@@ -2290,7 +2307,12 @@
             }
 
             const ext = file.name.split('.').pop();
-            const filename = `genealogy-photos/mary/${Date.now()}_${Math.random()
+            const personKey = mode === 'edit' ? editingId : pendingPersonKey;
+            console.log(personKey);
+            const folder = personKey
+              ? `genealogy-photos/mary/${personKey}`
+              : 'genealogy-photos/mary/unassigned';
+            const filename = `${folder}/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
             const storageRef = firebase.storage().ref(filename);
@@ -2366,12 +2388,24 @@
           .join('');
       }
 
+      function deleteStorageFile(url) {
+        // Convert a Firebase Storage download URL to a storage ref and delete it.
+        // Silently ignores errors (e.g. file already gone, external URLs).
+        try {
+          const ref = firebase.storage().refFromURL(url);
+          ref.delete().catch(() => {});
+        } catch (e) {
+          // refFromURL throws if the URL isn't a Firebase Storage URL — ignore
+        }
+      }
+
       function removePhoto(i, mode) {
         const confirmed = confirm(
           'Remove this photo? This cannot be undone once you save.'
         );
         if (!confirmed) return;
-        pendingPhotos.splice(i, 1);
+        const [removed] = pendingPhotos.splice(i, 1);
+        removedPhotos.push(removed); // track for deletion from Storage on save
         rerenderPhotoPreviews(mode);
       }
 
@@ -2428,15 +2462,20 @@
 
         if (mode === 'add') {
           person.createdAt = Date.now();
-          const ref = dbRef.push();
+          const ref = dbRef.child(pendingPersonKey);
           ref
             .set(person)
             .then(() => {
               toast(`${fullName(person)} added to the family tree.`);
-              selectedPersonId = ref.key;
-              treeHistory.push(ref.key);
+              selectedPersonId = pendingPersonKey;
+              treeHistory.push(pendingPersonKey);
               treeHistoryIndex = treeHistory.length - 1;
-              writeChangelog('ADD', ref.key, { name: fullName(person) });
+              writeChangelog('ADD', pendingPersonKey, {
+                name: fullName(person),
+              });
+              removedPhotos.forEach(deleteStorageFile);
+              removedPhotos = [];
+              pendingPersonKey = null;
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
@@ -2482,6 +2521,8 @@
             .child(editingId)
             .update(person)
             .then(() => {
+              removedPhotos.forEach(deleteStorageFile);
+              removedPhotos = [];
               toast('Record updated.');
               selectedPersonId = editingId;
               writeChangelog('EDIT', editingId, {
@@ -2991,6 +3032,8 @@
       function deletePerson(id) {
         const p = allPeople[id];
         const name = p ? fullName(p) : id;
+        // Delete all photos from Storage first (fire-and-forget, don't block on errors)
+        (p?.photos || []).forEach(deleteStorageFile);
         dbRef
           .child(id)
           .remove()
@@ -3011,36 +3054,51 @@
           return;
         }
 
-        db.ref('genealogy/mary/changelog')
-          .orderByChild('timestamp')
-          .limitToLast(100)
-          .once('value', (snap) => {
-            const entries = [];
-            snap.forEach((child) => {
-              entries.push(child.val());
-            });
-            entries.reverse();
+        Promise.all([
+          db
+            .ref('genealogy/mary/changelog')
+            .orderByChild('timestamp')
+            .limitToLast(100)
+            .once('value'),
+          db
+            .ref('genealogy/mary/loginLog')
+            .orderByChild('timestamp')
+            .limitToLast(200)
+            .once('value'),
+        ]).then(([changeSnap, loginSnap]) => {
+          const entries = [];
+          changeSnap.forEach((child) => entries.push(child.val()));
+          entries.reverse();
 
-            const rows = entries
-              .map((e) => {
-                const d = new Date(e.timestamp);
-                const date = d.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                });
-                const time = d.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
-                const badge =
-                  {
-                    ADD: `<span style="background:#1a3a2a;color:#4caf84;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">ADD</span>`,
-                    EDIT: `<span style="background:#2a2a0a;color:#c9a84c;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">EDIT</span>`,
-                    DELETE: `<span style="background:#3a0a0a;color:#f44336;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">DELETE</span>`,
-                  }[e.action] || e.action;
+          const logins = [];
+          loginSnap.forEach((child) => logins.push(child.val()));
+          logins.reverse();
 
-                return `<tr style="border-bottom:1px solid var(--card-border);">
+          const fmtDate = (ts) => {
+            const d = new Date(ts);
+            return {
+              date: d.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }),
+              time: d.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            };
+          };
+
+          const rows = entries
+            .map((e) => {
+              const { date, time } = fmtDate(e.timestamp);
+              const badge =
+                {
+                  ADD: `<span style="background:#1a3a2a;color:#4caf84;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">ADD</span>`,
+                  EDIT: `<span style="background:#2a2a0a;color:#c9a84c;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">EDIT</span>`,
+                  DELETE: `<span style="background:#3a0a0a;color:#f44336;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">DELETE</span>`,
+                }[e.action] || e.action;
+              return `<tr style="border-bottom:1px solid var(--card-border);">
                 <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
                 <td style="padding:8px 10px;">${badge}</td>
                 <td style="padding:8px 10px;font-weight:500;">${
@@ -3050,12 +3108,27 @@
                   e.email || e.uid
                 }</td>
               </tr>`;
-              })
-              .join('');
+            })
+            .join('');
 
-            document.getElementById('modal-body').innerHTML = `
+          const loginRows = logins
+            .map((e) => {
+              const { date, time } = fmtDate(e.timestamp);
+              const badge =
+                e.action === 'signup'
+                  ? `<span style="background:#1a2a3a;color:#64b5f6;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">NEW</span>`
+                  : `<span style="background:#1a1a2a;color:#b39ddb;padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:600;">LOGIN</span>`;
+              return `<tr style="border-bottom:1px solid var(--card-border);">
+                <td style="padding:8px 10px;white-space:nowrap;">${date}<br><span style="font-size:0.75rem;color:var(--muted)">${time}</span></td>
+                <td style="padding:8px 10px;">${badge}</td>
+                <td style="padding:8px 10px;font-size:0.9rem;color:var(--muted);">${e.email}</td>
+              </tr>`;
+            })
+            .join('');
+
+          document.getElementById('modal-body').innerHTML = `
               <h3 style="margin-bottom:16px;">📋 Change Log</h3>
-              <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+              <div style="overflow-x:auto;max-height:40vh;overflow-y:auto;margin-bottom:20px;">
                 <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
                   <thead>
                     <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
@@ -3071,11 +3144,27 @@
                   }</tbody>
                 </table>
               </div>
+              <h3 style="margin-bottom:12px;font-size:1.1rem;">🔑 Login Log</h3>
+              <div style="overflow-x:auto;max-height:25vh;overflow-y:auto;">
+                <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
+                  <thead>
+                    <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
+                      <th style="padding:6px 10px;text-align:left;">When</th>
+                      <th style="padding:6px 10px;text-align:left;">Type</th>
+                      <th style="padding:6px 10px;text-align:left;">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>${
+                    loginRows ||
+                    '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted);font-style:italic;">No logins recorded yet.</td></tr>'
+                  }</tbody>
+                </table>
+              </div>
               <div class="modal-actions">
                 <button class="btn btn-ghost" onclick="closeModal()">Close</button>
               </div>`;
-            document.getElementById('modal').style.display = 'flex';
-          });
+          document.getElementById('modal').style.display = 'flex';
+        });
       }
 
       // ─────────────────────────────────────────────
