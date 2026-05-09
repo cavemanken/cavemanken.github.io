@@ -1180,11 +1180,27 @@
 
       // default the category based on description keywords (very basic)
       window.autoCategory = function (val) {
-        const groceryStores = ['walmart', 'kroger', 'costco', 'publix'];
+        const groceryStores = ['Walmart', 'Kroger', 'Costco', 'Publix'];
+        const healthStores = ['CVS', 'Walgreens', 'Rite Aid', 'HCA'];
+        const homeStores = ["Lowe's", 'Lowes', 'Home Depot', 'IKEA'];
         const lower = val.toLowerCase().trim();
         const cat = document.getElementById('inp-cat');
-        if (groceryStores.some((store) => lower.includes(store))) {
+        if (
+          groceryStores.some((store) =>
+            lower.includes(store.toLowerCase().trim())
+          )
+        ) {
           cat.value = 'Groceries';
+        } else if (
+          healthStores.some((store) =>
+            lower.includes(store.toLowerCase().trim())
+          )
+        ) {
+          cat.value = 'Health';
+        } else if (
+          homeStores.some((store) => lower.includes(store.toLowerCase().trim()))
+        ) {
+          cat.value = 'Home';
         } else if (lower.length > 0) {
           cat.value = 'Eat Out';
         }
