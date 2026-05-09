@@ -2078,11 +2078,13 @@
       // ─────────────────────────────────────────────
       let formMode = 'add';
       let editingId = null;
+      let pendingPersonKey = null; // pre-generated key so photos land in the right subfolder
       let pendingPhotos = [];
       let removedPhotos = [];
 
       function renderAddForm(prefill) {
         const p = prefill || {};
+        pendingPersonKey = dbRef.push().key; // reserve key now so photos go in the right subfolder
         const html = buildFormHtml(p, 'add');
         document.getElementById('panel-add').innerHTML = html;
         pendingPhotos = [];
@@ -2284,7 +2286,9 @@
             }
 
             const ext = file.name.split('.').pop();
-            const filename = `genealogy-photos/${Date.now()}_${Math.random()
+            const personKey = mode === 'edit' ? editingId : pendingPersonKey;
+            const folder = personKey ? `genealogy-photos/${personKey}` : 'genealogy-photos/unassigned';
+            const filename = `${folder}/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
             const storageRef = firebase.storage().ref(filename);
@@ -2422,15 +2426,16 @@
 
         if (mode === 'add') {
           person.createdAt = Date.now();
-          const ref = dbRef.push();
+          const ref = dbRef.child(pendingPersonKey); // use pre-generated key
           ref
             .set(person)
             .then(() => {
               toast(`${fullName(person)} added to the family tree.`);
-              selectedPersonId = ref.key;
-              treeHistory.push(ref.key);
+              selectedPersonId = pendingPersonKey;
+              treeHistory.push(pendingPersonKey);
               treeHistoryIndex = treeHistory.length - 1;
-              writeChangelog('ADD', ref.key, { name: fullName(person) });
+              writeChangelog('ADD', pendingPersonKey, { name: fullName(person) });
+              pendingPersonKey = null;
               showTab('view');
             })
             .catch((e) => toast('Error: ' + e.message));
@@ -2916,7 +2921,6 @@
           return;
         }
 
-        // Load both changelog and loginLog in parallel
         Promise.all([
           db.ref('genealogy/changelog').orderByChild('timestamp').limitToLast(100).once('value'),
           db.ref('genealogy/loginLog').orderByChild('timestamp').limitToLast(200).once('value'),
