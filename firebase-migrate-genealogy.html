@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firebase Storage Migration — genealogy-photos → genealogy-photos/ken</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #1a1a1a; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e0ddd6; padding: 2rem; width: 100%; max-width: 680px; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 1.5rem; }
+  .subtitle code { background: #f0ede8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; margin-top: 12px; }
+  input { width: 100%; padding: 8px 10px; border: 1px solid #d0cdc8; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.15s; }
+  input:focus { border-color: #7a6f5a; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .actions { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
+  button { padding: 9px 18px; border-radius: 8px; border: 1px solid #c5c0b8; background: #fff; font-size: 13px; cursor: pointer; font-weight: 500; color: #333; transition: background 0.15s; }
+  button:hover:not(:disabled) { background: #f0ede8; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.primary { background: #4a6741; color: #fff; border-color: #4a6741; }
+  button.primary:hover:not(:disabled) { background: #3b5534; }
+  .status { margin-top: 1.25rem; padding: 10px 14px; border-radius: 8px; font-size: 13px; border: 1px solid #e0ddd6; background: #f9f8f5; display: none; }
+  .status.error { border-color: #e8a0a0; background: #fdf4f4; color: #b03030; }
+  .status.success { border-color: #9dc4a0; background: #f4faf4; color: #2e6b32; }
+  .section-title { font-size: 13px; font-weight: 600; margin: 1.25rem 0 6px; }
+  .file-list { display: grid; gap: 4px; max-height: 340px; overflow-y: auto; }
+  .file-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 6px 10px; background: #f9f8f5; border: 1px solid #e8e5e0; border-radius: 6px; font-size: 12px; gap: 8px; }
+  .file-row .path { font-family: monospace; color: #555; word-break: break-all; flex: 1; line-height: 1.6; }
+  .file-row .state { white-space: nowrap; font-weight: 500; padding-top: 2px; }
+  .state.ok { color: #2e6b32; }
+  .state.err { color: #b03030; }
+  .state.pending { color: #888; }
+  .state.working { color: #7a6200; }
+  .divider { border: none; border-top: 1px solid #e8e5e0; margin: 1.5rem 0; }
+  .progress-bar-wrap { background: #e8e5e0; border-radius: 4px; height: 6px; margin-top: 10px; overflow: hidden; display: none; }
+  .progress-bar { background: #4a6741; height: 100%; width: 0%; transition: width 0.2s; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Firebase Storage Migration</h1>
+  <p class="subtitle">Recursively moves everything under <code>genealogy-photos/</code> into <code>genealogy-photos/ken/</code>, preserving all subfolder structure.</p>
+
+  <label>Firebase API Key</label>
+  <input type="text" id="apiKey" placeholder="AIzaSy..." autocomplete="off" />
+
+  <div class="row">
+    <div>
+      <label>Auth Domain</label>
+      <input type="text" id="authDomain" value="cmk63project.firebaseapp.com" />
+    </div>
+    <div>
+      <label>Storage Bucket</label>
+      <input type="text" id="storageBucket" value="cmk63project.firebasestorage.app" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="username" />
+    </div>
+    <div>
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="listBtn" onclick="doList()">1. List all files</button>
+    <button id="migrateBtn" class="primary" onclick="doMigrate()" style="display:none;">2. Move all files →</button>
+  </div>
+
+  <div id="status" class="status"></div>
+  <div class="progress-bar-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div id="fileSection" style="display:none;">
+    <hr class="divider">
+    <div class="section-title" id="fileHeader"></div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, deleteApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getStorage, ref, listAll, getMetadata, getBytes, uploadBytes, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+
+let storage, foundFiles = [];
+
+function setStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.style.display = 'block';
+  el.className = 'status' + (type ? ' ' + type : '');
+  el.innerHTML = msg;
+}
+
+function setProgress(done, total) {
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('progressBar').style.width = Math.round((done / total) * 100) + '%';
+}
+
+async function initFirebase() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const authDomain = document.getElementById('authDomain').value.trim();
+  const storageBucket = document.getElementById('storageBucket').value.trim();
+  if (!apiKey) { setStatus('Please enter your Firebase API key.', 'error'); return false; }
+  try {
+    for (const a of getApps()) await deleteApp(a);
+    const app = initializeApp({ apiKey, authDomain, storageBucket, projectId: 'cmk63project' });
+    storage = getStorage(app);
+    const auth = getAuth(app);
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (email && password) {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+    return true;
+  } catch (e) {
+    setStatus('Firebase error: ' + e.message, 'error');
+    return false;
+  }
+}
+
+async function listAllFiles(storageRef, results) {
+  const res = await listAll(storageRef);
+  for (const item of res.items) {
+    if (!item.fullPath.startsWith('genealogy-photos/ken/')) {
+      results.push(item);
+    }
+  }
+  for (const prefix of res.prefixes) {
+    if (prefix.fullPath !== 'genealogy-photos/ken') {
+      await listAllFiles(prefix, results);
+    }
+  }
+}
+
+function safeId(path) {
+  return 'f-' + btoa(unescape(encodeURIComponent(path))).replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+async function doList() {
+  document.getElementById('listBtn').disabled = true;
+  document.getElementById('migrateBtn').style.display = 'none';
+  document.getElementById('fileSection').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+  setStatus('Connecting and scanning all subfolders…');
+
+  const ok = await initFirebase();
+  if (!ok) { document.getElementById('listBtn').disabled = false; return; }
+
+  try {
+    foundFiles = [];
+    await listAllFiles(ref(storage, 'genealogy-photos'), foundFiles);
+
+    if (foundFiles.length === 0) {
+      setStatus('No files found under genealogy-photos/ (or all are already under ken/).', '');
+      document.getElementById('listBtn').disabled = false;
+      return;
+    }
+
+    const listEl = document.getElementById('fileList');
+    listEl.innerHTML = '';
+    foundFiles.forEach(f => {
+      const relativePath = f.fullPath.replace('genealogy-photos/', '');
+      const newPath = 'genealogy-photos/ken/' + relativePath;
+      const id = safeId(f.fullPath);
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = `
+        <span class="path">
+          <span style="color:#aaa;">${f.fullPath}</span><br>
+          <span style="color:#4a6741;">→ ${newPath}</span>
+        </span>
+        <span class="state pending" id="${id}">ready</span>`;
+      listEl.appendChild(row);
+    });
+
+    document.getElementById('fileHeader').textContent = `${foundFiles.length} file(s) found — review before moving`;
+    document.getElementById('fileSection').style.display = 'block';
+    setStatus(`Found ${foundFiles.length} file(s). Review above, then click "Move all files" to proceed.`);
+    document.getElementById('migrateBtn').style.display = 'inline-block';
+  } catch (e) {
+    setStatus('Error scanning files: ' + e.message, 'error');
+  }
+  document.getElementById('listBtn').disabled = false;
+}
+
+async function doMigrate() {
+  if (!foundFiles.length) { setStatus('No files to move. List first.', 'error'); return; }
+  document.getElementById('migrateBtn').disabled = true;
+  document.getElementById('listBtn').disabled = true;
+
+  let succeeded = 0, failed = 0;
+  const total = foundFiles.length;
+
+  for (let i = 0; i < foundFiles.length; i++) {
+    const srcRef = foundFiles[i];
+    const id = safeId(srcRef.fullPath);
+    const stateEl = document.getElementById(id);
+    if (stateEl) { stateEl.textContent = 'copying…'; stateEl.className = 'state working'; }
+    setStatus(`Moving file ${i + 1} of ${total}: ${srcRef.name}`);
+    setProgress(i, total);
+
+    try {
+      const meta = await getMetadata(srcRef);
+      const bytes = await getBytes(srcRef);
+      const blob = new Blob([bytes], { type: meta.contentType });
+
+      const relativePath = srcRef.fullPath.replace('genealogy-photos/', '');
+      const destRef = ref(storage, 'genealogy-photos/ken/' + relativePath);
+
+      await uploadBytes(destRef, blob, {
+        contentType: meta.contentType,
+        customMetadata: meta.customMetadata || {}
+      });
+      await deleteObject(srcRef);
+
+      if (stateEl) { stateEl.textContent = 'moved ✓'; stateEl.className = 'state ok'; }
+      succeeded++;
+    } catch (e) {
+      if (stateEl) { stateEl.textContent = 'failed'; stateEl.className = 'state err'; stateEl.title = e.message; }
+      console.error(srcRef.fullPath, e);
+      failed++;
+    }
+  }
+
+  setProgress(total, total);
+  const msg = `Done: ${succeeded} file(s) moved successfully` + (failed ? `, ${failed} failed (originals kept).` : '.');
+  setStatus(msg, failed ? 'error' : 'success');
+  document.getElementById('migrateBtn').disabled = false;
+  document.getElementById('listBtn').disabled = false;
+}
+
+window.doList = doList;
+window.doMigrate = doMigrate;
+</script>
+</body>
+</html>
