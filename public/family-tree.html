@@ -1209,6 +1209,7 @@
     </div>
 
     <script>
+      const genealogySubPath = 'ken'; // change this to your name or family name to avoid conflicts with other users
       // ─────────────────────────────────────────────
       // FIREBASE CONFIG (your project)
       // ─────────────────────────────────────────────
@@ -1252,7 +1253,7 @@
 
         // Only initialize the db listener once
         if (!dbRef) {
-          dbRef = db.ref('genealogy/ken/people');
+          dbRef = db.ref('genealogy/' + genealogySubPath + '/people');
           loadPeople();
         }
       });
@@ -1283,7 +1284,7 @@
       }
 
       function writeLoginLog(user, action) {
-        db.ref('genealogy/ken/loginLog').push({
+        db.ref('genealogy/' + genealogySubPath + '/loginLog').push({
           email: user.email,
           uid: user.uid,
           action,
@@ -2310,8 +2311,8 @@
             const personKey = mode === 'edit' ? editingId : pendingPersonKey;
             console.log(personKey);
             const folder = personKey
-              ? `genealogy-photos/ken/${personKey}`
-              : 'genealogy-photos/ken/unassigned';
+              ? `genealogy-photos/${genealogySubPath}/${personKey}`
+              : `genealogy-photos/${genealogySubPath}/unassigned`;
             const filename = `${folder}/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
@@ -3162,12 +3163,12 @@
 
         Promise.all([
           db
-            .ref('genealogy/ken/changelog')
+            .ref('genealogy/' + genealogySubPath + '/changelog')
             .orderByChild('timestamp')
             .limitToLast(100)
             .once('value'),
           db
-            .ref('genealogy/ken/loginLog')
+            .ref('genealogy/' + genealogySubPath + '/loginLog')
             .orderByChild('timestamp')
             .limitToLast(200)
             .once('value'),
@@ -3428,7 +3429,9 @@
       }
       function writeChangelog(action, personId, details) {
         if (!currentUser) return;
-        const ref = db.ref('genealogy/ken/changelog').push();
+        const ref = db
+          .ref('genealogy/' + genealogySubPath + '/changelog')
+          .push();
         ref.set({
           action,
           personId,
