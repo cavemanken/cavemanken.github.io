@@ -1209,6 +1209,7 @@
     </div>
 
     <script>
+      const genealogySubPath = 'mary'; // change this to your name or family name to avoid conflicts with other users
       // ─────────────────────────────────────────────
       // FIREBASE CONFIG (your project)
       // ─────────────────────────────────────────────
@@ -1252,7 +1253,7 @@
 
         // Only initialize the db listener once
         if (!dbRef) {
-          dbRef = db.ref('genealogy/mary/people');
+          dbRef = db.ref('genealogy/' + genealogySubPath + '/people');
           loadPeople();
         }
       });
@@ -1283,7 +1284,7 @@
       }
 
       function writeLoginLog(user, action) {
-        db.ref('genealogy/mary/loginLog').push({
+        db.ref('genealogy/' + genealogySubPath + '/loginLog').push({
           email: user.email,
           uid: user.uid,
           action,
@@ -2310,8 +2311,8 @@
             const personKey = mode === 'edit' ? editingId : pendingPersonKey;
             console.log(personKey);
             const folder = personKey
-              ? `genealogy-photos/mary/${personKey}`
-              : 'genealogy-photos/mary/unassigned';
+              ? `genealogy-photos/${genealogySubPath}/${personKey}`
+              : `genealogy-photos/${genealogySubPath}/unassigned`;
             const filename = `${folder}/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
@@ -2659,20 +2660,94 @@
       }
 
       // Summarise the full path as a one-line relationship description
+      // Returns ordinal string: 1 → "1st", 2 → "2nd", etc.
+      function ordinal(n) {
+        if (n === 1) return '1st';
+        if (n === 2) return '2nd';
+        if (n === 3) return '3rd';
+        return `${n}th`;
+      }
+
+      // Returns the plain relationship label for a pure blood path.
+      // up   = steps from A up to common ancestor
+      // down = steps from common ancestor down to B
+      // Returns an object: { label, direction }
+      //   direction: 'symmetric'  → "A and B are [label]s"
+      //              'aToB'       → "B is A's [label]"  (B is the [label] of A)
+      //              'bToA'       → "A is B's [label]"  (A is the [label] of B)
+      function bloodRelInfo(up, down) {
+        // ── Straight-line descendants of A ──
+        if (up === 0) {
+          if (down === 1) return { label: 'child', dir: 'aToB' };
+          if (down === 2) return { label: 'grandchild', dir: 'aToB' };
+          return {
+            label: 'great-'.repeat(down - 2) + 'grandchild',
+            dir: 'aToB',
+          };
+        }
+        // ── Straight-line ancestors of A ──
+        if (down === 0) {
+          if (up === 1) return { label: 'parent', dir: 'aToB' };
+          if (up === 2) return { label: 'grandparent', dir: 'aToB' };
+          return {
+            label: 'great-'.repeat(up - 2) + 'grandparent',
+            dir: 'aToB',
+          };
+        }
+        // ── Siblings ──
+        if (up === 1 && down === 1)
+          return { label: 'sibling', dir: 'symmetric' };
+
+        // ── Aunt/Uncle and Niece/Nephew ──
+        // up=1, down=2: A goes up 1 to parent, then down 2 to B
+        //   → B is A's nephew/niece (A is the aunt/uncle)
+        // up=2, down=1: A goes up 2 to grandparent, then down 1 to B
+        //   → B is A's aunt/uncle (A is the niece/nephew)
+        if (up === 1 && down === 2) return { label: 'aunt/uncle', dir: 'bToA' }; // B is A's aunt/uncle → phrase: "A is B's niece/nephew" ... actually B is the aunt
+        if (up === 2 && down === 1) return { label: 'aunt/uncle', dir: 'aToB' }; // B is aunt/uncle of A
+
+        // up=1, down>2: B is A's great-niece/nephew (A is the great-aunt/uncle)
+        if (up === 1 && down > 2) {
+          return {
+            label: 'great-'.repeat(down - 2) + 'niece/nephew',
+            dir: 'bToA',
+          };
+        }
+        // up>2, down=1: B is A's great-aunt/uncle
+        if (up > 2 && down === 1) {
+          return { label: 'great-'.repeat(up - 2) + 'aunt/uncle', dir: 'aToB' };
+        }
+
+        // ── Cousins (both up≥2, down≥2) ──
+        if (up >= 2 && down >= 2) {
+          const degree = Math.min(up, down) - 1;
+          const removed = Math.abs(up - down);
+          const removedStr =
+            removed === 0
+              ? ''
+              : removed === 1
+              ? ' once removed'
+              : removed === 2
+              ? ' twice removed'
+              : ` ${removed} times removed`;
+          const label = `${ordinal(degree)} cousin${removedStr}`;
+          // Cousins of the same degree are symmetric; removed cousins are directional
+          // (the one further down is the "removed" one, but either phrasing works —
+          // we'll just use symmetric phrasing for simplicity)
+          // plural=false when "removed" is present — "1st cousins once removed" is wrong
+          return { label, dir: 'symmetric', plural: removed === 0 };
+        }
+
+        return null;
+      }
+
       function summarisePath(path) {
         if (path.length === 1) return 'Same person.';
-        if (path.length === 2) {
-          const lbl = path[1].label;
-          const a = fullName(allPeople[path[0].id]);
-          const b = fullName(allPeople[path[1].id]);
-          if (lbl === 'spouse') return `${a} and ${b} are <b>spouses</b>.`;
-          if (lbl === 'parent→child')
-            return `${b} is the <b>child</b> of ${a}.`;
-          if (lbl === 'child→parent')
-            return `${b} is the <b>parent</b> of ${a}.`;
-        }
-        // Count generations: each child→parent is going up, parent→child going down
-        // and spouse steps are lateral
+
+        const a = fullName(allPeople[path[0].id]);
+        const b = fullName(allPeople[path[path.length - 1].id]);
+
+        // Count step types
         let upSteps = 0,
           downSteps = 0,
           spouseSteps = 0;
@@ -2682,39 +2757,71 @@
           else if (lbl === 'parent→child') downSteps++;
           else if (lbl === 'spouse') spouseSteps++;
         }
-        const a = fullName(allPeople[path[0].id]);
-        const b = fullName(allPeople[path[path.length - 1].id]);
-        // Common relationship patterns
-        if (upSteps === 1 && downSteps === 1 && spouseSteps === 0)
-          return `${a} and ${b} are <b>siblings</b>.`;
-        if (upSteps === 0 && downSteps === 2 && spouseSteps === 0)
-          return `${b} is the <b>grandchild</b> of ${a}.`;
-        if (upSteps === 2 && downSteps === 0 && spouseSteps === 0)
-          return `${b} is the <b>grandparent</b> of ${a}.`;
-        if (upSteps === 1 && downSteps === 2 && spouseSteps === 0)
-          return `${a} and ${b} are <b>uncle/aunt and niece/nephew</b>.`;
-        if (upSteps === 2 && downSteps === 1 && spouseSteps === 0)
-          return `${a} and ${b} are <b>uncle/aunt and niece/nephew</b>.`;
-        if (upSteps === 2 && downSteps === 2 && spouseSteps === 0)
-          return `${a} and ${b} are <b>first cousins</b>.`;
-        if (upSteps === 3 && downSteps === 3 && spouseSteps === 0)
-          return `${a} and ${b} are <b>second cousins</b>.`;
-        if (upSteps === 0 && downSteps === 3 && spouseSteps === 0)
-          return `${b} is the <b>great-grandchild</b> of ${a}.`;
-        if (upSteps === 3 && downSteps === 0 && spouseSteps === 0)
-          return `${b} is the <b>great-grandparent</b> of ${a}.`;
-        if (spouseSteps > 0) {
-          const deg = upSteps + downSteps;
-          if (deg === 1)
-            return `${a} and ${b} are connected through <b>marriage</b> and one generation.`;
-          return `${a} and ${b} are connected through <b>marriage</b> and ${deg} generation${
-            deg !== 1 ? 's' : ''
-          }.`;
+
+        // ── Direct 1-step ──
+        if (path.length === 2) {
+          if (path[1].label === 'spouse')
+            return `${a} and ${b} are <b>spouses</b>.`;
+          if (path[1].label === 'parent→child')
+            return `${b} is the <b>child</b> of ${a}.`;
+          if (path[1].label === 'child→parent')
+            return `${b} is the <b>parent</b> of ${a}.`;
         }
-        const gens = Math.max(upSteps, downSteps);
-        return `${a} and ${b} are connected across <b>${
-          path.length - 1
-        } steps</b> (${upSteps} up, ${downSteps} down).`;
+
+        // ── Pure blood (no spouse steps) ──
+        if (spouseSteps === 0) {
+          const info = bloodRelInfo(upSteps, downSteps);
+          if (info) {
+            if (info.dir === 'symmetric') {
+              const pl = info.plural !== false;
+              return `${a} and ${b} are <b>${info.label}${pl ? 's' : ''}</b>.`;
+            }
+            if (info.dir === 'aToB')
+              return `${b} is ${a}'s <b>${info.label}</b>.`;
+            if (info.dir === 'bToA')
+              return `${a} is ${b}'s <b>${info.label}</b>.`;
+          }
+        }
+
+        // ── One spouse step → in-law ──
+        if (spouseSteps === 1) {
+          const firstLabel = path[1].label;
+          const spouseAtStart = firstLabel === 'spouse';
+          const bloodPath = spouseAtStart ? path.slice(1) : path.slice(0, -1);
+          const bUp = bloodPath.filter(
+            (n) => n.label === 'child→parent'
+          ).length;
+          const bDown = bloodPath.filter(
+            (n) => n.label === 'parent→child'
+          ).length;
+          const info = bloodRelInfo(bUp, bDown);
+          if (info) {
+            if (spouseAtStart) {
+              // A is spouse of X; X →blood→ B
+              // So A is B's [blood-rel]-in-law (using X's relationship to B)
+              if (info.dir === 'aToB' || info.dir === 'symmetric')
+                return `${a} is ${b}'s <b>${info.label}-in-law</b>.`;
+              if (info.dir === 'bToA')
+                return `${b} is ${a}'s <b>${info.label}-in-law</b>.`;
+            } else {
+              // A →blood→ X; X is spouse of B
+              if (info.dir === 'aToB')
+                return `${b} is ${a}'s <b>${info.label}-in-law</b>.`;
+              if (info.dir === 'bToA' || info.dir === 'symmetric')
+                return `${a} is ${b}'s <b>${info.label}-in-law</b>.`;
+            }
+          }
+        }
+
+        // ── Fallback ──
+        return (
+          `${a} and ${b} are connected across <b>${
+            path.length - 1
+          } steps</b> ` +
+          `(${upSteps} up, ${downSteps} down${
+            spouseSteps ? ', ' + spouseSteps + ' by marriage' : ''
+          }).`
+        );
       }
 
       // Person picker dropdown for relationship finder
@@ -3056,12 +3163,12 @@
 
         Promise.all([
           db
-            .ref('genealogy/mary/changelog')
+            .ref('genealogy/' + genealogySubPath + '/changelog')
             .orderByChild('timestamp')
             .limitToLast(100)
             .once('value'),
           db
-            .ref('genealogy/mary/loginLog')
+            .ref('genealogy/' + genealogySubPath + '/loginLog')
             .orderByChild('timestamp')
             .limitToLast(200)
             .once('value'),
@@ -3322,7 +3429,9 @@
       }
       function writeChangelog(action, personId, details) {
         if (!currentUser) return;
-        const ref = db.ref('genealogy/mary/changelog').push();
+        const ref = db
+          .ref('genealogy/' + genealogySubPath + '/changelog')
+          .push();
         ref.set({
           action,
           personId,
@@ -3377,10 +3486,16 @@
           generations.length !== 2 ? 's' : ''
         }
             </span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="window._ancestorZoom(-0.15)" title="Zoom out" style="font-size:1.1rem;padding:4px 10px;">−</button>
+              <span id="ancestor-zoom-label" style="font-size:0.82rem;color:var(--muted);min-width:38px;text-align:center;">100%</span>
+              <button class="btn btn-ghost btn-sm" onclick="window._ancestorZoom(+0.15)" title="Zoom in"  style="font-size:1.1rem;padding:4px 10px;">+</button>
+              <button class="btn btn-ghost btn-sm" onclick="window._ancestorZoomReset()" title="Reset zoom" style="font-size:0.8rem;padding:4px 10px;">Reset</button>
+            </div>
             <button class="btn btn-ghost btn-sm" onclick="renderPersonView('${rootId}')">✕ Close</button>
           </div>
-          <div id="ancestor-scroll" style="overflow-x:auto;overflow-y:auto;padding-bottom:20px;position:relative;">
-            <div id="ancestor-grid" style="position:relative;display:inline-block;min-width:100%;">
+          <div id="ancestor-scroll" style="overflow:auto;padding-bottom:20px;position:relative;cursor:grab;">
+            <div id="ancestor-grid" style="position:relative;display:inline-block;min-width:100%;transform-origin:top left;">
               <svg id="ancestor-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
               <div id="ancestor-gens" style="display:flex;flex-direction:column;gap:40px;padding:20px 30px;"></div>
             </div>
@@ -3502,6 +3617,52 @@
         requestAnimationFrame(() =>
           drawAncestorLines(generations, parentMap, cardEls)
         );
+
+        // ── Zoom state ──
+        let _ancestorScale = 1.0;
+
+        function ancestorZoom(delta) {
+          _ancestorScale = Math.min(
+            2.5,
+            Math.max(0.25, _ancestorScale + delta)
+          );
+          applyAncestorZoom();
+        }
+        function ancestorZoomReset() {
+          _ancestorScale = 1.0;
+          applyAncestorZoom();
+        }
+        function applyAncestorZoom() {
+          const grid = document.getElementById('ancestor-grid');
+          const label = document.getElementById('ancestor-zoom-label');
+          if (!grid) return;
+          grid.style.transform = `scale(${_ancestorScale})`;
+          // Shrink the scroll container's logical size to match scaled content
+          // so scrollbars don't over-extend
+          grid.style.marginBottom = `${
+            (_ancestorScale - 1) * grid.offsetHeight
+          }px`;
+          if (label) label.textContent = Math.round(_ancestorScale * 100) + '%';
+        }
+
+        // Mouse-wheel zoom (Ctrl/Cmd + scroll, or just scroll on the tree)
+        const scrollEl = document.getElementById('ancestor-scroll');
+        if (scrollEl) {
+          scrollEl.addEventListener(
+            'wheel',
+            (e) => {
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                ancestorZoom(e.deltaY < 0 ? 0.1 : -0.1);
+              }
+            },
+            { passive: false }
+          );
+        }
+
+        // Expose so the inline onclick buttons (which are outside this closure scope) can reach them
+        window._ancestorZoom = ancestorZoom;
+        window._ancestorZoomReset = ancestorZoomReset;
       }
 
       function drawAncestorLines(generations, parentMap, cardEls) {
