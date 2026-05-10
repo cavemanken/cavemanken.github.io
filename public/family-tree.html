@@ -2310,8 +2310,8 @@
             const personKey = mode === 'edit' ? editingId : pendingPersonKey;
             console.log(personKey);
             const folder = personKey
-              ? `genealogy-photos/${personKey}`
-              : 'genealogy-photos/unassigned';
+              ? `genealogy-photos/ken/${personKey}`
+              : 'genealogy-photos/ken/unassigned';
             const filename = `${folder}/${Date.now()}_${Math.random()
               .toString(36)
               .slice(2, 7)}.${ext}`;
