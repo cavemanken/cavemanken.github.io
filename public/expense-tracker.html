@@ -379,6 +379,13 @@
         color: var(--muted);
         font-size: 0.8rem;
         font-family: 'DM Mono', monospace;
+        white-space: nowrap;
+      }
+      td.desc {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       td.actions {
         display: flex;
@@ -1066,7 +1073,7 @@
                 : '';
             return `<tr class="${e.isLocal ? 'local-row' : ''}">
             <td class="date">${formatDate(e.date)}</td>
-            <td>${esc(e.desc)} ${pill}</td>
+            <td class="desc" title="${esc(e.desc)}">${esc(e.desc)} ${pill}</td>
             <td class="category"><span>${esc(e.cat)}</span></td>
             <td class="amount">${fmt(e.amount)}</td>
             <td class="actions">${delBtn}</td>
@@ -1150,7 +1157,7 @@
       function formatDate(d) {
         if (!d) return '—';
         const [y, m, day] = d.split('-');
-        return `${m}/${day}/${y}`;
+        return `${m}/${day}`;
       }
       function esc(s) {
         return String(s)
