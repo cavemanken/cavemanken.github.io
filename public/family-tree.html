@@ -3446,7 +3446,7 @@
       // ─────────────────────────────────────────────
       // ANCESTOR TREE
       // ─────────────────────────────────────────────
-      function showAncestorTree(rootId) {
+      function showAncestorTree(rootId, maxGen) {
         const p = allPeople[rootId];
         if (!p) return;
 
@@ -3454,10 +3454,14 @@
         const visited = new Set();
         const parentMap = {};
 
+        if (maxGen === undefined) maxGen = window._ancestorMaxGen || 5;
+        window._ancestorMaxGen = maxGen;
+        window._ancestorRootId = rootId;
+
         let currentGen = [rootId];
         visited.add(rootId);
 
-        while (currentGen.length > 0) {
+        while (currentGen.length > 0 && generations.length < maxGen) {
           generations.push(currentGen);
           const nextGen = [];
           currentGen.forEach((id) => {
@@ -3486,6 +3490,12 @@
           generations.length !== 2 ? 's' : ''
         }
             </span>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--muted);">
+              <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;">Generations:</span>
+              ${[3,4,5,6,99].map(n => `<button class="btn btn-ghost btn-sm" onclick="showAncestorTree('${rootId}',${n})"
+                style="padding:3px 9px;font-size:0.82rem;${(maxGen||5)===n?'background:var(--ink);color:var(--parchment);border-color:var(--ink);':''}"
+              >${n===99?'All':n}</button>`).join('')}
+            </div>
             <div style="display:flex;align-items:center;gap:6px;">
               <button class="btn btn-ghost btn-sm" onclick="window._ancestorZoom(-0.15)" title="Zoom out" style="font-size:1.1rem;padding:4px 10px;">−</button>
               <span id="ancestor-zoom-label" style="font-size:0.82rem;color:var(--muted);min-width:38px;text-align:center;">100%</span>
