@@ -3173,13 +3173,11 @@
             .limitToLast(200)
             .once('value'),
         ]).then(([changeSnap, loginSnap]) => {
-          const entries = [];
-          changeSnap.forEach((child) => entries.push(child.val()));
-          entries.reverse();
+          const entries = Object.values(changeSnap.val() || {});
+          entries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-          const logins = [];
-          loginSnap.forEach((child) => logins.push(child.val()));
-          logins.reverse();
+          const logins = Object.values(loginSnap.val() || {});
+          logins.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
           const fmtDate = (ts) => {
             const d = new Date(ts);
@@ -3233,9 +3231,14 @@
             })
             .join('');
 
-          document.getElementById('modal-body').innerHTML = `
+          const modalEl = document.getElementById('modal-body');
+          modalEl.style.maxWidth = '780px';
+          modalEl.style.width = '95vw';
+          modalEl.style.maxHeight = '85vh';
+          modalEl.style.overflowY = 'auto';
+          modalEl.innerHTML = `
               <h3 style="margin-bottom:16px;">📋 Change Log</h3>
-              <div style="overflow-x:auto;max-height:40vh;overflow-y:auto;margin-bottom:20px;">
+              <div style="overflow-x:auto;margin-bottom:20px;">
                 <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
                   <thead>
                     <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
@@ -3252,7 +3255,7 @@
                 </table>
               </div>
               <h3 style="margin-bottom:12px;font-size:1.1rem;">🔑 Login Log</h3>
-              <div style="overflow-x:auto;max-height:25vh;overflow-y:auto;">
+              <div style="overflow-x:auto;">
                 <table style="width:100%;border-collapse:collapse;font-family:'Crimson Pro',serif;font-size:0.95rem;">
                   <thead>
                     <tr style="border-bottom:2px solid var(--card-border);color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;">
@@ -3280,6 +3283,11 @@
       function closeModal(e) {
         if (!e || e.target.id === 'modal') {
           document.getElementById('modal').style.display = 'none';
+          const mb = document.getElementById('modal-body');
+          mb.style.maxWidth = '';
+          mb.style.width = '';
+          mb.style.maxHeight = '';
+          mb.style.overflowY = '';
           pendingGEDCOMData = null;
         }
       }
