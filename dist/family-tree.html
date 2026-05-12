@@ -1609,6 +1609,11 @@
                     ? `<div class="person-detail-loc">📍 ${p.bornLocation}</div>`
                     : ''
                 }
+                ${
+                  p.gender && p.gender !== 'unknown'
+                    ? `<div class="person-detail-loc">${p.gender === 'female' ? '♀' : '♂'} ${p.gender.charAt(0).toUpperCase() + p.gender.slice(1)}</div>`
+                    : ''
+                }
               </div>
             </div>
             <div class="person-detail-body">
@@ -2167,6 +2172,14 @@
           p.bornLocation
         )}" placeholder="City, State or Country">
               </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select id="${mode}-gender">
+                  <option value="unknown" ${(!p.gender || p.gender === 'unknown') ? 'selected' : ''}>Unknown</option>
+                  <option value="female" ${p.gender === 'female' ? 'selected' : ''}>Female</option>
+                  <option value="male" ${p.gender === 'male' ? 'selected' : ''}>Male</option>
+                </select>
+              </div>
               <div class="form-group full">
                 <label>Notes / Biography</label>
                 <textarea id="${mode}-notes" placeholder="Life story, occupation, memories…">${esc(
@@ -2455,6 +2468,7 @@
           dob: normalizeDate(g('dob')),
           dod: normalizeDate(g('dod')),
           bornLocation: g('bornLocation'),
+          gender: g('gender') || 'unknown',
           notes: g('notes'),
           photos: pendingPhotos,
           relationships: formRels[mode] || [],
@@ -2490,6 +2504,7 @@
             'dob',
             'dod',
             'bornLocation',
+            'gender',
             'notes',
           ].forEach((field) => {
             const oldVal = oldPerson[field] || '';
@@ -3473,15 +3488,21 @@
           generations.push(currentGen);
           const nextGen = [];
           currentGen.forEach((id) => {
-            const parents = findRelatives(id, 'childOf');
+            const parents = findRelatives(id, 'childOf')
+              .filter((pid) => allPeople[pid])
+              .sort((a, b) => {
+                // Father (male) left, mother (female) right, unknown last
+                const order = { male: 0, unknown: 1, female: 2 };
+                const ga = order[allPeople[a]?.gender] ?? 1;
+                const gb = order[allPeople[b]?.gender] ?? 1;
+                return ga - gb;
+              });
             parentMap[id] = [];
             parents.forEach((pid) => {
-              if (allPeople[pid]) {
-                parentMap[id].push(pid);
-                if (!visited.has(pid)) {
-                  visited.add(pid);
-                  nextGen.push(pid);
-                }
+              parentMap[id].push(pid);
+              if (!visited.has(pid)) {
+                visited.add(pid);
+                nextGen.push(pid);
               }
             });
           });
