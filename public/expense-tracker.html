@@ -119,7 +119,8 @@
         line-height: 1.4;
       }
 
-      .btn-signin {
+      .btn-signin,
+      .btn-signout {
         background: none;
         border: 1px solid var(--border);
         border-radius: 2px;
@@ -132,17 +133,6 @@
       .btn-signin:hover {
         border-color: var(--fern);
         color: var(--fern);
-      }
-
-      .btn-signout {
-        background: none;
-        border: 1px solid var(--border);
-        border-radius: 2px;
-        color: var(--muted);
-        font-size: 0.75rem;
-        padding: 0.35rem 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s;
       }
       .btn-signout:hover {
         border-color: var(--tan);
@@ -1087,8 +1077,7 @@
 
       // ── EXPORT ────────────────────────────────────────────────────────────────
       window.exportCSV = function () {
-        const localAll = loadLocal();
-        const pending = localAll.filter((r) => !r.synced);
+        const pending = loadLocal().filter((r) => !r.synced);
         const combined = [...Object.values(firebaseExpenses), ...pending].sort(
           (a, b) => (a.date > b.date ? -1 : 1)
         );
@@ -1152,7 +1141,7 @@
       }
       function formatDate(d) {
         if (!d) return '—';
-        const [y, m, day] = d.split('-');
+        const [, m, day] = d.split('-');
         return `${m}/${day}`;
       }
       function esc(s) {
@@ -1181,28 +1170,20 @@
         setTimeout(() => t.classList.remove('show'), 2800);
       };
 
-      // default the category based on description keywords (very basic)
+      // ----------------------------------------------------------------------------------------
+      // !!! only enter these in all lowercase for matching to work, e.g. "walmart" not "Walmart"
+      // ----------------------------------------------------------------------------------------
+      const _groceryStores = ['walmart', 'kroger', 'costco', 'publix'];
+      const _healthStores = ['cvs', 'walgreens', 'rite aid', 'hca'];
+      const _homeStores = ["lowe's", 'lowes', 'home depot', 'ikea'];
       window.autoCategory = function (val) {
-        const groceryStores = ['Walmart', 'Kroger', 'Costco', 'Publix'];
-        const healthStores = ['CVS', 'Walgreens', 'Rite Aid', 'HCA'];
-        const homeStores = ["Lowe's", 'Lowes', 'Home Depot', 'IKEA'];
         const lower = val.toLowerCase().trim();
         const cat = document.getElementById('inp-cat');
-        if (
-          groceryStores.some((store) =>
-            lower.includes(store.toLowerCase().trim())
-          )
-        ) {
+        if (_groceryStores.some((s) => lower.includes(s))) {
           cat.value = 'Groceries';
-        } else if (
-          healthStores.some((store) =>
-            lower.includes(store.toLowerCase().trim())
-          )
-        ) {
+        } else if (_healthStores.some((s) => lower.includes(s))) {
           cat.value = 'Health';
-        } else if (
-          homeStores.some((store) => lower.includes(store.toLowerCase().trim()))
-        ) {
+        } else if (_homeStores.some((s) => lower.includes(s))) {
           cat.value = 'Home';
         } else if (lower.length > 0) {
           cat.value = 'Eat Out';
