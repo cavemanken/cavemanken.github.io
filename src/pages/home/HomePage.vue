@@ -10,6 +10,8 @@
     <a href="game-tracker.html">Game Tracker</a>
     <br />
     <a href="pre-haul-checklist.html">Pre-Haul Checklist </a>
+    <br />
+    <a href="family-tree.html">Family Tree</a>
   </base-card>
 </template>
 
