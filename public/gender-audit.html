@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gender Audit — cmk63project</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #1a1a1a; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e0ddd6; padding: 2rem; width: 100%; max-width: 700px; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 1.5rem; }
+  label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; margin-top: 12px; }
+  input { width: 100%; padding: 8px 10px; border: 1px solid #d0cdc8; border-radius: 8px; font-size: 14px; outline: none; }
+  input:focus { border-color: #7a6f5a; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .actions { display: flex; gap: 10px; margin-top: 1.25rem; }
+  button { padding: 9px 18px; border-radius: 8px; border: 1px solid #c5c0b8; background: #fff; font-size: 13px; cursor: pointer; font-weight: 500; color: #333; }
+  button:hover:not(:disabled) { background: #f0ede8; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.primary { background: #4a6741; color: #fff; border-color: #4a6741; }
+  button.primary:hover:not(:disabled) { background: #3b5534; }
+  .status { margin-top: 1.25rem; padding: 10px 14px; border-radius: 8px; font-size: 13px; border: 1px solid #e0ddd6; background: #f9f8f5; display: none; }
+  .status.error { border-color: #e8a0a0; background: #fdf4f4; color: #b03030; }
+  .status.success { border-color: #9dc4a0; background: #f4faf4; color: #2e6b32; }
+  .results { margin-top: 1.5rem; display: none; }
+  .results-header { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 7px 10px; background: #f5f4f0; border-bottom: 2px solid #e0ddd6; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f0ede8; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #faf9f7; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-unknown { background: #f0ede8; color: #888; }
+  .badge-missing { background: #fdf4f4; color: #b03030; border: 1px solid #e8a0a0; }
+  .empty { text-align: center; padding: 2rem; color: #888; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Gender Audit</h1>
+  <p class="subtitle">Lists all people in <code>genealogy/ken/people</code> whose gender is not set to <strong>male</strong> or <strong>female</strong>.</p>
+
+  <label>Firebase API Key</label>
+  <input type="text" id="apiKey" placeholder="AIzaSy..." autocomplete="off" />
+  <div class="row">
+    <div>
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="username" />
+    </div>
+    <div>
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="runBtn" onclick="runAudit()">Run Audit</button>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="results" id="results">
+    <div class="results-header">
+      <span id="results-title"></span>
+    </div>
+    <div id="results-body"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+function setStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.style.display = 'block';
+  el.className = 'status' + (type ? ' ' + type : '');
+  el.innerHTML = msg;
+}
+
+window.runAudit = async function() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!apiKey) { setStatus('Please enter your Firebase API key.', 'error'); return; }
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('results').style.display = 'none';
+  setStatus('Connecting...');
+
+  try {
+    const app = initializeApp({
+      apiKey,
+      authDomain: 'cmk63project.firebaseapp.com',
+      databaseURL: 'https://cmk63project-default-rtdb.firebaseio.com',
+      projectId: 'cmk63project'
+    });
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    if (email && password) await signInWithEmailAndPassword(auth, email, password);
+
+    setStatus('Loading records...');
+    const snap = await get(ref(db, 'genealogy/ken/people'));
+    const people = snap.val();
+    if (!people) { setStatus('No records found.', 'error'); document.getElementById('runBtn').disabled = false; return; }
+
+    const flagged = Object.entries(people)
+      .filter(([, p]) => p.gender !== 'male' && p.gender !== 'female')
+      .map(([key, p]) => ({
+        key,
+        name: [p.firstName, p.middleName, p.lastName].filter(Boolean).join(' ') || '(no name)',
+        gender: p.gender || null,
+        dob: p.dob || '',
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const total = Object.keys(people).length;
+
+    if (flagged.length === 0) {
+      setStatus(`All ${total} records have a gender of male or female. ✓`, 'success');
+      document.getElementById('runBtn').disabled = false;
+      return;
+    }
+
+    setStatus(`Found ${flagged.length} of ${total} records without male/female gender.`);
+
+    const rows = flagged.map(p => `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.dob ? p.dob.split('-')[0] : '—'}</td>
+        <td>
+          ${p.gender
+            ? `<span class="badge badge-unknown">${p.gender}</span>`
+            : `<span class="badge badge-missing">not set</span>`}
+        </td>
+        <td style="font-family:monospace;font-size:11px;color:#aaa;">${p.key}</td>
+      </tr>`).join('');
+
+    document.getElementById('results-title').textContent = `${flagged.length} people need a gender assignment`;
+    document.getElementById('results-body').innerHTML = `
+      <table>
+        <thead><tr><th>Name</th><th>Birth Year</th><th>Gender</th><th>DB Key</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    document.getElementById('results').style.display = 'block';
+
+  } catch(e) {
+    setStatus('Error: ' + e.message, 'error');
+  }
+  document.getElementById('runBtn').disabled = false;
+};
+</script>
+</body>
+</html>
