@@ -1237,6 +1237,25 @@
       let treeHistory = []; // stack of personIds for back/fwd
       let treeHistoryIndex = -1;
 
+      // ── Derived indexes — rebuilt whenever allPeople changes ──
+      let _childrenByParent = {}; // parentId → [childId, ...]
+      let _relGraphCache = null; // invalidated on data change
+
+      function rebuildIndexes() {
+        _childrenByParent = {};
+        _relGraphCache = null;
+        Object.entries(allPeople).forEach(([pid, p]) => {
+          (p.relationships || []).forEach((r) => {
+            if (r.type === 'childOf') {
+              if (!_childrenByParent[r.targetId])
+                _childrenByParent[r.targetId] = [];
+              if (!_childrenByParent[r.targetId].includes(pid))
+                _childrenByParent[r.targetId].push(pid);
+            }
+          });
+        });
+      }
+
       auth.onAuthStateChanged((user) => {
         currentUser = user;
 
@@ -1352,6 +1371,7 @@
           });
 
           allPeople = raw;
+          rebuildIndexes();
           const q = document.getElementById('search-input')?.value || '';
           if (q.trim()) {
             filterPeople(q);
@@ -1372,19 +1392,25 @@
       function renderPersonList(people) {
         const list = document.getElementById('person-list');
         const empty = document.getElementById('person-list-empty');
-        const sorted = Object.entries(people).sort(([, a], [, b]) => {
-          return (
+        // Pre-compute names once for sorting and rendering
+        const entries = Object.entries(people).map(([id, p]) => [
+          id,
+          p,
+          fullName(p),
+        ]);
+        entries.sort(
+          ([, a, aN], [, b, bN]) =>
             (a.lastName || '').localeCompare(b.lastName || '') ||
-            (a.firstName || '').localeCompare(b.firstName || '')
-          );
-        });
+            aN.localeCompare(bN)
+        );
         list.innerHTML = '';
-        if (sorted.length === 0) {
+        if (entries.length === 0) {
           empty.style.display = 'block';
           return;
         }
         empty.style.display = 'none';
-        sorted.forEach(([id, p]) => {
+        const frag = document.createDocumentFragment();
+        entries.forEach(([id, p, name]) => {
           const li = document.createElement('li');
           li.className =
             'person-item' + (id === selectedPersonId ? ' active' : '');
@@ -1401,11 +1427,12 @@
           li.innerHTML = `
             <div class="person-avatar">${photo}</div>
             <div>
-              <div class="person-info-name">${fullName(p)}</div>
+              <div class="person-info-name">${name}</div>
               <div class="person-info-dates">${lifespan(p)}</div>
             </div>`;
-          list.appendChild(li);
+          frag.appendChild(li);
         });
+        list.appendChild(frag);
       }
 
       // ─────────────────────────────────────────────
@@ -1426,22 +1453,19 @@
       }
 
       function filterPeople(q) {
-        let pool = allPeople;
-        if (listFilter === 'notable') {
-          const notableOnly = {};
-          Object.entries(allPeople).forEach(([id, p]) => {
-            if (p.notable) notableOnly[id] = p;
-          });
-          pool = notableOnly;
-        }
-        if (!q.trim()) {
-          renderPersonList(pool);
+        const lc = q ? q.toLowerCase().trim() : '';
+        const onlyNotable = listFilter === 'notable';
+
+        if (!lc && !onlyNotable) {
+          renderPersonList(allPeople);
           return;
         }
-        const lc = q.toLowerCase();
+
         const filtered = {};
-        Object.entries(pool).forEach(([id, p]) => {
-          if (fullName(p).toLowerCase().includes(lc)) filtered[id] = p;
+        Object.entries(allPeople).forEach(([id, p]) => {
+          if (onlyNotable && !p.notable) return;
+          if (lc && !fullName(p).toLowerCase().includes(lc)) return;
+          filtered[id] = p;
         });
         renderPersonList(filtered);
       }
@@ -1905,15 +1929,7 @@
       }
 
       function findChildren(parentId) {
-        const results = [];
-        Object.entries(allPeople).forEach(([pid, p]) => {
-          const rels = p.relationships || [];
-          rels.forEach((r) => {
-            if (r.type === 'childOf' && r.targetId === parentId)
-              results.push(pid);
-          });
-        });
-        return [...new Set(results)];
+        return [...new Set(_childrenByParent[parentId] || [])];
       }
 
       function findSiblings(id) {
@@ -2090,7 +2106,7 @@
           treeHistoryIndex--;
           const id = treeHistory[treeHistoryIndex];
           selectedPersonId = id;
-          renderPersonList(allPeople);
+          filterPeople(document.getElementById('search-input')?.value || '');
           renderPersonView(id);
         }
       }
@@ -2099,7 +2115,7 @@
           treeHistoryIndex++;
           const id = treeHistory[treeHistoryIndex];
           selectedPersonId = id;
-          renderPersonList(allPeople);
+          filterPeople(document.getElementById('search-input')?.value || '');
           renderPersonView(id);
         }
       }
@@ -2332,7 +2348,6 @@
 
             const ext = file.name.split('.').pop();
             const personKey = mode === 'edit' ? editingId : pendingPersonKey;
-            console.log(personKey);
             const folder = personKey
               ? `genealogy-photos/${genealogySubPath}/${personKey}`
               : `genealogy-photos/${genealogySubPath}/unassigned`;
@@ -2563,6 +2578,21 @@
         }
       }
 
+      const MONTHS = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
       function normalizeDate(val) {
         if (!val) return '';
         val = val.trim();
@@ -2570,21 +2600,7 @@
         const slashMatch = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (slashMatch) {
           const [, month, day, year] = slashMatch;
-          const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-          ];
-          const monthName = months[parseInt(month, 10) - 1];
+          const monthName = MONTHS[parseInt(month, 10) - 1];
           if (!monthName) return val;
           return `${parseInt(day, 10)} ${monthName} ${year}`;
         }
@@ -2592,21 +2608,7 @@
         const isoMatch = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if (isoMatch) {
           const [, year, month, day] = isoMatch;
-          const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-          ];
-          const monthName = months[parseInt(month, 10) - 1];
+          const monthName = MONTHS[parseInt(month, 10) - 1];
           const d = parseInt(day, 10);
           if (!monthName) return val;
           if (d === 0) return `${monthName} ${year}`;
@@ -2625,6 +2627,7 @@
 
       // Build a graph of all edges: for each person, list connected people + edge label
       function buildRelGraph() {
+        if (_relGraphCache) return _relGraphCache;
         const graph = {}; // id → [{id, label}]
         const add = (a, b, label) => {
           if (!graph[a]) graph[a] = [];
@@ -2634,7 +2637,6 @@
           (p.relationships || []).forEach((r) => {
             if (!allPeople[r.targetId]) return;
             if (r.type === 'childOf') {
-              // id is child of r.targetId
               add(id, r.targetId, 'child→parent');
               add(r.targetId, id, 'parent→child');
             } else if (r.type === 'spouseOf') {
@@ -2643,6 +2645,7 @@
             }
           });
         });
+        _relGraphCache = graph;
         return graph;
       }
 
