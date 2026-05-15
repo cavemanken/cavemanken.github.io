@@ -797,6 +797,7 @@
                 background: rgba(143, 184, 122, 0.08);
               "
             ></span>
+            <button class="btn-export" id="btn-clear-filters" onclick="clearFilters()" style="display:none">✕ Clear</button>
             <button class="btn-export" onclick="exportCSV()">Export CSV</button>
           </div>
         </div>
@@ -1255,6 +1256,7 @@
           ? `${fmt(filteredTotal)} filtered`
           : '';
         totalEl.style.display = isFiltered ? 'inline' : 'none';
+        document.getElementById('btn-clear-filters').style.display = isFiltered ? '' : 'none';
 
         const wrap = document.getElementById('table-wrap');
         if (!filtered.length) {
@@ -1296,7 +1298,15 @@
       };
 
       // ── EXPORT ────────────────────────────────────────────────────────────────
-      window.exportCSV = function () {
+      // ── CLEAR FILTERS ─────────────────────────────────────────────────────────
+      window.clearFilters = function () {
+        document.getElementById('filter-cat').value = '';
+        document.getElementById('filter-month').value = '';
+        document.getElementById('filter-trip').value = '';
+        renderExpenses();
+      };
+
+            window.exportCSV = function () {
         const pending = loadLocal().filter((r) => !r.synced);
         const combined = [...Object.values(firebaseExpenses), ...pending].sort(
           (a, b) => (a.date > b.date ? -1 : 1)
