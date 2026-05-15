@@ -692,6 +692,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem">
             <span class="count-badge" id="count-badge">0 entries</span>
+            <span class="count-badge" id="filtered-total" style="color: var(--fern); border-color: rgba(143,184,122,0.35); background: rgba(143,184,122,0.08);"></span>
             <button class="btn-export" onclick="exportCSV()">Export CSV</button>
           </div>
         </div>
@@ -1050,6 +1051,12 @@
         document.getElementById('count-badge').textContent = `${
           filtered.length
         } entr${filtered.length === 1 ? 'y' : 'ies'}`;
+
+        const filteredTotal = filtered.reduce((s, e) => s + e.amount, 0);
+        const totalEl = document.getElementById('filtered-total');
+        const isFiltered = catFilter || monthFilter;
+        totalEl.textContent = isFiltered ? `${fmt(filteredTotal)} filtered` : '';
+        totalEl.style.display = isFiltered ? 'inline' : 'none';
 
         const wrap = document.getElementById('table-wrap');
         if (!filtered.length) {
