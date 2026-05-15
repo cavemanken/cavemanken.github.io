@@ -399,6 +399,72 @@
         padding: 0.12rem 0.5rem;
         white-space: nowrap;
       }
+      .trip-pill {
+        font-size: 0.6rem;
+        letter-spacing: 0.5px;
+        background: rgba(80, 140, 200, 0.15);
+        color: #7ab8e8;
+        border: 1px solid rgba(80, 140, 200, 0.35);
+        border-radius: 20px;
+        padding: 0.12rem 0.5rem;
+        white-space: nowrap;
+      }
+
+      /* ── TRIP SUMMARY ── */
+      .trip-summary {
+        display: none;
+        background: rgba(80, 140, 200, 0.06);
+        border: 1px solid rgba(80, 140, 200, 0.25);
+        border-radius: 2px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1.4rem;
+      }
+      .trip-summary.visible {
+        display: block;
+      }
+      .trip-summary-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.1rem;
+        color: #7ab8e8;
+        letter-spacing: 2px;
+        margin-bottom: 0.9rem;
+      }
+      .trip-summary-stats {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+      .trip-stat-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        margin-bottom: 0.25rem;
+      }
+      .trip-stat-value {
+        font-family: 'DM Mono', monospace;
+        font-size: 1.3rem;
+        color: #7ab8e8;
+      }
+      .trip-cat-breakdown {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .trip-cat-chip {
+        background: rgba(80, 140, 200, 0.1);
+        border: 1px solid rgba(80, 140, 200, 0.25);
+        border-radius: 2px;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.75rem;
+        color: #a8d0f0;
+      }
+      .trip-cat-chip span {
+        color: var(--muted);
+        font-size: 0.68rem;
+        margin-left: 0.35rem;
+      }
 
       .btn-del {
         background: rgba(192, 57, 43, 0.08);
@@ -652,6 +718,18 @@
             <label>Date</label>
             <input type="date" id="inp-date" onchange="checkAddReady()" />
           </div>
+          <div class="form-group">
+            <label>Trip <span style="color:var(--muted);font-size:0.6rem;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input
+              type="text"
+              id="inp-trip"
+              placeholder="Trip name…"
+              maxlength="60"
+              list="trip-datalist"
+              oninput="saveStickyTrip(this.value)"
+            />
+            <datalist id="trip-datalist"></datalist>
+          </div>
           <button class="btn-add" onclick="addExpense()">+ Add</button>
         </div>
         <div class="offline-note" id="offline-note">
@@ -690,6 +768,12 @@
                 onchange="renderExpenses()"
               />
             </div>
+            <div>
+              <label>Filter Trip</label><br />
+              <select id="filter-trip" onchange="renderExpenses()">
+                <option value="">All Trips</option>
+              </select>
+            </div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem">
             <span class="count-badge" id="count-badge">0 entries</span>
@@ -705,6 +789,22 @@
             <button class="btn-export" onclick="exportCSV()">Export CSV</button>
           </div>
         </div>
+        <!-- Trip Summary (shown when trip filter active) -->
+        <div class="trip-summary" id="trip-summary">
+          <div class="trip-summary-title" id="trip-summary-title">TRIP SUMMARY</div>
+          <div class="trip-summary-stats">
+            <div>
+              <div class="trip-stat-label">Total Spent</div>
+              <div class="trip-stat-value" id="trip-sum-total">$0.00</div>
+            </div>
+            <div>
+              <div class="trip-stat-label">Entries</div>
+              <div class="trip-stat-value" id="trip-sum-count">0</div>
+            </div>
+          </div>
+          <div class="trip-cat-breakdown" id="trip-cat-breakdown"></div>
+        </div>
+
         <div id="table-wrap">
           <div class="empty-state">
             <div class="icon">💵</div>
@@ -816,6 +916,26 @@
       // ────────────────────────────────────────────────────────────────────────
 
       const LS_KEY = 'expense_tracker_local';
+      const LS_TRIP_KEY = 'expense_tracker_sticky_trip';
+
+      function saveStickyTrip(val) {
+        localStorage.setItem(LS_TRIP_KEY, val.trim());
+      }
+      function loadStickyTrip() {
+        return localStorage.getItem(LS_TRIP_KEY) || '';
+      }
+
+      function updateTripDatalist(combined) {
+        const trips = [...new Set(combined.map(e => e.trip).filter(Boolean))].sort();
+        // datalist for form autocomplete
+        const dl = document.getElementById('trip-datalist');
+        dl.innerHTML = trips.map(t => `<option value="${t}"></option>`).join('');
+        // filter-trip dropdown
+        const sel = document.getElementById('filter-trip');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">All Trips</option>' +
+          trips.map(t => `<option value="${t}"${t === cur ? ' selected' : ''}>${t}</option>`).join('');
+      }
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
@@ -899,6 +1019,7 @@
         const amount = parseFloat(document.getElementById('inp-amount').value);
         const cat = document.getElementById('inp-cat').value;
         const date = document.getElementById('inp-date').value;
+        const trip = document.getElementById('inp-trip').value.trim();
 
         if (!desc) return showToast('Please enter a description.');
         if (!amount || amount <= 0)
@@ -915,6 +1036,7 @@
           amount,
           cat,
           date,
+          trip: trip || '',
           ts: Date.now(),
           synced: false,
         };
@@ -963,6 +1085,7 @@
             amount: record.amount,
             cat: record.cat,
             date: record.date,
+            trip: record.trip || '',
             ts: record.ts,
             localId: record.id, // lets the listener match & auto-mark synced
           });
@@ -1000,6 +1123,7 @@
       window.renderExpenses = function () {
         const catFilter = document.getElementById('filter-cat').value;
         const monthFilter = document.getElementById('filter-month').value;
+        const tripFilter = document.getElementById('filter-trip').value;
         const localAll = loadLocal();
         const pending = localAll.filter((r) => !r.synced);
 
@@ -1022,6 +1146,7 @@
             amount: e.amount,
             cat: e.cat,
             date: e.date,
+            trip: e.trip || '',
             ts: e.ts || 0,
           })),
           ...pending.map((e) => ({
@@ -1032,18 +1157,42 @@
             amount: e.amount,
             cat: e.cat,
             date: e.date,
+            trip: e.trip || '',
             ts: e.ts || 0,
           })),
         ].sort((a, b) =>
           b.date > a.date ? 1 : b.date < a.date ? -1 : b.ts - a.ts
         );
 
+        updateTripDatalist(combined);
+
         // Apply filters
         const filtered = combined.filter((e) => {
           if (catFilter && e.cat !== catFilter) return false;
           if (monthFilter && !e.date.startsWith(monthFilter)) return false;
+          if (tripFilter && e.trip !== tripFilter) return false;
           return true;
         });
+
+        // Trip summary panel
+        const tripSummaryEl = document.getElementById('trip-summary');
+        if (tripFilter) {
+          const tripEntries = combined.filter(e => e.trip === tripFilter);
+          const tripTotal = tripEntries.reduce((s, e) => s + e.amount, 0);
+          const catTotals = {};
+          tripEntries.forEach(e => { catTotals[e.cat] = (catTotals[e.cat] || 0) + e.amount; });
+          document.getElementById('trip-summary-title').textContent = `✈ ${tripFilter}`;
+          document.getElementById('trip-sum-total').textContent = fmt(tripTotal);
+          document.getElementById('trip-sum-count').textContent = tripEntries.length;
+          document.getElementById('trip-cat-breakdown').innerHTML =
+            Object.entries(catTotals)
+              .sort((a, b) => b[1] - a[1])
+              .map(([cat, tot]) => `<div class="trip-cat-chip">${cat}<span>${fmt(tot)}</span></div>`)
+              .join('');
+          tripSummaryEl.classList.add('visible');
+        } else {
+          tripSummaryEl.classList.remove('visible');
+        }
 
         // Summaries (unfiltered)
         const now = new Date();
@@ -1063,7 +1212,7 @@
 
         const filteredTotal = filtered.reduce((s, e) => s + e.amount, 0);
         const totalEl = document.getElementById('filtered-total');
-        const isFiltered = catFilter || monthFilter;
+        const isFiltered = catFilter || monthFilter || tripFilter;
         totalEl.textContent = isFiltered
           ? `${fmt(filteredTotal)} filtered`
           : '';
@@ -1080,6 +1229,9 @@
             const pill = e.synced
               ? ''
               : `<span class="pending-pill">local</span>`;
+            const tripPill = e.trip
+              ? `<span class="trip-pill">✈ ${esc(e.trip)}</span>`
+              : '';
             const delFn = e.isLocal
               ? `deleteExpense('${e.key}', true)`
               : `deleteExpense('${e.key}', false)`;
@@ -1089,7 +1241,7 @@
                 : '';
             return `<tr class="${e.isLocal ? 'local-row' : ''}">
             <td class="date">${formatDate(e.date)}</td>
-            <td>${esc(e.desc)} ${pill}</td>
+            <td>${esc(e.desc)} ${pill} ${tripPill}</td>
             <td class="category"><span>${esc(e.cat)}</span></td>
             <td class="amount">${fmt(e.amount)}</td>
             <td class="actions">${delBtn}</td>
@@ -1112,13 +1264,13 @@
           (a, b) => (a.date > b.date ? -1 : 1)
         );
 
-        const header = 'Date,Description,Category,Amount\n';
+        const header = 'Date,Description,Category,Amount,Trip\n';
         const rows = combined
           .map(
             (e) =>
               `${e.date},"${String(e.desc).replace(/"/g, '""')}",${
                 e.cat
-              },${Number(e.amount).toFixed(2)}`
+              },${Number(e.amount).toFixed(2)},"${String(e.trip || '').replace(/"/g, '""')}"`
           )
           .join('\n');
         const blob = new Blob([header + rows], { type: 'text/csv' });
@@ -1224,6 +1376,9 @@
       document.getElementById('inp-date').value = new Date()
         .toISOString()
         .split('T')[0];
+
+      // Restore sticky trip
+      document.getElementById('inp-trip').value = loadStickyTrip();
 
       // Check whether all required fields are filled and light up the Add button
       window.checkAddReady = function () {
