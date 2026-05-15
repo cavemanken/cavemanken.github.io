@@ -719,7 +719,18 @@
             <input type="date" id="inp-date" onchange="checkAddReady()" />
           </div>
           <div class="form-group">
-            <label>Trip <span style="color:var(--muted);font-size:0.6rem;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <label
+              >Trip
+              <span
+                style="
+                  color: var(--muted);
+                  font-size: 0.6rem;
+                  text-transform: none;
+                  letter-spacing: 0;
+                "
+                >(optional)</span
+              ></label
+            >
             <input
               type="text"
               id="inp-trip"
@@ -791,7 +802,9 @@
         </div>
         <!-- Trip Summary (shown when trip filter active) -->
         <div class="trip-summary" id="trip-summary">
-          <div class="trip-summary-title" id="trip-summary-title">TRIP SUMMARY</div>
+          <div class="trip-summary-title" id="trip-summary-title">
+            TRIP SUMMARY
+          </div>
           <div class="trip-summary-stats">
             <div>
               <div class="trip-stat-label">Total Spent</div>
@@ -814,7 +827,7 @@
       </div>
 
       <!-- Summary -->
-      <div class="summary-grid" style="margin-top: 2rem">
+      <!-- <div class="summary-grid" style="margin-top: 2rem">
         <div class="sum-card">
           <div class="sum-label">This Month</div>
           <div class="sum-value amber" id="sum-month">$0.00</div>
@@ -823,7 +836,7 @@
           <div class="sum-label" style="margin-top: 0.75rem">Entries</div>
           <div class="sum-value green" id="sum-count">0</div>
         </div>
-      </div>
+      </div> -->
     </main>
 
     <!-- AUTH MODAL -->
@@ -926,15 +939,27 @@
       }
 
       function updateTripDatalist(combined) {
-        const trips = [...new Set(combined.map(e => e.trip).filter(Boolean))].sort();
+        const trips = [
+          ...new Set(combined.map((e) => e.trip).filter(Boolean)),
+        ].sort();
         // datalist for form autocomplete
         const dl = document.getElementById('trip-datalist');
-        dl.innerHTML = trips.map(t => `<option value="${t}"></option>`).join('');
+        dl.innerHTML = trips
+          .map((t) => `<option value="${t}"></option>`)
+          .join('');
         // filter-trip dropdown
         const sel = document.getElementById('filter-trip');
         const cur = sel.value;
-        sel.innerHTML = '<option value="">All Trips</option>' +
-          trips.map(t => `<option value="${t}"${t === cur ? ' selected' : ''}>${t}</option>`).join('');
+        sel.innerHTML =
+          '<option value="">All Trips</option>' +
+          trips
+            .map(
+              (t) =>
+                `<option value="${t}"${
+                  t === cur ? ' selected' : ''
+                }>${t}</option>`
+            )
+            .join('');
       }
 
       const app = initializeApp(firebaseConfig);
@@ -1177,17 +1202,28 @@
         // Trip summary panel
         const tripSummaryEl = document.getElementById('trip-summary');
         if (tripFilter) {
-          const tripEntries = combined.filter(e => e.trip === tripFilter);
+          const tripEntries = combined.filter((e) => e.trip === tripFilter);
           const tripTotal = tripEntries.reduce((s, e) => s + e.amount, 0);
           const catTotals = {};
-          tripEntries.forEach(e => { catTotals[e.cat] = (catTotals[e.cat] || 0) + e.amount; });
-          document.getElementById('trip-summary-title').textContent = `✈ ${tripFilter}`;
-          document.getElementById('trip-sum-total').textContent = fmt(tripTotal);
-          document.getElementById('trip-sum-count').textContent = tripEntries.length;
+          tripEntries.forEach((e) => {
+            catTotals[e.cat] = (catTotals[e.cat] || 0) + e.amount;
+          });
+          document.getElementById(
+            'trip-summary-title'
+          ).textContent = `✈ ${tripFilter}`;
+          document.getElementById('trip-sum-total').textContent =
+            fmt(tripTotal);
+          document.getElementById('trip-sum-count').textContent =
+            tripEntries.length;
           document.getElementById('trip-cat-breakdown').innerHTML =
             Object.entries(catTotals)
               .sort((a, b) => b[1] - a[1])
-              .map(([cat, tot]) => `<div class="trip-cat-chip">${cat}<span>${fmt(tot)}</span></div>`)
+              .map(
+                ([cat, tot]) =>
+                  `<div class="trip-cat-chip">${cat}<span>${fmt(
+                    tot
+                  )}</span></div>`
+              )
               .join('');
           tripSummaryEl.classList.add('visible');
         } else {
@@ -1203,9 +1239,11 @@
         const monthTot = combined
           .filter((e) => e.date.startsWith(thisMonth))
           .reduce((s, e) => s + e.amount, 0);
+        /*          
         document.getElementById('sum-total').textContent = fmt(totalAll);
         document.getElementById('sum-month').textContent = fmt(monthTot);
         document.getElementById('sum-count').textContent = combined.length;
+*/
         document.getElementById('count-badge').textContent = `${
           filtered.length
         } entr${filtered.length === 1 ? 'y' : 'ies'}`;
@@ -1270,7 +1308,10 @@
             (e) =>
               `${e.date},"${String(e.desc).replace(/"/g, '""')}",${
                 e.cat
-              },${Number(e.amount).toFixed(2)},"${String(e.trip || '').replace(/"/g, '""')}"`
+              },${Number(e.amount).toFixed(2)},"${String(e.trip || '').replace(
+                /"/g,
+                '""'
+              )}"`
           )
           .join('\n');
         const blob = new Blob([header + rows], { type: 'text/csv' });
