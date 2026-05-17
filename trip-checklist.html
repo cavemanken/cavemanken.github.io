@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip Checklist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pine:    #1a2e1a;
+      --bark:    #2c1f12;
+      --moss:    #3d5c2e;
+      --sage:    #6b8f5a;
+      --fern:    #8fb87a;
+      --cream:   #e8dfc8;
+      --tan:     #c4a87a;
+      --amber:   #d4831a;
+      --red:     #c0392b;
+      --text:    #e8dfc8;
+      --muted:   #9a9080;
+      --card:    rgba(255,255,255,0.04);
+      --border:  rgba(232,223,200,0.12);
+      --blue:    #7ab8e8;
+      --blue-bg: rgba(80,140,200,0.10);
+      --blue-bd: rgba(80,140,200,0.30);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--pine);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 10% 20%, rgba(61,92,46,0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 80%, rgba(44,31,18,0.4) 0%, transparent 50%);
+    }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── HEADER ── */
+    .app-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .app-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.8rem;
+      letter-spacing: 4px;
+      color: var(--cream);
+      line-height: 1;
+    }
+    .app-title span { color: var(--fern); }
+    .header-meta { font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+    /* ── AUTH PANEL ── */
+    #auth-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    #auth-panel h2 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; font-size: 1.4rem; margin-bottom: 1.25rem; color: var(--cream); }
+    .auth-inputs { display: flex; flex-direction: column; gap: 0.6rem; max-width: 320px; margin: 0 auto 1rem; }
+    .auth-inputs input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.6rem 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .auth-inputs input:focus { border-color: var(--sage); }
+    .auth-inputs input::placeholder { color: var(--muted); }
+    .btn-auth {
+      background: var(--moss);
+      border: none;
+      border-radius: 2px;
+      color: var(--cream);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      padding: 0.65rem 1.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    .btn-auth:hover { background: var(--sage); }
+    .auth-error { color: #e07070; font-size: 0.8rem; margin-top: 0.4rem; min-height: 1.1em; }
+
+    /* ── TRIP SELECTOR ── */
+    #main-panel { display: none; }
+    .trip-bar {
+      display: flex;
+      gap: 0.65rem;
+      align-items: center;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .trip-bar label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); white-space: nowrap; }
+    .trip-bar select, .trip-bar input[type="text"] {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .trip-bar select { min-width: 180px; }
+    .trip-bar input[type="text"] { flex: 1; min-width: 140px; }
+    .trip-bar select:focus, .trip-bar input[type="text"]:focus { border-color: var(--sage); }
+    option { background: #1e2e1e; }
+
+    .btn-sm {
+      background: var(--moss);
+      border: none;
+      border-radius: 2px;
+      color: var(--cream);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-sm:hover { background: var(--sage); }
+    .btn-sm.danger { background: rgba(192,57,43,0.25); color: #e07070; border: 1px solid rgba(192,57,43,0.3); }
+    .btn-sm.danger:hover { background: rgba(192,57,43,0.4); }
+    .btn-sm.blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-bd); }
+    .btn-sm.blue:hover { background: rgba(80,140,200,0.2); }
+
+    /* ── OVERALL PROGRESS ── */
+    .overall-progress {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .overall-progress .prog-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); white-space: nowrap; }
+    .prog-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .prog-bar-fill { height: 100%; background: var(--fern); border-radius: 3px; transition: width 0.4s ease; }
+    .prog-count { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--fern); white-space: nowrap; }
+
+    /* ── ADD CATEGORY ── */
+    .add-category-row {
+      display: flex;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+    }
+    .add-category-row input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px dashed rgba(232,223,200,0.2);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      padding: 0.5rem 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .add-category-row input:focus { border-color: var(--sage); border-style: solid; }
+    .add-category-row input::placeholder { color: var(--muted); }
+
+    /* ── CATEGORY CARDS ── */
+    .category-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .category-card.drag-over { border-color: var(--sage); }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      user-select: none;
+      gap: 0.75rem;
+      transition: background 0.15s;
+    }
+    .category-header:hover { background: rgba(255,255,255,0.03); }
+
+    .cat-drag-handle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: grab;
+      padding: 0 0.15rem;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+    .cat-drag-handle:active { cursor: grabbing; }
+
+    .cat-chevron {
+      color: var(--muted);
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .category-card.open .cat-chevron { transform: rotate(90deg); }
+
+    .cat-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: var(--cream);
+      flex: 1;
+    }
+    .cat-name-input {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--sage);
+      color: var(--cream);
+      outline: none;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cat-prog-mini {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .cat-prog-mini.done { color: var(--fern); }
+
+    .cat-mini-bar {
+      width: 60px;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .cat-mini-bar-fill { height: 100%; background: var(--fern); border-radius: 2px; transition: width 0.3s; }
+
+    .btn-cat-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 2px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-cat-del:hover { color: #e07070; background: rgba(192,57,43,0.12); }
+
+    .btn-cat-edit {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 2px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-cat-edit:hover { color: var(--tan); }
+
+    /* ── ITEMS ── */
+    .category-body { display: none; padding: 0 0 0.5rem; }
+    .category-card.open .category-body { display: block; }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.45rem 1rem 0.45rem 0.75rem;
+      border-top: 1px solid rgba(232,223,200,0.05);
+      transition: background 0.15s;
+      cursor: grab;
+    }
+    .item-row:active { cursor: grabbing; }
+    .item-row:hover { background: rgba(255,255,255,0.03); }
+    .item-row.dragging { opacity: 0.4; }
+    .item-row.drag-over-item { border-top: 2px solid var(--sage); }
+
+    .item-drag-handle {
+      color: var(--muted);
+      font-size: 0.75rem;
+      opacity: 0.4;
+      flex-shrink: 0;
+      cursor: grab;
+    }
+
+    /* Custom checkbox */
+    .item-check-wrap { position: relative; flex-shrink: 0; }
+    .item-check-wrap input[type="checkbox"] { opacity: 0; width: 0; height: 0; position: absolute; }
+    .item-check-box {
+      width: 18px; height: 18px;
+      border: 1.5px solid rgba(232,223,200,0.25);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      flex-shrink: 0;
+    }
+    .item-check-wrap input:checked + .item-check-box {
+      background: var(--moss);
+      border-color: var(--fern);
+    }
+    .item-check-box::after {
+      content: '✓';
+      font-size: 0.7rem;
+      color: var(--fern);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .item-check-wrap input:checked + .item-check-box::after { opacity: 1; }
+
+    .item-label {
+      flex: 1;
+      font-size: 0.9rem;
+      color: var(--text);
+      transition: color 0.2s, text-decoration 0.2s;
+      line-height: 1.3;
+    }
+    .item-label.checked {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: rgba(154,144,128,0.5);
+    }
+
+    .item-label-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--sage);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      padding: 0.1rem 0;
+      min-width: 0;
+    }
+
+    .btn-item-del {
+      background: none; border: none;
+      color: transparent;
+      cursor: pointer; font-size: 0.78rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 2px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .item-row:hover .btn-item-del { color: var(--muted); }
+    .btn-item-del:hover { color: #e07070 !important; background: rgba(192,57,43,0.12); }
+
+    /* Add item row */
+    .add-item-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.4rem 1rem 0.4rem 2.5rem;
+      border-top: 1px solid rgba(232,223,200,0.05);
+    }
+    .add-item-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed rgba(232,223,200,0.15);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      padding: 0.2rem 0;
+      transition: border-color 0.2s;
+    }
+    .add-item-input:focus { border-color: var(--sage); border-style: solid; }
+    .add-item-input::placeholder { color: rgba(154,144,128,0.5); }
+    .btn-add-item {
+      background: none; border: none;
+      color: var(--sage);
+      cursor: pointer; font-size: 1rem;
+      padding: 0.1rem 0.3rem;
+      border-radius: 2px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-add-item:hover { color: var(--fern); }
+
+    /* ── EMPTY / STATUS ── */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 0.9rem; }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--moss); color: var(--cream);
+      font-size: 0.82rem; letter-spacing: 0.5px;
+      padding: 0.55rem 1.25rem; border-radius: 20px;
+      transition: transform 0.3s ease; z-index: 999; pointer-events: none;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── USER BAR ── */
+    .user-bar {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.72rem; color: var(--muted);
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .user-bar span { flex: 1; }
+    .btn-signout {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem; padding: 0.3rem 0.75rem;
+      border-radius: 2px; cursor: pointer; letter-spacing: 0.5px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-signout:hover { color: var(--cream); border-color: var(--tan); }
+
+    /* ── NO TRIP SELECTED ── */
+    .no-trip-msg { color: var(--muted); font-size: 0.88rem; font-style: italic; padding: 1rem 0; }
+
+    @media (max-width: 540px) {
+      .app-title { font-size: 2rem; }
+      .trip-bar { gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="app-header">
+    <div>
+      <div class="app-title">Trip <span>Checklist</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <button class="btn-sm blue" id="btn-reset" onclick="checkAll()" style="display:none">✓ Check All</button>
+      <div class="header-meta">Firebase Synced</div>
+    </div>
+  </div>
+
+  <!-- Auth Panel -->
+  <div id="auth-panel">
+    <h2>Sign In</h2>
+    <div class="auth-inputs">
+      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" />
+      <input type="password" id="auth-pass" placeholder="Password" autocomplete="current-password" />
+    </div>
+    <button class="btn-auth" onclick="signIn()">Sign In</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+
+  <!-- Main Panel -->
+  <div id="main-panel" style="display:none">
+
+    <div class="user-bar">
+      <span id="user-email-display"></span>
+      <button class="btn-signout" onclick="signOut()">Sign Out</button>
+    </div>
+
+    <!-- Overall progress -->
+    <div class="overall-progress">
+      <span class="prog-label">Progress</span>
+      <div class="prog-bar-wrap"><div class="prog-bar-fill" id="overall-bar" style="width:0%"></div></div>
+      <span class="prog-count" id="overall-count">0 / 0</span>
+    </div>
+
+    <!-- Add category -->
+    <div class="add-category-row">
+      <input type="text" id="new-cat-input" placeholder="New category name…" maxlength="60"
+        onkeydown="if(event.key==='Enter') addCategory()" />
+      <button class="btn-sm blue" onclick="addCategory()">+ Category</button>
+    </div>
+
+    <!-- Category list -->
+    <div id="categories-wrap"></div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import {
+    getAuth, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import {
+    getDatabase, ref, set, remove, onValue, off, push
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+  const app = initializeApp({
+    apiKey:            'AIzaSyDO_RXTRJx_PYGERVMcBJTL2aoAgpTXQeE',
+    authDomain:        'cmk63project.firebaseapp.com',
+    databaseURL:       'https://cmk63project-default-rtdb.firebaseio.com',
+    projectId:         'cmk63project',
+    storageBucket:     'cmk63project.firebasestorage.app',
+    messagingSenderId: '520150418866',
+    appId:             '1:520150418866:web:5bd7d2aa561b987b1b90ab',
+  });
+
+  const auth = getAuth(app);
+  const db   = getDatabase(app);
+
+  // ── STATE ──────────────────────────────────────────────────────────────────
+  let currentUID  = null;
+  let categories  = {};   // { catId: { name, order, items: { itemId: {name,order} } } }
+  let checkStates = {};   // { itemId: true }
+  const collapsedCats = new Set(); // catIds the user has collapsed
+  let unsub = null;
+
+  // ── REFS ───────────────────────────────────────────────────────────────────
+  const masterRef = () => ref(db, `tripChecklist/${currentUID}/masterList`);
+  const checksRef = () => ref(db, `tripChecklist/${currentUID}/checks`);
+
+  // ── HELPERS ────────────────────────────────────────────────────────────────
+  const toast = (msg, dur = 2200) => {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+  };
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // ── AUTH ───────────────────────────────────────────────────────────────────
+  window.signIn = async () => {
+    const email = document.getElementById('auth-email').value.trim();
+    const pass  = document.getElementById('auth-pass').value;
+    document.getElementById('auth-error').textContent = '';
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (e) {
+      document.getElementById('auth-error').textContent = e.message.replace('Firebase: ','');
+    }
+  };
+
+  window.signOut = async () => {
+    if (unsub) { off(masterRef()); off(checksRef()); unsub = null; }
+    await fbSignOut(auth);
+  };
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUID = user.uid;
+      document.getElementById('auth-panel').style.display    = 'none';
+      document.getElementById('main-panel').style.display    = 'block';
+      document.getElementById('btn-reset').style.display     = '';
+      document.getElementById('user-email-display').textContent = user.email;
+      subscribe();
+    } else {
+      currentUID = null; categories = {}; checkStates = {};
+      document.getElementById('auth-panel').style.display = '';
+      document.getElementById('main-panel').style.display = 'none';
+      document.getElementById('btn-reset').style.display  = 'none';
+    }
+  });
+
+  // ── SUBSCRIBE ──────────────────────────────────────────────────────────────
+  function subscribe() {
+    onValue(masterRef(), snap => {
+      categories = snap.exists() ? snap.val() : {};
+      renderCategories();
+    });
+    onValue(checksRef(), snap => {
+      checkStates = snap.exists() ? snap.val() : {};
+      renderCategories();
+    });
+  }
+
+  // ── RESET ──────────────────────────────────────────────────────────────────
+  window.checkAll = async () => {
+    if (!confirm('Mark every item as checked?')) return;
+    const ids = Object.values(categories).flatMap(cat => Object.keys(cat.items || {}));
+    const update = {};
+    ids.forEach(id => { update[id] = true; checkStates[id] = true; });
+    await set(checksRef(), update);
+    renderCategories();
+    toast('All items checked!');
+  };
+
+  // ── CHECK TOGGLE ──────────────────────────────────────────────────────────
+  window.toggleCheck = async (itemId, checked) => {
+    if (checked) {
+      await set(ref(db, `tripChecklist/${currentUID}/checks/${itemId}`), true);
+      checkStates[itemId] = true;
+    } else {
+      await remove(ref(db, `tripChecklist/${currentUID}/checks/${itemId}`));
+      delete checkStates[itemId];
+    }
+    // update label immediately for snappy feel
+    const label = document.querySelector(`[data-item-label="${itemId}"]`);
+    if (label) label.classList.toggle('checked', checked);
+    updateProgress();
+  };
+
+  // ── CATEGORIES ────────────────────────────────────────────────────────────
+  window.addCategory = async () => {
+    const inp  = document.getElementById('new-cat-input');
+    const name = inp.value.trim();
+    if (!name) return;
+    await push(masterRef(), { name, order: Date.now(), items: {} });
+    inp.value = '';
+    inp.focus();
+  };
+
+  window.deleteCategory = async catId => {
+    if (!confirm('Delete this category and all its items?')) return;
+    await remove(ref(db, `tripChecklist/${currentUID}/masterList/${catId}`));
+  };
+
+  window.renameCategory = async (catId, newName) => {
+    if (!newName.trim()) return;
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/name`), newName.trim());
+  };
+
+  // ── ITEMS ─────────────────────────────────────────────────────────────────
+  window.addItem = async (catId, inputEl) => {
+    const name = inputEl.value.trim();
+    if (!name) return;
+    await push(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items`), { name, order: Date.now() });
+    inputEl.value = '';
+    inputEl.focus();
+  };
+
+  window.deleteItem = async (catId, itemId) => {
+    await remove(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${itemId}`));
+    await remove(ref(db, `tripChecklist/${currentUID}/checks/${itemId}`));
+    delete checkStates[itemId];
+  };
+
+  window.renameItem = async (catId, itemId, newName) => {
+    if (!newName.trim()) return;
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${itemId}/name`), newName.trim());
+  };
+
+  // ── PROGRESS ──────────────────────────────────────────────────────────────
+  function allItemIds() {
+    return Object.values(categories).flatMap(cat => Object.keys(cat.items || {}));
+  }
+
+  function updateProgress() {
+    const ids     = allItemIds();
+    const total   = ids.length;
+    const checked = ids.filter(id => checkStates[id]).length;
+    const pct     = total ? Math.round(checked / total * 100) : 0;
+    document.getElementById('overall-bar').style.width  = pct + '%';
+    document.getElementById('overall-count').textContent = `${checked} / ${total}`;
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  function renderCategories() {
+    const wrap  = document.getElementById('categories-wrap');
+    const sorted = Object.entries(categories).sort((a,b) => (a[1].order||0)-(b[1].order||0));
+
+    if (!sorted.length) {
+      wrap.innerHTML = '<div class="empty-state"><div class="icon">📋</div>No categories yet. Add one above.</div>';
+      updateProgress();
+      return;
+    }
+
+    wrap.innerHTML = '';
+    sorted.forEach(([catId, cat]) => {
+      const items   = Object.entries(cat.items || {}).sort((a,b) => {
+        const aChecked = checkStates[a[0]] ? 1 : 0;
+        const bChecked = checkStates[b[0]] ? 1 : 0;
+        if (aChecked !== bChecked) return aChecked - bChecked;
+        return (a[1].order||0) - (b[1].order||0);
+      });
+      const total   = items.length;
+      const checked = items.filter(([id]) => checkStates[id]).length;
+      const pct     = total ? Math.round(checked / total * 100) : 0;
+      const allDone = total > 0 && checked === total;
+
+      const card = document.createElement('div');
+      card.className = 'category-card' + (collapsedCats.has(catId) ? '' : ' open');
+      card.dataset.catId = catId;
+
+      card.innerHTML = `
+        <div class="category-header" onclick="toggleCat(this)">
+          <span class="cat-drag-handle">⠿</span>
+          <span class="cat-chevron">▶</span>
+          <span class="cat-name">${esc(cat.name)}</span>
+          <span class="cat-mini-bar"><span class="cat-mini-bar-fill" style="width:${pct}%"></span></span>
+          <span class="cat-prog-mini ${allDone?'done':''}">${checked}/${total}</span>
+          <button class="btn-cat-edit" title="Rename" onclick="event.stopPropagation(); startRenameCat(this.closest('.category-card'),'${catId}')">✎</button>
+          <button class="btn-cat-del" title="Delete" onclick="event.stopPropagation(); deleteCategory('${catId}')">✕</button>
+        </div>
+        <div class="category-body">
+          ${items.map(([itemId, item]) => `
+            <div class="item-row" draggable="true" data-item-id="${itemId}" data-cat-id="${catId}">
+              <span class="item-drag-handle">⠿</span>
+              <label class="item-check-wrap">
+                <input type="checkbox" ${checkStates[itemId] ? 'checked' : ''}
+                  onchange="toggleCheck('${itemId}', this.checked)" />
+                <span class="item-check-box"></span>
+              </label>
+              <span class="item-label ${checkStates[itemId]?'checked':''}"
+                data-item-label="${itemId}"
+                ondblclick="startRenameItem(this,'${catId}','${itemId}')">${esc(item.name)}</span>
+              <button class="btn-item-del" title="Delete item" onclick="deleteItem('${catId}','${itemId}')">✕</button>
+            </div>
+          `).join('')}
+          <div class="add-item-row">
+            <input class="add-item-input" type="text" placeholder="Add item…" maxlength="100"
+              onkeydown="if(event.key==='Enter') addItem('${catId}', this)" />
+            <button class="btn-add-item" onclick="addItem('${catId}', this.previousElementSibling)">＋</button>
+          </div>
+        </div>`;
+
+      wrap.appendChild(card);
+    });
+
+    updateProgress();
+    setupItemDrag();
+  }
+
+  // ── INLINE RENAME ─────────────────────────────────────────────────────────
+  window.startRenameCat = (card, catId) => {
+    const nameEl = card.querySelector('.cat-name');
+    const cur    = nameEl.textContent;
+    const inp    = document.createElement('input');
+    inp.className = 'cat-name-input';
+    inp.value = cur;
+    nameEl.replaceWith(inp);
+    inp.focus(); inp.select();
+    const finish = () => {
+      const newName = inp.value.trim() || cur;
+      inp.replaceWith(Object.assign(document.createElement('span'), { className:'cat-name', textContent: newName }));
+      renameCategory(catId, newName);
+    };
+    inp.addEventListener('blur', finish);
+    inp.addEventListener('keydown', e => { if (e.key==='Enter') inp.blur(); if (e.key==='Escape') { inp.value=cur; inp.blur(); } });
+    inp.addEventListener('click', e => e.stopPropagation());
+  };
+
+  window.startRenameItem = (el, catId, itemId) => {
+    const cur = el.textContent;
+    const inp = document.createElement('input');
+    inp.className = 'item-label-input';
+    inp.value = cur;
+    el.replaceWith(inp);
+    inp.focus(); inp.select();
+    const finish = () => {
+      const newName = inp.value.trim() || cur;
+      const span = Object.assign(document.createElement('span'), {
+        className: 'item-label' + (checkStates[itemId] ? ' checked' : ''),
+        textContent: newName,
+      });
+      span.dataset.itemLabel = itemId;
+      span.addEventListener('dblclick', () => startRenameItem(span, catId, itemId));
+      inp.replaceWith(span);
+      renameItem(catId, itemId, newName);
+    };
+    inp.addEventListener('blur', finish);
+    inp.addEventListener('keydown', e => { if (e.key==='Enter') inp.blur(); if (e.key==='Escape') { inp.value=cur; inp.blur(); } });
+  };
+
+  // ── COLLAPSE ──────────────────────────────────────────────────────────────
+  window.toggleCat = header => {
+    const card = header.closest('.category-card');
+    card.classList.toggle('open');
+    const catId = card.dataset.catId;
+    if (card.classList.contains('open')) {
+      collapsedCats.delete(catId);
+    } else {
+      collapsedCats.add(catId);
+    }
+  };
+
+  // ── DRAG TO REORDER ITEMS ─────────────────────────────────────────────────
+  function setupItemDrag() {
+    let dragSrc = null;
+    document.querySelectorAll('.item-row').forEach(row => {
+      row.addEventListener('dragstart', e => {
+        dragSrc = row; row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+        document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
+      });
+      row.addEventListener('dragover', e => {
+        e.preventDefault();
+        document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
+        if (row !== dragSrc) row.classList.add('drag-over-item');
+      });
+      row.addEventListener('drop', async e => {
+        e.preventDefault();
+        if (!dragSrc || dragSrc === row) return;
+        const srcCat = dragSrc.dataset.catId;
+        const tgtCat = row.dataset.catId;
+        if (srcCat !== tgtCat) return;
+        const srcId = dragSrc.dataset.itemId;
+        const tgtId = row.dataset.itemId;
+        const srcOrd = categories[srcCat].items[srcId].order;
+        const tgtOrd = categories[srcCat].items[tgtId].order;
+        await set(ref(db, `tripChecklist/${currentUID}/masterList/${srcCat}/items/${srcId}/order`), tgtOrd - 0.5);
+        await set(ref(db, `tripChecklist/${currentUID}/masterList/${srcCat}/items/${tgtId}/order`), srcOrd);
+        row.classList.remove('drag-over-item');
+      });
+    });
+  }
+
+  document.getElementById('auth-pass').addEventListener('keydown', e => { if (e.key==='Enter') signIn(); });
+</script>
+</body>
+</html>
