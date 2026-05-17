@@ -406,6 +406,49 @@
     }
     .btn-add-item:hover { color: var(--fern); }
 
+
+    /* ── MOVE DROPDOWN ── */
+    .move-wrap { position: relative; flex-shrink: 0; }
+    .btn-item-move {
+      background: none; border: none;
+      color: transparent;
+      cursor: pointer; font-size: 0.82rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 2px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .item-row:hover .btn-item-move { color: var(--muted); }
+    .btn-item-move:hover { color: var(--blue) !important; }
+    .move-dropdown {
+      position: absolute;
+      right: 0; top: 100%;
+      background: #1e2e1e;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      z-index: 100;
+      min-width: 180px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+    .move-dropdown div {
+      padding: 0.5rem 0.85rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .move-dropdown div:hover { background: rgba(143,184,122,0.12); color: var(--fern); }
+    .move-dropdown .move-header {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--muted); cursor: default; padding: 0.4rem 0.85rem 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .move-dropdown .move-header:hover { background: none; color: var(--muted); }
+
     /* ── EMPTY / STATUS ── */
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 0.9rem; }
     .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
@@ -671,6 +714,38 @@
   }
 
   // ── RENDER ────────────────────────────────────────────────────────────────
+
+  // ── MOVE ITEM ────────────────────────────────────────────────────────────
+  window.showMoveMenu = (btn, catId, itemId) => {
+    // close any open menus first
+    document.querySelectorAll('.move-dropdown').forEach(d => d.remove());
+    const sorted = Object.entries(categories).sort((a,b) => (a[1].order||0)-(b[1].order||0));
+    const others = sorted.filter(([id]) => id !== catId);
+    if (!others.length) return;
+    const menu = document.createElement('div');
+    menu.className = 'move-dropdown';
+    menu.innerHTML = '<div class="move-header">Move to…</div>' +
+      others.map(([id, cat]) =>
+        `<div onclick="moveItem('${catId}','${itemId}','${id}')">${esc(cat.name)}</div>`
+      ).join('');
+    btn.closest('.move-wrap').appendChild(menu);
+    // close on outside click
+    setTimeout(() => document.addEventListener('click', function handler(e) {
+      if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', handler); }
+    }), 0);
+    event.stopPropagation();
+  };
+
+  window.moveItem = async (fromCatId, itemId, toCatId) => {
+    document.querySelectorAll('.move-dropdown').forEach(d => d.remove());
+    const item = categories[fromCatId]?.items?.[itemId];
+    if (!item) return;
+    // write to new category
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${toCatId}/items/${itemId}`), item);
+    // remove from old category
+    await remove(ref(db, `tripChecklist/${currentUID}/masterList/${fromCatId}/items/${itemId}`));
+  };
+
   function renderCategories() {
     const wrap  = document.getElementById('categories-wrap');
     const sorted = Object.entries(categories).sort((a,b) => (a[1].order||0)-(b[1].order||0));
@@ -720,6 +795,7 @@
               <span class="item-label ${checkStates[itemId]?'checked':''}"
                 data-item-label="${itemId}"
                 ondblclick="startRenameItem(this,'${catId}','${itemId}')">${esc(item.name)}</span>
+              <span class="move-wrap"><button class="btn-item-move" title="Move to category" onclick="showMoveMenu(this,'${catId}','${itemId}')">⇄</button></span>
               <button class="btn-item-del" title="Delete item" onclick="deleteItem('${catId}','${itemId}')">✕</button>
             </div>
           `).join('')}
