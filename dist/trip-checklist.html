@@ -1030,11 +1030,24 @@
 
   async function swapItemOrder(catId, srcId, tgtId) {
     if (!catId || !srcId || !tgtId || srcId === tgtId) return;
-    const srcOrd = categories[catId]?.items?.[srcId]?.order;
-    const tgtOrd = categories[catId]?.items?.[tgtId]?.order;
+    const items = categories[catId]?.items;
+    if (!items) return;
+    const sorted = Object.entries(items)
+      .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+    const srcOrd = items[srcId]?.order;
+    const tgtOrd = items[tgtId]?.order;
     if (srcOrd == null || tgtOrd == null) return;
-    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${srcId}/order`), tgtOrd - 0.5);
-    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${tgtId}/order`), srcOrd);
+    const draggingDown = srcOrd < tgtOrd;
+    const tgtIdx = sorted.findIndex(([id]) => id === tgtId);
+    let newOrder;
+    if (draggingDown) {
+      const next = sorted[tgtIdx + 1];
+      newOrder = next ? (tgtOrd + next[1].order) / 2 : tgtOrd + 1000;
+    } else {
+      const prev = sorted[tgtIdx - 1];
+      newOrder = prev ? (prev[1].order + tgtOrd) / 2 : tgtOrd - 1000;
+    }
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${srcId}/order`), newOrder);
   }
 
   // ── DRAG TO REORDER CATEGORIES (mouse + touch) ───────────────────────────
