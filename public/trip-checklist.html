@@ -205,11 +205,13 @@
 
     .cat-drag-handle {
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       cursor: grab;
-      padding: 0 0.15rem;
-      opacity: 0.5;
+      padding: 0.5rem 0.6rem;
+      margin: -0.5rem -0.25rem;
+      opacity: 0.6;
       flex-shrink: 0;
+      touch-action: none;
     }
     .cat-drag-handle:active { cursor: grabbing; }
 
@@ -304,14 +306,17 @@
 
     .item-drag-handle {
       color: var(--muted);
-      font-size: 0.75rem;
-      opacity: 0.4;
+      font-size: 1rem;
+      opacity: 0.5;
       flex-shrink: 0;
       cursor: grab;
+      padding: 0.5rem 0.6rem;
+      margin: -0.5rem -0.25rem;
+      touch-action: none;
     }
 
     /* Custom checkbox */
-    .item-check-wrap { position: relative; flex-shrink: 0; }
+    .item-check-wrap { position: relative; flex: 1; display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
     .item-check-wrap input[type="checkbox"] { opacity: 0; width: 0; height: 0; position: absolute; }
     .item-check-box {
       width: 18px; height: 18px;
@@ -337,6 +342,7 @@
 
     .item-label {
       flex: 1;
+      min-width: 0;
       font-size: 0.9rem;
       color: var(--text);
       transition: color 0.2s, text-decoration 0.2s;
@@ -372,6 +378,18 @@
     }
     .item-row:hover .btn-item-del { color: var(--muted); }
     .btn-item-del:hover { color: #e07070 !important; background: rgba(192,57,43,0.12); }
+
+    .btn-item-edit {
+      background: none; border: none;
+      color: transparent;
+      cursor: pointer; font-size: 0.8rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 2px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .item-row:hover .btn-item-edit { color: var(--muted); }
+    .btn-item-edit:hover { color: var(--tan) !important; }
 
     /* Add item row */
     .add-item-row {
@@ -421,12 +439,11 @@
     .item-row:hover .btn-item-move { color: var(--muted); }
     .btn-item-move:hover { color: var(--blue) !important; }
     .move-dropdown {
-      position: absolute;
-      right: 0; top: 100%;
+      position: fixed;
       background: #1e2e1e;
       border: 1px solid var(--border);
       border-radius: 3px;
-      z-index: 100;
+      z-index: 1000;
       min-width: 180px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
       overflow: hidden;
@@ -500,8 +517,7 @@
       <div class="app-title">Trip <span>Checklist</span></div>
     </div>
     <div style="display:flex;align-items:center;gap:0.75rem">
-      <button class="btn-sm blue" id="btn-reset" onclick="checkAll()" style="display:none">✓ Check All</button>
-      <div class="header-meta">Firebase Synced</div>
+<div class="header-meta">Firebase Synced</div>
     </div>
   </div>
 
@@ -610,14 +626,14 @@
       currentUID = user.uid;
       document.getElementById('auth-panel').style.display    = 'none';
       document.getElementById('main-panel').style.display    = 'block';
-      document.getElementById('btn-reset').style.display     = '';
+
       document.getElementById('user-email-display').textContent = user.email;
       subscribe();
     } else {
       currentUID = null; categories = {}; checkStates = {};
       document.getElementById('auth-panel').style.display = '';
       document.getElementById('main-panel').style.display = 'none';
-      document.getElementById('btn-reset').style.display  = 'none';
+
     }
   });
 
@@ -634,16 +650,6 @@
   }
 
   // ── RESET ──────────────────────────────────────────────────────────────────
-  window.checkAll = async () => {
-    if (!confirm('Mark every item as checked?')) return;
-    const ids = Object.values(categories).flatMap(cat => Object.keys(cat.items || {}));
-    const update = {};
-    ids.forEach(id => { update[id] = true; checkStates[id] = true; });
-    await set(checksRef(), update);
-    renderCategories();
-    toast('All items checked!');
-  };
-
   // ── CHECK TOGGLE ──────────────────────────────────────────────────────────
   window.toggleCheck = async (itemId, checked) => {
     if (checked) {
@@ -657,6 +663,18 @@
     const label = document.querySelector(`[data-item-label="${itemId}"]`);
     if (label) label.classList.toggle('checked', checked);
     updateProgress();
+    // auto-collapse category when all its items are checked
+    if (checked) {
+      for (const [catId, cat] of Object.entries(categories)) {
+        const itemIds = Object.keys(cat.items || {});
+        if (!itemIds.length) continue;
+        if (itemIds.every(id => checkStates[id])) {
+          collapsedCats.add(catId);
+          const card = document.querySelector(`.category-card[data-cat-id="${catId}"]`);
+          if (card) card.classList.remove('open');
+        }
+      }
+    }
   };
 
   // ── CATEGORIES ────────────────────────────────────────────────────────────
@@ -689,6 +707,8 @@
   };
 
   window.deleteItem = async (catId, itemId) => {
+    const name = categories[catId]?.items?.[itemId]?.name || 'this item';
+    if (!confirm(`Delete "${name}"?`)) return;
     await remove(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${itemId}`));
     await remove(ref(db, `tripChecklist/${currentUID}/checks/${itemId}`));
     delete checkStates[itemId];
@@ -724,11 +744,23 @@
     if (!others.length) return;
     const menu = document.createElement('div');
     menu.className = 'move-dropdown';
-    menu.innerHTML = '<div class="move-header">Move to…</div>' +
+    menu.innerHTML = '<div class="move-header">Move to\u2026</div>' +
       others.map(([id, cat]) =>
         `<div onclick="moveItem('${catId}','${itemId}','${id}')">${esc(cat.name)}</div>`
       ).join('');
-    btn.closest('.move-wrap').appendChild(menu);
+    // Append to body so overflow:hidden on category-card does not clip it
+    document.body.appendChild(menu);
+    // Position using fixed coords from the button
+    const r = btn.getBoundingClientRect();
+    const menuW = 180;
+    let left = r.right - menuW;
+    if (left < 8) left = 8;
+    let top = r.bottom + 4;
+    // Flip upward if it would overflow the viewport
+    const estH = 36 + others.length * 34;
+    if (top + estH > window.innerHeight - 8) top = r.top - estH - 4;
+    menu.style.left = left + 'px';
+    menu.style.top  = top  + 'px';
     // close on outside click
     setTimeout(() => document.addEventListener('click', function handler(e) {
       if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', handler); }
@@ -785,17 +817,18 @@
         </div>
         <div class="category-body">
           ${items.map(([itemId, item]) => `
-            <div class="item-row" draggable="true" data-item-id="${itemId}" data-cat-id="${catId}">
+            <div class="item-row" data-item-id="${itemId}" data-cat-id="${catId}">
               <span class="item-drag-handle">⠿</span>
               <label class="item-check-wrap">
                 <input type="checkbox" ${checkStates[itemId] ? 'checked' : ''}
                   onchange="toggleCheck('${itemId}', this.checked)" />
                 <span class="item-check-box"></span>
+                <span class="item-label ${checkStates[itemId]?'checked':''}"
+                  data-item-label="${itemId}"
+                  ondblclick="event.preventDefault();startRenameItem(this,'${catId}','${itemId}')">${esc(item.name)}</span>
               </label>
-              <span class="item-label ${checkStates[itemId]?'checked':''}"
-                data-item-label="${itemId}"
-                ondblclick="startRenameItem(this,'${catId}','${itemId}')">${esc(item.name)}</span>
               <span class="move-wrap"><button class="btn-item-move" title="Move to category" onclick="showMoveMenu(this,'${catId}','${itemId}')">⇄</button></span>
+              <button class="btn-item-edit" title="Rename item" onclick="startRenameItem(this.closest('.item-row').querySelector('[data-item-label]'),'${catId}','${itemId}')">✎</button>
               <button class="btn-item-del" title="Delete item" onclick="deleteItem('${catId}','${itemId}')">✕</button>
             </div>
           `).join('')}
@@ -811,6 +844,7 @@
 
     updateProgress();
     setupItemDrag();
+    setupCatDrag();
   }
 
   // ── INLINE RENAME ─────────────────────────────────────────────────────────
@@ -852,6 +886,9 @@
     };
     inp.addEventListener('blur', finish);
     inp.addEventListener('keydown', e => { if (e.key==='Enter') inp.blur(); if (e.key==='Escape') { inp.value=cur; inp.blur(); } });
+    // Prevent clicks on the input from bubbling to the label and toggling the checkbox
+    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('change', e => e.stopPropagation());
   };
 
   // ── COLLAPSE ──────────────────────────────────────────────────────────────
@@ -866,38 +903,263 @@
     }
   };
 
-  // ── DRAG TO REORDER ITEMS ─────────────────────────────────────────────────
+  // ── DRAG TO REORDER ITEMS (mouse + touch) ────────────────────────────────
   function setupItemDrag() {
-    let dragSrc = null;
-    document.querySelectorAll('.item-row').forEach(row => {
-      row.addEventListener('dragstart', e => {
-        dragSrc = row; row.classList.add('dragging');
+
+    // ── Mouse drag (desktop only — uses HTML5 drag API on the handle) ──
+    document.querySelectorAll('.item-drag-handle').forEach(handle => {
+      handle.setAttribute('draggable', 'true');
+      const row = handle.closest('.item-row');
+
+      handle.addEventListener('dragstart', e => {
         e.dataTransfer.effectAllowed = 'move';
+        // Store source on the event so dragover/drop on rows can read it
+        e.dataTransfer.setData('text/plain', row.dataset.itemId + '|' + row.dataset.catId);
+        setTimeout(() => row.classList.add('dragging'), 0);
       });
-      row.addEventListener('dragend', () => {
+      handle.addEventListener('dragend', () => {
         row.classList.remove('dragging');
         document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
       });
+    });
+
+    document.querySelectorAll('.item-row').forEach(row => {
       row.addEventListener('dragover', e => {
         e.preventDefault();
         document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
-        if (row !== dragSrc) row.classList.add('drag-over-item');
+        row.classList.add('drag-over-item');
+      });
+      row.addEventListener('dragleave', () => {
+        row.classList.remove('drag-over-item');
       });
       row.addEventListener('drop', async e => {
         e.preventDefault();
-        if (!dragSrc || dragSrc === row) return;
-        const srcCat = dragSrc.dataset.catId;
-        const tgtCat = row.dataset.catId;
-        if (srcCat !== tgtCat) return;
-        const srcId = dragSrc.dataset.itemId;
-        const tgtId = row.dataset.itemId;
-        const srcOrd = categories[srcCat].items[srcId].order;
-        const tgtOrd = categories[srcCat].items[tgtId].order;
-        await set(ref(db, `tripChecklist/${currentUID}/masterList/${srcCat}/items/${srcId}/order`), tgtOrd - 0.5);
-        await set(ref(db, `tripChecklist/${currentUID}/masterList/${srcCat}/items/${tgtId}/order`), srcOrd);
         row.classList.remove('drag-over-item');
+        const data = e.dataTransfer.getData('text/plain');
+        // Reject category drag payloads (they have no '|')
+        if (!data || !data.includes('|')) return;
+        const [srcId, srcCat] = data.split('|');
+        const tgtId  = row.dataset.itemId;
+        const tgtCat = row.dataset.catId;
+        if (srcCat !== tgtCat || srcId === tgtId) return;
+        await swapItemOrder(srcCat, srcId, tgtId);
       });
     });
+
+    // ── Touch drag ──
+    let touchSrc = null, ghost = null, lastTarget = null, startX = 0, startY = 0;
+
+    function itemFromPoint(x, y) {
+      if (ghost) ghost.style.visibility = 'hidden';
+      const el = document.elementFromPoint(x, y);
+      if (ghost) ghost.style.visibility = '';
+      return el ? el.closest('.item-row') : null;
+    }
+
+    document.querySelectorAll('.item-drag-handle').forEach(handle => {
+      handle.addEventListener('touchstart', e => {
+        const row = handle.closest('.item-row');
+        if (!row) return;
+        e.preventDefault();
+        e.stopPropagation();
+        touchSrc = row;
+        const t = e.touches[0];
+        startX = t.clientX; startY = t.clientY;
+
+        // Ghost follows the finger — anchored to touch point
+        const r = row.getBoundingClientRect();
+        ghost = row.cloneNode(true);
+        ghost.style.cssText = `
+          position:fixed; left:${r.left}px; top:${r.top}px;
+          width:${r.width}px; opacity:0.85; pointer-events:none;
+          background:var(--moss); border:1px solid var(--sage);
+          border-radius:4px; z-index:9999; box-shadow:0 6px 20px rgba(0,0,0,0.5);
+          transition: none;
+        `;
+        document.body.appendChild(ghost);
+        row.classList.add('dragging');
+      }, { passive: false });
+
+      handle.addEventListener('touchmove', e => {
+        if (!touchSrc || !ghost) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const t = e.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        const r  = touchSrc.getBoundingClientRect();
+        ghost.style.left = (r.left + dx) + 'px';
+        ghost.style.top  = (r.top  + dy) + 'px';
+
+        const over = itemFromPoint(t.clientX, t.clientY);
+        if (over !== lastTarget) {
+          document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
+          if (over && over !== touchSrc) over.classList.add('drag-over-item');
+          lastTarget = over;
+        }
+      }, { passive: false });
+
+      handle.addEventListener('touchend', async e => {
+        if (!touchSrc) return;
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        const over = itemFromPoint(t.clientX, t.clientY);
+
+        if (ghost) { ghost.remove(); ghost = null; }
+        touchSrc.classList.remove('dragging');
+        document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
+
+        if (over && over !== touchSrc) {
+          const srcCat = touchSrc.dataset.catId;
+          const tgtCat = over.dataset.catId;
+          if (srcCat === tgtCat) {
+            await swapItemOrder(srcCat, touchSrc.dataset.itemId, over.dataset.itemId);
+          }
+        }
+        touchSrc = null; lastTarget = null;
+      }, { passive: false });
+
+      handle.addEventListener('touchcancel', () => {
+        if (ghost) { ghost.remove(); ghost = null; }
+        if (touchSrc) { touchSrc.classList.remove('dragging'); touchSrc = null; }
+        document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over-item'));
+        lastTarget = null;
+      });
+    });
+  }
+
+  async function swapItemOrder(catId, srcId, tgtId) {
+    if (!catId || !srcId || !tgtId || srcId === tgtId) return;
+    const srcOrd = categories[catId]?.items?.[srcId]?.order;
+    const tgtOrd = categories[catId]?.items?.[tgtId]?.order;
+    if (srcOrd == null || tgtOrd == null) return;
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${srcId}/order`), tgtOrd - 0.5);
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${tgtId}/order`), srcOrd);
+  }
+
+  // ── DRAG TO REORDER CATEGORIES (mouse + touch) ───────────────────────────
+  function setupCatDrag() {
+    const wrap = document.getElementById('categories-wrap');
+
+    // ── Mouse drag ──
+    wrap.querySelectorAll('.cat-drag-handle').forEach(handle => {
+      handle.setAttribute('draggable', 'true');
+      const card = handle.closest('.category-card');
+
+      handle.addEventListener('dragstart', e => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.dataset.catId);
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      handle.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        wrap.querySelectorAll('.category-card').forEach(c => c.classList.remove('drag-over'));
+      });
+    });
+
+    wrap.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        wrap.querySelectorAll('.category-card').forEach(c => c.classList.remove('drag-over'));
+        card.classList.add('drag-over');
+      });
+      card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+      card.addEventListener('drop', async e => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        const srcId = e.dataTransfer.getData('text/plain');
+        const tgtId = card.dataset.catId;
+        // Reject item drag payloads (they contain '|') — only accept plain catIds
+        if (!srcId || srcId.includes('|') || srcId === tgtId) return;
+        await swapCatOrder(srcId, tgtId);
+      });
+    });
+
+    // ── Touch drag ──
+    let touchSrc = null, ghost = null, lastTarget = null, startX = 0, startY = 0;
+
+    function cardFromPoint(x, y) {
+      if (ghost) ghost.style.visibility = 'hidden';
+      const el = document.elementFromPoint(x, y);
+      if (ghost) ghost.style.visibility = '';
+      return el ? el.closest('.category-card') : null;
+    }
+
+    wrap.querySelectorAll('.cat-drag-handle').forEach(handle => {
+      handle.addEventListener('touchstart', e => {
+        const card = handle.closest('.category-card');
+        if (!card) return;
+        e.preventDefault();
+        e.stopPropagation();
+        touchSrc = card;
+        const t = e.touches[0];
+        startX = t.clientX; startY = t.clientY;
+
+        const r = card.getBoundingClientRect();
+        ghost = document.createElement('div');
+        ghost.textContent = card.querySelector('.cat-name')?.textContent || '';
+        ghost.style.cssText = `
+          position:fixed; left:${r.left}px; top:${r.top}px;
+          width:${r.width}px; height:44px; line-height:44px;
+          padding:0 1rem; opacity:0.85; pointer-events:none;
+          background:var(--moss); border:1px solid var(--sage);
+          border-radius:4px; z-index:9999; box-shadow:0 6px 20px rgba(0,0,0,0.5);
+          font-family:'Bebas Neue',sans-serif; font-size:1rem;
+          letter-spacing:2px; color:var(--cream);
+        `;
+        document.body.appendChild(ghost);
+        card.classList.add('dragging');
+      }, { passive: false });
+
+      handle.addEventListener('touchmove', e => {
+        if (!touchSrc || !ghost) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const t = e.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        const r  = touchSrc.getBoundingClientRect();
+        ghost.style.left = (r.left + dx) + 'px';
+        ghost.style.top  = (r.top  + dy) + 'px';
+
+        const over = cardFromPoint(t.clientX, t.clientY);
+        if (over !== lastTarget) {
+          wrap.querySelectorAll('.category-card').forEach(c => c.classList.remove('drag-over'));
+          if (over && over !== touchSrc) over.classList.add('drag-over');
+          lastTarget = over;
+        }
+      }, { passive: false });
+
+      handle.addEventListener('touchend', async e => {
+        if (!touchSrc) return;
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        const over = cardFromPoint(t.clientX, t.clientY);
+
+        if (ghost) { ghost.remove(); ghost = null; }
+        touchSrc.classList.remove('dragging');
+        wrap.querySelectorAll('.category-card').forEach(c => c.classList.remove('drag-over'));
+
+        if (over && over !== touchSrc) {
+          await swapCatOrder(touchSrc.dataset.catId, over.dataset.catId);
+        }
+        touchSrc = null; lastTarget = null;
+      }, { passive: false });
+
+      handle.addEventListener('touchcancel', () => {
+        if (ghost) { ghost.remove(); ghost = null; }
+        if (touchSrc) { touchSrc.classList.remove('dragging'); touchSrc = null; }
+        wrap.querySelectorAll('.category-card').forEach(c => c.classList.remove('drag-over'));
+        lastTarget = null;
+      });
+    });
+  }
+
+  async function swapCatOrder(srcId, tgtId) {
+    const srcOrd = categories[srcId]?.order ?? 0;
+    const tgtOrd = categories[tgtId]?.order ?? 0;
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${srcId}/order`), tgtOrd - 0.5);
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${tgtId}/order`), srcOrd);
   }
 
   document.getElementById('auth-pass').addEventListener('keydown', e => { if (e.key==='Enter') signIn(); });
