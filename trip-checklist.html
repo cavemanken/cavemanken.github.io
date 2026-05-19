@@ -545,6 +545,7 @@
       <span class="prog-label">Progress</span>
       <div class="prog-bar-wrap"><div class="prog-bar-fill" id="overall-bar" style="width:0%"></div></div>
       <span class="prog-count" id="overall-count">0 / 0</span>
+      <button class="btn-sm" id="expand-all-btn" onclick="expandAll()" style="font-size:0.72rem;padding:0.3rem 0.75rem;letter-spacing:1px;">Expand All</button>
     </div>
 
     <!-- Add category -->
@@ -590,6 +591,7 @@
   let checkStates = {};   // { itemId: true }
   const collapsedCats = new Set(); // catIds the user has collapsed
   let unsub = null;
+  let initialLoadDone = false;
 
   // ── REFS ───────────────────────────────────────────────────────────────────
   const masterRef = () => ref(db, `tripChecklist/${currentUID}/masterList`);
@@ -639,14 +641,28 @@
 
   // ── SUBSCRIBE ──────────────────────────────────────────────────────────────
   function subscribe() {
+    let masterLoaded = false, checksLoaded = false;
     onValue(masterRef(), snap => {
       categories = snap.exists() ? snap.val() : {};
+      masterLoaded = true;
+      if (!initialLoadDone && masterLoaded && checksLoaded) applyInitialCollapse();
       renderCategories();
     });
     onValue(checksRef(), snap => {
       checkStates = snap.exists() ? snap.val() : {};
+      checksLoaded = true;
+      if (!initialLoadDone && masterLoaded && checksLoaded) applyInitialCollapse();
       renderCategories();
     });
+  }
+
+  function applyInitialCollapse() {
+    initialLoadDone = true;
+    for (const [catId, cat] of Object.entries(categories)) {
+      const itemIds = Object.keys(cat.items || {});
+      const hasUnchecked = itemIds.some(id => !checkStates[id]);
+      if (!hasUnchecked) collapsedCats.add(catId);
+    }
   }
 
   // ── RESET ──────────────────────────────────────────────────────────────────
@@ -795,6 +811,22 @@
     await set(ref(db, `tripChecklist/${currentUID}/masterList/${toCatId}/items/${itemId}`), item);
     // remove from old category
     await remove(ref(db, `tripChecklist/${currentUID}/masterList/${fromCatId}/items/${itemId}`));
+  };
+
+  window.expandAll = () => {
+    const btn = document.getElementById('expand-all-btn');
+    const allCollapsed = [...document.querySelectorAll('.category-card')].every(c => !c.classList.contains('open'));
+    if (allCollapsed || btn.textContent === 'Expand All') {
+      // Expand all
+      collapsedCats.clear();
+      document.querySelectorAll('.category-card').forEach(c => c.classList.add('open'));
+      btn.textContent = 'Collapse All';
+    } else {
+      // Collapse all
+      Object.keys(categories).forEach(id => collapsedCats.add(id));
+      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('open'));
+      btn.textContent = 'Expand All';
+    }
   };
 
   function renderCategories() {
