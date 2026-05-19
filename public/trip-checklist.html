@@ -688,7 +688,12 @@
   };
 
   window.deleteCategory = async catId => {
-    if (!confirm('Delete this category and all its items?')) return;
+    const itemCount = Object.keys(categories[catId]?.items || {}).length;
+    if (itemCount > 0) {
+      toast(`Move or delete all ${itemCount} item${itemCount > 1 ? 's' : ''} first`, 3000);
+      return;
+    }
+    if (!confirm('Delete this category?')) return;
     await remove(ref(db, `tripChecklist/${currentUID}/masterList/${catId}`));
   };
 
@@ -707,11 +712,25 @@
   };
 
   window.deleteItem = async (catId, itemId) => {
-    const name = categories[catId]?.items?.[itemId]?.name || 'this item';
-    if (!confirm(`Delete "${name}"?`)) return;
+    const item = categories[catId]?.items?.[itemId];
+    if (!item) return;
+
+    // Find or create the DELETED category
+    let deletedCatId = Object.entries(categories).find(([, cat]) => cat.name === 'DELETED')?.[0];
+    if (!deletedCatId) {
+      const newRef = await push(masterRef(), { name: 'DELETED', order: Date.now(), items: {} });
+      deletedCatId = newRef.key;
+    }
+
+    // Move item to DELETED category
+    await set(ref(db, `tripChecklist/${currentUID}/masterList/${deletedCatId}/items/${itemId}`), item);
+    // Remove from source category
     await remove(ref(db, `tripChecklist/${currentUID}/masterList/${catId}/items/${itemId}`));
+    // Uncheck it
     await remove(ref(db, `tripChecklist/${currentUID}/checks/${itemId}`));
     delete checkStates[itemId];
+
+    toast(`"${item.name}" moved to DELETED`);
   };
 
   window.renameItem = async (catId, itemId, newName) => {
