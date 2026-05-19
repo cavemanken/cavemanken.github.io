@@ -12,6 +12,8 @@
     <a href="pre-haul-checklist.html">Pre-Haul Checklist </a>
     <br />
     <a href="family-tree.html">Family Tree</a>
+    <br />
+    <a href="trip-checklist.html">Trip Checklist</a>
   </base-card>
 </template>
 
