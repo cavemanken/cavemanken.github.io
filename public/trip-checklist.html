@@ -1186,8 +1186,16 @@
           document.querySelectorAll('.category-card').forEach(c => c.classList.add('open'));
           btn.textContent = 'Collapse All';
         } else {
-          Object.keys(categories).forEach(id => collapsedCats.add(id));
-          document.querySelectorAll('.category-card').forEach(c => c.classList.remove('open'));
+          // Only collapse categories where all items are checked off
+          Object.entries(categories).forEach(([id, cat]) => {
+            const itemIds = Object.keys(cat.items || {});
+            const allDone = itemIds.length > 0 && itemIds.every(iid => checkStates[iid]);
+            if (allDone) {
+              collapsedCats.add(id);
+              const card = document.querySelector(`.category-card[data-cat-id="${id}"]`);
+              if (card) card.classList.remove('open');
+            }
+          });
           btn.textContent = 'Expand All';
         }
       };
