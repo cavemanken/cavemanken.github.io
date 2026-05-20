@@ -13,7 +13,7 @@
     <br />
     <a href="family-tree.html">Family Tree</a>
     <br />
-    <a href="trip-checklist.html">Trip Checklist</a>
+    <a href="trip-checklist.html">Trip Check1ist</a>
   </base-card>
 </template>
 
