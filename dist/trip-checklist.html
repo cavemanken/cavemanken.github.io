@@ -1186,17 +1186,28 @@
           document.querySelectorAll('.category-card').forEach(c => c.classList.add('open'));
           btn.textContent = 'Collapse All';
         } else {
-          Object.keys(categories).forEach(id => collapsedCats.add(id));
-          document.querySelectorAll('.category-card').forEach(c => c.classList.remove('open'));
+          // Only collapse categories where all items are checked off
+          Object.entries(categories).forEach(([id, cat]) => {
+            const itemIds = Object.keys(cat.items || {});
+            const allDone = itemIds.length > 0 && itemIds.every(iid => checkStates[iid]);
+            if (allDone) {
+              collapsedCats.add(id);
+              const card = document.querySelector(`.category-card[data-cat-id="${id}"]`);
+              if (card) card.classList.remove('open');
+            }
+          });
           btn.textContent = 'Expand All';
         }
       };
 
       function renderCategories() {
         const wrap = document.getElementById('categories-wrap');
-        const sorted = Object.entries(categories).sort(
-          (a, b) => (a[1].order || 0) - (b[1].order || 0)
-        );
+        const sorted = Object.entries(categories).sort((a, b) => {
+          const aDone = (() => { const ids = Object.keys(a[1].items || {}); return ids.length > 0 && ids.every(id => checkStates[id]); })();
+          const bDone = (() => { const ids = Object.keys(b[1].items || {}); return ids.length > 0 && ids.every(id => checkStates[id]); })();
+          if (aDone !== bDone) return aDone ? 1 : -1;
+          return (a[1].order || 0) - (b[1].order || 0);
+        });
 
         if (!sorted.length) {
           wrap.innerHTML =
