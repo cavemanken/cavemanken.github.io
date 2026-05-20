@@ -1202,9 +1202,12 @@
 
       function renderCategories() {
         const wrap = document.getElementById('categories-wrap');
-        const sorted = Object.entries(categories).sort(
-          (a, b) => (a[1].order || 0) - (b[1].order || 0)
-        );
+        const sorted = Object.entries(categories).sort((a, b) => {
+          const aDone = (() => { const ids = Object.keys(a[1].items || {}); return ids.length > 0 && ids.every(id => checkStates[id]); })();
+          const bDone = (() => { const ids = Object.keys(b[1].items || {}); return ids.length > 0 && ids.every(id => checkStates[id]); })();
+          if (aDone !== bDone) return aDone ? 1 : -1;
+          return (a[1].order || 0) - (b[1].order || 0);
+        });
 
         if (!sorted.length) {
           wrap.innerHTML =
